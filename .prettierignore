@@ -1,0 +1,11 @@
+.next/
+out/
+node_modules/
+public/web_data/
+web_data_original/
+
+# シークレットを含むため処理対象外
+.env
+.env.*
+!.env.example
+
