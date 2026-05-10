@@ -14,7 +14,7 @@ if [ -z "$staged_files" ]; then
 fi
 
 # 1. .env 系ファイル自体のステージングをブロック（.env.example は除外）
-forbidden=$(echo "$staged_files" | grep -E '(^|/)\.env($|\.)' | grep -v -E '\.env\.example$' || true)
+forbidden=$(echo "$staged_files" | grep -E '(^|/)\.env($|\.)' | grep -v -E '\.env\.(example|development|production)$' || true)
 if [ -n "$forbidden" ]; then
   echo "[ERROR] シークレットを含む可能性のあるファイルがステージされています:" >&2
   echo "$forbidden" >&2

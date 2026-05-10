@@ -28,9 +28,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files
-.env*
-!.env.example
+# env files（シークレットを含むファイルのみ除外）
+# .env.development / .env.production はコミット対象（非シークレット）
+.env
+.env*.local
 
 # vercel
 .vercel
