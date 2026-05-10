@@ -49,7 +49,7 @@ export function SessionCell({
   return (
     <div
       className={cn(
-        "flex flex-col gap-1.5 h-full text-[11px] leading-tight",
+        "flex flex-col gap-1.5 h-full text-xs leading-tight",
         isCanceled && "opacity-50"
       )}
     >
@@ -181,7 +181,7 @@ function EventCellContent({ event, isCustom }: { event: ExtraEvent; isCustom: bo
   return (
     <div
       className={cn(
-        "flex flex-col gap-1 h-full text-[11px] leading-tight",
+        "flex flex-col gap-1 h-full text-xs leading-tight",
         isFullColspan && "items-center justify-center text-center text-2xl font-bold"
       )}
     >
