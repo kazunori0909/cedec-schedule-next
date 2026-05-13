@@ -51,6 +51,9 @@ cedec_schedule/
 │   ├── app/                    # App Router（layout.tsx, page.tsx, globals.css）
 │   ├── components/             # UIコンポーネント
 │   │   ├── ScheduleView.tsx    # メインビュー
+│   │   ├── FilterDrawer.tsx    # フィルター（モバイル用ボトムシート、sm未満で表示）
+│   │   ├── FilterPanel.tsx     # フィルター（デスクトップ用インライン、sm以上で表示）
+│   │   ├── InfoTooltip.tsx     # データ取得日時（ℹアイコン＋ツールチップ）
 │   │   └── schedule/
 │   │       ├── ScheduleTable.tsx # 部屋別タイムテーブル
 │   │       └── SessionCell.tsx   # 個別セッションセル

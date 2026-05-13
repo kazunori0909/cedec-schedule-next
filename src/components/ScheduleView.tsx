@@ -10,7 +10,9 @@ import { useRoomColumns } from "@/hooks/useRoomColumns";
 
 import { DateSelector } from "@/components/DateSelector";
 import { FavoriteToggle } from "@/components/FavoriteToggle";
+import { FilterDrawer } from "@/components/FilterDrawer";
 import { FilterPanel } from "@/components/FilterPanel";
+import { InfoTooltip } from "@/components/InfoTooltip";
 import { SideMenu } from "@/components/SideMenu";
 import { ScheduleTable } from "@/components/schedule/ScheduleTable";
 
@@ -96,6 +98,18 @@ export function ScheduleView() {
           <SideMenu currentYear={year} onYearChange={handleYearChange} />
           <h1 className="text-xl font-bold">CEDEC {year} スケジュール</h1>
           <span className="text-xs text-muted-foreground hidden sm:inline">非公式</span>
+          {(CASH_SETTING[year] || cedilUpdate) && (
+            <InfoTooltip
+              lines={[
+                ...(CASH_SETTING[year]
+                  ? [`※セッション情報 取得日時：${CASH_SETTING[year].time}`]
+                  : []),
+                ...(cedilUpdate
+                  ? [`※CEDiL情報 ${cedilCount}件 取得日時：${formatCedilDate(cedilUpdate)}`]
+                  : []),
+              ]}
+            />
+          )}
         </div>
         <div className="px-4 pb-3 flex flex-col gap-2">
           <div className="flex items-center gap-3 flex-wrap">
@@ -105,25 +119,24 @@ export function ScheduleView() {
               onSelect={(i) => setDayIndex(year, i)}
             />
             <FavoriteToggle active={favoriteMode} onToggle={() => toggleFavoriteMode(year)} />
+            {/* モバイル: ドロワーボタン */}
+            <div className="sm:hidden">
+              <FilterDrawer
+                categories={allCategories}
+                hideSpecs={hideSpecs}
+                onToggle={(spec) => toggleHideSpec(year, spec)}
+              />
+            </div>
           </div>
-          <FilterPanel
-            categories={allCategories}
-            hideSpecs={hideSpecs}
-            onToggle={(spec) => toggleHideSpec(year, spec)}
-          />
+          {/* デスクトップ: インラインフィルター */}
+          <div className="hidden sm:block">
+            <FilterPanel
+              categories={allCategories}
+              hideSpecs={hideSpecs}
+              onToggle={(spec) => toggleHideSpec(year, spec)}
+            />
+          </div>
         </div>
-        {(CASH_SETTING[year] || cedilUpdate) && (
-          <div className="px-4 pb-2 text-xs text-muted-foreground">
-            {CASH_SETTING[year] && (
-              <span>※セッション情報 取得日時：{CASH_SETTING[year].time}　</span>
-            )}
-            {cedilUpdate && (
-              <span className="block sm:inline">
-                ※CEDiL情報 {cedilCount}件 取得日時：{formatCedilDate(cedilUpdate)}
-              </span>
-            )}
-          </div>
-        )}
       </header>
 
       <main className="flex-1 p-4">
