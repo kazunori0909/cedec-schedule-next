@@ -24,28 +24,39 @@ export function useScheduleData(year: string, dateList: Date[]): UseScheduleData
   const [cedilCount, setCedilCount] = useState<number>(0);
 
   useEffect(() => {
+    // year 切り替え時の古いフェッチ結果で state を上書きさせないためのフラグ
+    let cancelled = false;
     setLoading(true);
     setError(null);
     setScheduleData(null);
     fetchSchedule(year)
       .then((data) => {
+        if (cancelled) return;
         setScheduleData(data);
         setLoading(false);
       })
       .catch((err) => {
+        if (cancelled) return;
         setError(err instanceof Error ? err.message : "読み込み失敗");
         setLoading(false);
       });
+    return () => {
+      cancelled = true;
+    };
   }, [year]);
 
   useEffect(() => {
     if (!scheduleData) return;
+    let cancelled = false;
     fetchCedil(year).then((cedil) => {
-      if (!cedil) return;
+      if (cancelled || !cedil) return;
       setCedilUpdate(cedil.update_date);
       setCedilCount(cedil.list.length);
       setCedilLookup(buildCedilLookup(cedil.list, scheduleData.sessions, dateList));
     });
+    return () => {
+      cancelled = true;
+    };
   }, [scheduleData, year, dateList]);
 
   return { scheduleData, loading, error, cedilLookup, cedilUpdate, cedilCount };

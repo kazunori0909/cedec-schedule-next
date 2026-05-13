@@ -30,7 +30,7 @@ CEDiL公式サイト
 ## 主要な状態（src/store/scheduleStore.ts）
 
 Zustand ストア + `persist` ミドルウェアで管理。`yearStates` に年度ごとの state を集約し、
-`useCurrentYearState()` で現在年度のサブセットを購読する。
+`useCurrentYearState(year)` で指定年度のサブセットを購読する。
 
 | 状態                            | スコープ   | 用途                                      |
 | ------------------------------- | ---------- | ----------------------------------------- |
