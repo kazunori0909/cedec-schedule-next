@@ -17,19 +17,12 @@ import { ScheduleTable } from "@/components/schedule/ScheduleTable";
 export function ScheduleView() {
   const searchParams = useSearchParams();
   const yearParam = searchParams.get("year");
-  const initialYear = yearParam && isValidYear(yearParam) ? yearParam : DEFAULT_YEAR;
+  // year はURLが唯一の真実。ストアには持たない。
+  const year = yearParam && isValidYear(yearParam) ? yearParam : DEFAULT_YEAR;
 
-  const {
-    year,
-    hydrated,
-    setYear,
-    setHydrated,
-    setDayIndex,
-    toggleFavoriteMode,
-    toggleHideSpec,
-    toggleFavorite,
-  } = useScheduleStore();
-  const { dayIndex, favoriteMode, hideSpecs, favorites } = useCurrentYearState();
+  const { hydrated, setHydrated, setDayIndex, toggleFavoriteMode, toggleHideSpec, toggleFavorite } =
+    useScheduleStore();
+  const { dayIndex, favoriteMode, hideSpecs, favorites } = useCurrentYearState(year);
 
   // マウント後に localStorage から rehydrate（skipHydration: true のため手動で呼ぶ）
   useEffect(() => {
@@ -38,12 +31,6 @@ export function ScheduleView() {
     return unsub;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // URLパラメータが変わったときだけ store を更新
-  useEffect(() => {
-    setYear(initialYear);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialYear]);
 
   const setting = useMemo(() => findYearSetting(year), [year]);
   const dateList = useMemo(() => getDateList(setting), [setting]);
@@ -78,17 +65,16 @@ export function ScheduleView() {
   useEffect(() => {
     if (!scheduleData) return;
     if (todayDayIndex !== undefined) {
-      setDayIndex(todayDayIndex);
+      setDayIndex(year, todayDayIndex);
     }
-  }, [scheduleData, todayDayIndex, setDayIndex]);
+  }, [scheduleData, todayDayIndex, year, setDayIndex]);
 
   // 現在時刻ハイライト（開催期間中のみ）
   const highlightEnabled = todayDayIndex === dayIndex;
   const currentTimeStr = useCurrentTimeRow(timeRows, highlightEnabled);
 
-  // 年度変更: store 更新 + URL 同期
+  // 年度変更: URL のみ更新（year は URL から派生するため store 更新不要）
   const handleYearChange = (newYear: string) => {
-    setYear(newYear);
     const params = new URLSearchParams(window.location.search);
     if (newYear === DEFAULT_YEAR) {
       params.delete("year");
@@ -113,10 +99,18 @@ export function ScheduleView() {
         </div>
         <div className="px-4 pb-3 flex flex-col gap-2">
           <div className="flex items-center gap-3 flex-wrap">
-            <DateSelector dateList={dateList} selected={dayIndex} onSelect={setDayIndex} />
-            <FavoriteToggle active={favoriteMode} onToggle={toggleFavoriteMode} />
+            <DateSelector
+              dateList={dateList}
+              selected={dayIndex}
+              onSelect={(i) => setDayIndex(year, i)}
+            />
+            <FavoriteToggle active={favoriteMode} onToggle={() => toggleFavoriteMode(year)} />
           </div>
-          <FilterPanel categories={allCategories} hideSpecs={hideSpecs} onToggle={toggleHideSpec} />
+          <FilterPanel
+            categories={allCategories}
+            hideSpecs={hideSpecs}
+            onToggle={(spec) => toggleHideSpec(year, spec)}
+          />
         </div>
         {(CASH_SETTING[year] || cedilUpdate) && (
           <div className="px-4 pb-2 text-xs text-muted-foreground">
@@ -148,7 +142,7 @@ export function ScheduleView() {
               hideSpecs={hideSpecs}
               cedilLookup={cedilLookup}
               currentTimeStr={currentTimeStr}
-              onToggleFavorite={(id) => toggleFavorite(id)}
+              onToggleFavorite={(id) => toggleFavorite(year, id)}
             />
             {!hydrated && (
               <div className="text-xs text-muted-foreground mt-2">ローカル設定を読み込み中...</div>
