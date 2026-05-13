@@ -4,6 +4,9 @@
     "dockerfile": "Dockerfile",
     "context": "."
   },
+  "features": {
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {}
+  },
   "forwardPorts": [3000],
   "portsAttributes": {
     "3000": {
@@ -11,10 +14,18 @@
       "onAutoForward": "openBrowser"
     }
   },
+  "mounts": [
+    "source=cedec-schedule-claude-config-${devcontainerId},target=/home/node/.claude,type=volume"
+  ],
+  "containerEnv": {
+    "DISABLE_AUTOUPDATER": "1",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+  },
   "postCreateCommand": "bash .devcontainer/setup.sh",
   "customizations": {
     "vscode": {
       "extensions": [
+        "anthropics.claude-code",
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "bradlc.vscode-tailwindcss",
@@ -22,5 +33,5 @@
       ]
     }
   },
-  "remoteUser": "root"
+  "remoteUser": "node"
 }
