@@ -28,10 +28,11 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files（シークレットを含むファイルのみ除外）
-# .env.development / .env.production はコミット対象（非シークレット）
+# env files
 .env
 .env*.local
+.env.development
+.env.production
 
 # vercel
 .vercel
