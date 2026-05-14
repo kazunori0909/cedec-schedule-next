@@ -1,9 +1,12 @@
-# HTML は毎回サーバーに確認させる（キャッシュを使わない）
-<FilesMatch "\.(html|htm)$">
-  Header set Cache-Control "no-cache, must-revalidate"
-</FilesMatch>
+# 1. Nginxキャッシュ（Xアクセラレータ）をHTMLとJSONで無効化
+SetEnvIf Request_URI "(\/|\.(html|htm|json))$" Ngx_Cache_NoCacheMode=on
 
-# JS / CSS / フォント / 画像はハッシュ付きファイル名なので長期キャッシュ可
-<FilesMatch "\.(js|css|woff2?|ttf|otf|eot|ico|png|jpg|jpeg|gif|svg|webp)$">
-  Header set Cache-Control "public, max-age=31536000, immutable"
-</FilesMatch>
+# 2. ブラウザキャッシュの設定
+<IfModule mod_headers.c>
+    # HTML, JSON はキャッシュさせない、または再確認させる
+    <FilesMatch "\.(html|htm|json)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires 0
+    </FilesMatch>
+</IfModule>
