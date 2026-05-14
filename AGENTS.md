@@ -31,15 +31,15 @@ CEDiL公式サイト
 
 Zustand ストア + `persist` ミドルウェアで管理。`yearStates` に年度ごとの state を集約し、
 `useCurrentYearState(year)` で指定年度のサブセットを購読する。
+`year`（現在表示中の年度）はストアに持たず、URL の `?year=` クエリパラメータが唯一の真実。
 
-| 状態                            | スコープ   | 用途                                      |
-| ------------------------------- | ---------- | ----------------------------------------- |
-| `year`                          | グローバル | 現在表示中の年度（URL駆動、永続化しない） |
-| `hydrated`                      | グローバル | localStorage からの読み込み完了フラグ     |
-| `yearStates[year].dayIndex`     | 年度ごと   | 選択中の日付インデックス                  |
-| `yearStates[year].favoriteMode` | 年度ごと   | お気に入りモード有効フラグ                |
-| `yearStates[year].hideSpecs`    | 年度ごと   | フィルター非表示状態 `{ タグ名: true }`   |
-| `yearStates[year].favorites`    | 年度ごと   | お気に入り登録状態 `{ sessionId: true }`  |
+| 状態                            | スコープ   | 用途                                     |
+| ------------------------------- | ---------- | ---------------------------------------- |
+| `hydrated`                      | グローバル | localStorage からの読み込み完了フラグ    |
+| `yearStates[year].dayIndex`     | 年度ごと   | 選択中の日付インデックス                 |
+| `yearStates[year].favoriteMode` | 年度ごと   | お気に入りモード有効フラグ               |
+| `yearStates[year].hideSpecs`    | 年度ごと   | フィルター非表示状態 `{ タグ名: true }`  |
+| `yearStates[year].favorites`    | 年度ごと   | お気に入り登録状態 `{ sessionId: true }` |
 
 localStorage は単一キー `cedec_schedule_state` に zustand/persist 形式で全年度分を保存する。
 
@@ -50,13 +50,21 @@ cedec_schedule/
 ├── src/
 │   ├── app/                    # App Router（layout.tsx, page.tsx, globals.css）
 │   ├── components/             # UIコンポーネント
-│   │   ├── ScheduleView.tsx    # メインビュー
+│   │   ├── ScheduleView.tsx    # メインビュー（年度・日付・フィルター統合）
+│   │   ├── CategoryBadge.tsx   # カテゴリバッジ（色付きラベル）
+│   │   ├── CurrentTimeHighlight.tsx # 現在時刻ハイライト（開催期間中1分更新）
+│   │   ├── DateSelector.tsx    # 日付選択タブ
+│   │   ├── FavoriteToggle.tsx  # お気に入りモード切替ボタン
 │   │   ├── FilterDrawer.tsx    # フィルター（モバイル用ボトムシート、sm未満で表示）
 │   │   ├── FilterPanel.tsx     # フィルター（デスクトップ用インライン、sm以上で表示）
 │   │   ├── InfoTooltip.tsx     # データ取得日時（ℹアイコン＋ツールチップ）
+│   │   ├── SideMenu.tsx        # 年度切り替えサイドメニュー
 │   │   └── schedule/
 │   │       ├── ScheduleTable.tsx # 部屋別タイムテーブル
 │   │       └── SessionCell.tsx   # 個別セッションセル
+│   ├── hooks/                  # カスタムフック
+│   │   ├── useRoomColumns.ts   # 部屋カラム・フィルタリング・時刻軸計算
+│   │   └── useScheduleData.ts  # スケジュール・CEDiLデータ取得
 │   ├── lib/
 │   │   ├── cedec.ts            # 年度別設定（SCHEDULE_SETTING）
 │   │   ├── cedil.ts            # CEDiL資料リンク付与
@@ -64,14 +72,15 @@ cedec_schedule/
 │   │   ├── schedule.ts         # JSONフェッチ・パース
 │   │   └── utils.ts            # 共通ユーティリティ（safeExternalUrl 等）
 │   ├── store/scheduleStore.ts  # Zustandストア（永続化込み）
-│   └── types/schedule.ts       # 型定義
+│   ├── types/schedule.ts       # 型定義
+│   └── __tests__/              # Vitestユニットテスト
 ├── public/web_data/            # 事前生成済みJSON（git管理外）
 ├── scripts/                    # データ生成スクリプト（tsx で実行）
 │   ├── generate_json.ts        # 公式HTMLを解析しschedule.jsonを生成
 │   ├── generate_cedil.ts       # CEDiLサイトを解析しcedil.jsonを生成
 │   ├── generate_youtube.ts     # CEDECチャンネル動画リストをキャッシュ
 │   ├── lib/                    # 共通ユーティリティ
-│   └── parsers/                # 年度別フォーマットパーサー（format_2020〜2025）
+│   └── parsers/                # 年度別フォーマットパーサー（format_2020・2023〜2025）
 ├── web_data_original/          # 公式サイトHTMLのローカルキャッシュ（コミット対象外）
 └── .claude/                    # Claude Code 設定
 ```

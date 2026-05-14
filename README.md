@@ -31,13 +31,30 @@ cedec_schedule/
 ├── src/
 │   ├── app/                    App Router（layout.tsx, page.tsx）
 │   ├── components/             UIコンポーネント
+│   │   ├── ScheduleView.tsx    メインビュー
+│   │   ├── CategoryBadge.tsx   カテゴリバッジ
+│   │   ├── CurrentTimeHighlight.tsx  現在時刻ハイライト
+│   │   ├── DateSelector.tsx    日付選択タブ
+│   │   ├── FavoriteToggle.tsx  お気に入りモード切替
+│   │   ├── FilterDrawer.tsx    フィルター（モバイル用）
+│   │   ├── FilterPanel.tsx     フィルター（デスクトップ用）
+│   │   ├── InfoTooltip.tsx     データ取得日時ツールチップ
+│   │   ├── SideMenu.tsx        年度切り替えサイドメニュー
+│   │   └── schedule/
+│   │       ├── ScheduleTable.tsx  部屋別タイムテーブル
+│   │       └── SessionCell.tsx    個別セッションセル
+│   ├── hooks/
+│   │   ├── useRoomColumns.ts   部屋カラム・フィルタリング・時刻軸
+│   │   └── useScheduleData.ts  スケジュール・CEDiLデータ取得
 │   ├── lib/
 │   │   ├── cedec.ts            年度設定（SCHEDULE_SETTING）
 │   │   ├── cedil.ts            CEDiL資料リンク付与
 │   │   ├── custom.ts           非公式イベント設定
-│   │   └── schedule.ts         JSON取得・パース
+│   │   ├── schedule.ts         JSON取得・パース
+│   │   └── utils.ts            共通ユーティリティ（safeExternalUrl 等）
 │   ├── store/scheduleStore.ts  Zustandストア
-│   └── types/schedule.ts       型定義
+│   ├── types/schedule.ts       型定義
+│   └── __tests__/              Vitestユニットテスト
 ├── public/
 │   └── web_data/               生成済みJSON（git管理外）
 │       └── {year}/
@@ -48,7 +65,7 @@ cedec_schedule/
 │   ├── generate_cedil.ts       CEDiL JSONデータ生成スクリプト
 │   ├── generate_youtube.ts     YouTube動画リスト生成スクリプト
 │   ├── lib/                    共通ユーティリティ
-│   └── parsers/                年度別フォーマットパーサー
+│   └── parsers/                年度別フォーマットパーサー（format_2020・2023〜2025）
 ├── web_data_original/          公式サイトから取得したHTMLキャッシュ
 │   ├── {year}/
 │   │   ├── day1.html           公式スケジュールHTML（2025年以降）
