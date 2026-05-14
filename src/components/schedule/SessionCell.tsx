@@ -145,7 +145,17 @@ function SpeakerList({ speakers }: { speakers: { name: string; company: string }
           ほか{rest.length}名
         </button>
       )}
-      {expanded && rest.map((sp, i) => <SpeakerItem key={i} speaker={sp} />)}
+      {expanded &&
+        rest.map((sp, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => setExpanded(false)}
+            className="text-left w-full"
+          >
+            <SpeakerItem speaker={sp} />
+          </button>
+        ))}
     </div>
   );
 }
