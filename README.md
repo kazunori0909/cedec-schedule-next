@@ -204,8 +204,9 @@ export const CASH_SETTING = {
 - 2026年 データ生成スクリプトを PHP から TypeScript (tsx + cheerio) に移行
 - 2026年 Next.js + React + TypeScript への全面リプレース（旧jQuery版を破棄）
 - 2026年 YouTube Live配信リンク・YouTube動画URL自動付与に対応
-- 2025年 お気に入り等の保存をCookieからlocalStorageに変更
-- 2025年 リファクタリング（jQuery UI削除・不要CSS削除・コード整理）
+- 2026年 お気に入り等の保存をCookieからlocalStorageに変更
+- 2026年 リファクタリング（jQuery UI削除・不要CSS削除・コード整理）
+- 2024年 2024年フォーマット対応
 - 2022/07/24 Ver.3.0: 2011〜2019年設定を削除
 - 2020/09/09 Ver.2.2: 2020年フォーマット対応
 - 2018/08/24 Ver.2.0: 2018年新フォーマット対応・CEDiLリンクをJSONに移行
