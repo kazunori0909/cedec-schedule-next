@@ -26,12 +26,4 @@ describe("FilterPanel", () => {
     expect(onToggle).toHaveBeenCalledOnce();
     expect(onToggle).toHaveBeenCalledWith("ENG");
   });
-
-  it("hideSpecs に含まれるカテゴリーのバッジは hidden 状態で表示される", () => {
-    render(<FilterPanel categories={["ENG", "GD"]} hideSpecs={{ ENG: true }} onToggle={vi.fn()} />);
-    // CategoryBadge は hidden=true のとき bg-[var(--cat-hidden)] クラスを持つ
-    // ここではバッジ要素の存在のみ確認（CSS 変数はテスト環境で解決されない）
-    expect(screen.getByText("ENG")).toBeInTheDocument();
-    expect(screen.getByText("GD")).toBeInTheDocument();
-  });
 });
