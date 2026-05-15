@@ -37,6 +37,7 @@ export interface ExtraEvent {
   start_time: string; // "HH:MM"
   end_time: string; // "HH:MM"
   room_no: string;
+  detail_url?: string;
   html?: string;
   hash_tag?: string;
   colspan?: "all" | number;
@@ -74,6 +75,7 @@ export interface CustomEvent {
   start_time: string;
   end_time: string;
   room_no: string;
+  detail_url?: string;
   html?: string;
   hash_tag?: string;
 }

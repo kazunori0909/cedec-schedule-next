@@ -188,6 +188,7 @@ function CedilStatus({ url }: { url?: string }) {
 
 function EventCellContent({ event, isCustom }: { event: ExtraEvent; isCustom: boolean }) {
   const isFullColspan = event.colspan === "all";
+  const detailUrl = safeExternalUrl(event.detail_url);
   return (
     <div
       className={cn(
@@ -205,6 +206,16 @@ function EventCellContent({ event, isCustom }: { event: ExtraEvent; isCustom: bo
             #{tag}
           </div>
         ))}
+      {detailUrl && (
+        <a
+          href={detailUrl}
+          target="_blank"
+          rel="noopener"
+          className="inline-flex items-center gap-1 text-blue-600 hover:underline text-[10px]"
+        >
+          <ExternalLink className="w-3 h-3" /> 詳細
+        </a>
+      )}
       {event.html && (
         <div
           className="text-zinc-600 text-[10px]"
