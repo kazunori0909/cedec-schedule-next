@@ -11,7 +11,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
         day_index: 2,
         start_time: "19:45",
         end_time: "21:45",
-        html: '<a href="https://peatix.com/event/4060671/" target="_blank" rel="noopener">詳細</a>',
+        detail_url: "https://peatix.com/event/4060671/",
       },
       {
         title: "CEDEC・GDGD #2024（CEDEC3日目ゲームデザイン懇親会）",
@@ -19,15 +19,15 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
         day_index: 2,
         start_time: "19:45",
         end_time: "21:45",
-        html: '<a href="https://peatix.com/event/4077809" target="_blank" rel="noopener">詳細</a>',
+        detail_url: "https://peatix.com/event/4077809",
       },
       {
         title: "Artists Meet Technicals 2024 supported by TA Night",
-        room_no: "FISHERMAN’S MARKET",
+        room_no: "FISHERMAN'S MARKET",
         day_index: 2,
         start_time: "19:00",
         end_time: "21:00",
-        html: '<a href="https://artistsmeetstechnicals.doorkeeper.jp/events/176019" target="_blank" rel="noopener">詳細</a>',
+        detail_url: "https://artistsmeetstechnicals.doorkeeper.jp/events/176019",
       },
       {
         title: "UI CEDEC 2024【UI懇親会】",
@@ -36,7 +36,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
         day_index: 2,
         start_time: "19:30",
         end_time: "22:00",
-        html: '<a href="https://peatix.com/event/4081264" target="_blank" rel="noopener">詳細</a>',
+        detail_url: "https://peatix.com/event/4081264",
       },
       {
         title: "CEDECON2024",
@@ -44,7 +44,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
         day_index: 2,
         start_time: "19:45",
         end_time: "22:00",
-        html: '<a href="https://peatix.com/event/4081195" target="_blank" rel="noopener">詳細</a>',
+        detail_url: "https://peatix.com/event/4081195",
       },
       {
         title: "教育CEDEC 2024",
@@ -52,7 +52,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
         day_index: 2,
         start_time: "19:00",
         end_time: "22:00",
-        html: '<a href="https://peatix.com/event/4082927" target="_blank" rel="noopener">詳細</a>',
+        detail_url: "https://peatix.com/event/4082927",
       },
     ],
   },
@@ -65,7 +65,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
         day_index: 2,
         start_time: "19:30",
         end_time: "22:30",
-        html: '<a href="https://peatix.com/event/3640537" target="_blank" rel="noopener">詳細</a>',
+        detail_url: "https://peatix.com/event/3640537",
       },
       {
         title: "CEDEC・GDGD #2023",
@@ -73,7 +73,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
         day_index: 2,
         start_time: "19:00",
         end_time: "21:00",
-        html: '<a href="https://cedecgdgd2023.peatix.com/" target="_blank" rel="noopener">詳細</a>',
+        detail_url: "https://cedecgdgd2023.peatix.com/",
       },
       {
         title: "Artists Meet Technicals 2023 supported by TA Night",
@@ -81,7 +81,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
         day_index: 2,
         start_time: "19:30",
         end_time: "21:00",
-        html: '<a href="https://www.creativevillage.ne.jp/category/event-list/138051/" target="_blank" rel="noopener">詳細</a>',
+        detail_url: "https://www.creativevillage.ne.jp/category/event-list/138051/",
       },
       {
         title: "【裏CEDEC】UI CEDEC 2023",
@@ -89,7 +89,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
         day_index: 2,
         start_time: "19:30",
         end_time: "23:00",
-        html: '<a href="https://www.facebook.com/events/309432671558065" target="_blank" rel="noopener">詳細</a>',
+        detail_url: "https://www.facebook.com/events/309432671558065",
       },
       {
         title: "CEDECON2023",
@@ -97,7 +97,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
         day_index: 2,
         start_time: "19:45",
         end_time: "22:00",
-        html: '<a href="https://peatix.com/event/3676741" target="_blank" rel="noopener">詳細</a>',
+        detail_url: "https://peatix.com/event/3676741",
       },
     ],
   },
@@ -109,7 +109,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
         day_index: 2,
         start_time: "19:30",
         end_time: "21:30",
-        html: '<a href="https://www.creativevillage.ne.jp/115551" target="_blank" rel="noopener">詳細</a>',
+        detail_url: "https://www.creativevillage.ne.jp/115551",
       },
       {
         title: "『VRプロダクト開発ラウンドテーブル』に連動した非公式の懇親イベント",
@@ -117,7 +117,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
         day_index: 1,
         start_time: "22:30",
         end_time: "24:00",
-        html: '<a href="https://twitter.com/nkjzm/status/1561308056822358016" target="_blank" rel="noopener">詳細</a>',
+        detail_url: "https://twitter.com/nkjzm/status/1561308056822358016",
       },
       {
         title: "感想戦・深夜の部",
