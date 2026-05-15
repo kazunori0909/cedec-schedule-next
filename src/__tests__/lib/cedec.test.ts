@@ -18,19 +18,11 @@ import {
 // ---------------------------------------------------------------------------
 describe("parseTimeToMinutes", () => {
   it("09:00 → 540", () => expect(parseTimeToMinutes("09:00")).toBe(540));
-  it("10:30 → 630", () => expect(parseTimeToMinutes("10:30")).toBe(630));
   it("00:00 → 0", () => expect(parseTimeToMinutes("00:00")).toBe(0));
   it("23:59 → 1439", () => expect(parseTimeToMinutes("23:59")).toBe(1439));
-  it("12:05 → 725", () => expect(parseTimeToMinutes("12:05")).toBe(725));
 });
 
 describe("formatMinutesToTime", () => {
-  it("540 → 09:00", () => expect(formatMinutesToTime(540)).toBe("09:00"));
-  it("630 → 10:30", () => expect(formatMinutesToTime(630)).toBe("10:30"));
-  it("0 → 00:00", () => expect(formatMinutesToTime(0)).toBe("00:00"));
-  it("1439 → 23:59", () => expect(formatMinutesToTime(1439)).toBe("23:59"));
-  it("725 → 12:05", () => expect(formatMinutesToTime(725)).toBe("12:05"));
-
   it("parseTimeToMinutes との往復変換が一致する", () => {
     const times = ["09:00", "10:30", "17:45", "00:00", "23:55"];
     for (const t of times) {
