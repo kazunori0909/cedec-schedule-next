@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { CASH_SETTING, DEFAULT_YEAR, findYearSetting, getDateList, isValidYear } from "@/lib/cedec";
 import { useCurrentYearState, useScheduleStore } from "@/store/scheduleStore";
 import { useCurrentTimeRow } from "@/components/CurrentTimeHighlight";
@@ -17,11 +16,31 @@ import { SideMenu } from "@/components/SideMenu";
 import { ScheduleTable } from "@/components/schedule/ScheduleTable";
 
 export function ScheduleView() {
-  const searchParams = useSearchParams();
-  const yearParam = searchParams.get("year");
-  // year はURLが唯一の真実。ストアには持たない。
-  const year = yearParam && isValidYear(yearParam) ? yearParam : DEFAULT_YEAR;
+  // next build（静的出力）ではビルド時にURLパラメータが存在しないため useSearchParams は
+  // 使わず、useEffect でクライアント側から window.location.search を読み出す。
+  // year が確定するまで null を返すことで DEFAULT_YEAR のフラッシュを防ぐ。
+  const [year, setYear] = useState<string | null>(null);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const yearParam = params.get("year");
+    setYear(yearParam && isValidYear(yearParam) ? yearParam : DEFAULT_YEAR);
+  }, []);
+
+  if (year === null) {
+    return <div className="p-8 text-center">読み込み中...</div>;
+  }
+
+  return <ScheduleViewInner year={year} onYearChange={setYear} />;
+}
+
+function ScheduleViewInner({
+  year,
+  onYearChange,
+}: {
+  year: string;
+  onYearChange: (year: string) => void;
+}) {
   const { hydrated, setHydrated, setDayIndex, toggleFavoriteMode, toggleHideSpec, toggleFavorite } =
     useScheduleStore();
   const { dayIndex, favoriteMode, hideSpecs, favorites } = useCurrentYearState(year);
@@ -76,7 +95,7 @@ export function ScheduleView() {
   const highlightEnabled = todayDayIndex === dayIndex;
   const currentTimeStr = useCurrentTimeRow(timeRows, highlightEnabled);
 
-  // 年度変更: URL のみ更新（year は URL から派生するため store 更新不要）
+  // 年度変更: URL と year state を同時更新
   const handleYearChange = (newYear: string) => {
     const params = new URLSearchParams(window.location.search);
     if (newYear === DEFAULT_YEAR) {
@@ -90,6 +109,7 @@ export function ScheduleView() {
       "",
       `${window.location.pathname}${search ? `?${search}` : ""}`
     );
+    onYearChange(newYear);
   };
 
   return (
