@@ -25,7 +25,6 @@ function makeScheduleData(sessions: Session[]): ScheduleData {
   return {
     year: 2020,
     first_date: "0902",
-    domain: "https://cedec.cesa.or.jp/2020/",
     generated: "2020-09-07T16:00:00Z",
     sessions,
   };

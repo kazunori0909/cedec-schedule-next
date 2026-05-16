@@ -11,6 +11,11 @@ const CATEGORY_BG: Record<string, string> = {
   SND: "bg-[var(--cat-snd)]",
   GD: "bg-[var(--cat-gd)]",
   AC: "bg-[var(--cat-ac)]",
+  NW: "bg-[var(--cat-nw)]",
+  // 2011/2012 固有コード（ENGまたはBPと同色）
+  PG: "bg-[var(--cat-eng)]",
+  PD: "bg-[var(--cat-bp)]",
+  BM: "bg-[var(--cat-bp)]",
   INT: "bg-[var(--cat-int)]",
   基調講演: "bg-[var(--cat-keynote)]",
 };

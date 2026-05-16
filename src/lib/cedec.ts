@@ -136,6 +136,11 @@ export const SPEC_CLASS: Record<string, string> = {
   SND: "cat-snd",
   GD: "cat-gd",
   AC: "cat-ac",
+  NW: "cat-nw",
+  // 2011/2012 固有コード（ENGまたはBPと同色）
+  PG: "cat-eng",
+  PD: "cat-bp",
+  BM: "cat-bp",
   基調講演: "cat-keynote",
 };
 

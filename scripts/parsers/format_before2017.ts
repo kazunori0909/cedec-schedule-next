@@ -4,7 +4,7 @@ import { buildSession, type RawSession } from "../lib/session";
 import { isCancelled as titleIsCancelled } from "../lib/helpers";
 
 /**
- * 2016/2017 フォーマット
+ * 2011-2017 フォーマット
  *
  * HTML 構造（1日分のファイルが渡される）:
  *   div.schedule_timeframe_normal
@@ -22,14 +22,19 @@ import { isCancelled as titleIsCancelled } from "../lib/helpers";
  *                 [span.ss_name]         名前（なければテキストノード）
  *                 span.schedule_speaker_organization  所属（（会社名）形式）
  *
- * カテゴリ: div.schedule_session のクラスから抽出
- *   ss_ENG/VA/PRD/BP/SND/GD/AC  → 対応カテゴリ
- *   ss_KN（2016）/ ss_（2017）  → 基調講演
- *   ss_{CAT}_2                  → サブカテゴリ
- *   ss_VR 等                    → 無視（カテゴリ外タグ）
+ * カテゴリ抽出（優先順）:
+ *   1. p.ss_spec > img[src*="genre_icon"] の src ファイル名から抽出
+ *      - *_m.gif (width=48) → 主カテゴリ
+ *      - *_s.gif (width=24) → 副カテゴリ
+ *   2. div.schedule_session のクラスにフォールバック（genre_icon img がない場合）
+ *      - ss_ENG/VA/PRD/BP/SND/GD/AC  → 対応カテゴリ
+ *      - ss_KN（2016）/ ss_（2017）  → 基調講演
+ *      - ss_{CAT}_2（英字）          → 副カテゴリ（2011/2014以降）
+ *      - ss_{NUM}_2（数字）          → 無視（2012/2013: 対応表なし）
  *
  * URL解決（../始まり）:
  *   2016: ../session/KN/xxx.html → domain + year/session/KN/xxx.html
+ *   2011-2013: ../program/KN/xxx.html（program/ 含む）
  *   2017: ../KN/xxx.html        → domain + year/session/KN/xxx.html（session/ を補完）
  */
 
@@ -42,31 +47,65 @@ const CAT_CLASS_MAP: Record<string, string> = {
   GD: "GD",
   AC: "AC",
   KN: "基調講演",
+  // 2011/2012 固有カテゴリ（色はENG/BPと共用、コードはそのまま表示）
+  PG: "PG", // プログラミング（ENGと同色）
+  NW: "NW", // ネットワーク
+  PD: "PD", // プロデュース（BPと同色）
+  BM: "BM", // ビジネス＆マネージメント（BPと同色）
 };
 
-function extractCategories(classStr: string): { category: string; subCategories: string[] } {
-  const classes = classStr.split(/\s+/);
+/**
+ * カテゴリを抽出する。
+ * p.ss_spec の genre_icon img src を優先し、取得できない場合は CSS クラスにフォールバック。
+ */
+function extractCategories(
+  classStr: string,
+  specImgSrcs: string[]
+): { category: string; subCategories: string[] } {
   let category = "";
   const subCategories: string[] = [];
 
-  for (const cls of classes) {
-    // サブカテゴリ: ss_ENG_2, ss_PRD_2 等
-    const subMatch = cls.match(/^ss_([A-Z]+)_2$/);
-    if (subMatch) {
-      const code = CAT_CLASS_MAP[subMatch[1]];
-      if (code) subCategories.push(code);
-      continue;
-    }
-    // 主カテゴリ: ss_ENG, ss_KN 等
-    const priMatch = cls.match(/^ss_([A-Z]+)$/);
-    if (priMatch && category === "") {
-      const code = CAT_CLASS_MAP[priMatch[1]];
+  // p.ss_spec > img[src*="genre_icon"] からカテゴリを抽出
+  // ファイル名末尾: _m.gif = 主カテゴリ、_s.gif = 副カテゴリ
+  for (const src of specImgSrcs) {
+    const filename = src.split("/").pop() ?? "";
+    const mainMatch = filename.match(/^([A-Za-z]+)_m\.gif$/);
+    const subMatch = filename.match(/^([A-Za-z]+)_s\.gif$/);
+    if (mainMatch && category === "") {
+      const code = CAT_CLASS_MAP[mainMatch[1].toUpperCase()];
       if (code) category = code;
-      continue;
+    } else if (subMatch) {
+      const code = CAT_CLASS_MAP[subMatch[1].toUpperCase()];
+      if (code) subCategories.push(code);
     }
-    // 2017年基調講演: ss_（サフィックスなし）
-    if (cls === "ss_" && category === "") {
-      category = "基調講演";
+  }
+
+  // img から主カテゴリが取得できない場合は CSS クラスにフォールバック
+  if (category === "") {
+    // 全角英字（Ａ-Ｚ）を半角に正規化（2011年HTMLに ss_ＢＭ_2 のような表記が混在するため）
+    const normalized = classStr.replace(/[Ａ-Ｚ]/g, (c) =>
+      String.fromCharCode(c.charCodeAt(0) - 0xfee0)
+    );
+    const classes = normalized.split(/\s+/);
+    for (const cls of classes) {
+      // 副カテゴリ: ss_ENG_2, ss_PRD_2 等（英字コードのみ。数字コードは対応表なし）
+      const subMatch = cls.match(/^ss_([A-Z]+)_2$/);
+      if (subMatch) {
+        const code = CAT_CLASS_MAP[subMatch[1]];
+        if (code) subCategories.push(code);
+        continue;
+      }
+      // 主カテゴリ: ss_ENG, ss_KN 等
+      const priMatch = cls.match(/^ss_([A-Z]+)$/);
+      if (priMatch && category === "") {
+        const code = CAT_CLASS_MAP[priMatch[1]];
+        if (code) category = code;
+        continue;
+      }
+      // 2017年基調講演: ss_（サフィックスなし）
+      if (cls === "ss_" && category === "") {
+        category = "基調講演";
+      }
     }
   }
 
@@ -113,7 +152,13 @@ export function parseFormatBefore2017($: CheerioAPI, day: number, year: string):
 
     const roomNo = $el.find(".room_number").first().text().trim();
 
-    const { category, subCategories } = extractCategories(classStr);
+    // p.ss_spec > img[src*="genre_icon"] の src を収集（主/副カテゴリ判定に使用）
+    const specImgSrcs: string[] = [];
+    $el.find("p.ss_spec img").each((_, imgEl) => {
+      const src = $(imgEl).attr("src") ?? "";
+      if (src.includes("genre_icon")) specImgSrcs.push(src);
+    });
+    const { category, subCategories } = extractCategories(classStr, specImgSrcs);
 
     const $titleLink = $el.find(".ss_title a").first();
     const title =
