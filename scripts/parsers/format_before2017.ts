@@ -78,9 +78,11 @@ function resolveAbsoluteUrl(href: string, domain: string, year: string): string 
   if (href.startsWith("http")) return href;
   if (href.startsWith("../")) {
     const path = href.slice(3); // "../" を除去
-    // 2016: ../session/KN/xxx.html（session/ 含む）
-    // 2017: ../KN/xxx.html（session/ が欠けているため補完）
-    const prefix = path.startsWith("session/") ? "" : "session/";
+    // 2016+: ../session/KN/xxx.html（session/ 含む）
+    // 2011-2013: ../program/KN/xxx.html（program/ 含む）
+    // 2017: ../KN/xxx.html（ディレクトリ名なし → session/ を補完）
+    const hasKnownDir = path.startsWith("session/") || path.startsWith("program/");
+    const prefix = hasKnownDir ? "" : "session/";
     return domain + year + "/" + prefix + path;
   }
   if (href.startsWith("/")) {

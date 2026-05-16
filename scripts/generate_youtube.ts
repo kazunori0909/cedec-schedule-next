@@ -98,8 +98,8 @@ async function main(): Promise<void> {
       const m = title.match(/【CEDEC(\d{4})】/);
       const year = m ? m[1] : null;
 
-      // 2013年以前・年度不明はスキップ
-      if (year === null || parseInt(year, 10) < 2014) continue;
+      // 2010年以前・年度不明はスキップ
+      if (year === null || parseInt(year, 10) < 2011) continue;
 
       // プレフィックスを除いたセッションタイトル
       const sessionTitle = title.replace(/^【CEDEC\d{4}】\s*/, "").trim();

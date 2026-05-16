@@ -132,30 +132,13 @@ export const SCHEDULE_SETTING: YearSetting[] = [
       },
     ],
   },
-  {
-    year: "2017",
-    first_date: "0830",
-    domain: "http://cedec.cesa.or.jp/",
-    cedil_tag_no: 713,
-  },
-  {
-    year: "2016",
-    first_date: "0824",
-    domain: "http://cedec.cesa.or.jp/",
-    cedil_tag_no: 712,
-  },
-  {
-    year: "2015",
-    first_date: "0826",
-    domain: "http://cedec.cesa.or.jp/",
-    cedil_tag_no: 709,
-  },
-  {
-    year: "2014",
-    first_date: "0902",
-    domain: "http://cedec.cesa.or.jp/",
-    cedil_tag_no: 9,
-  },
+  { year: "2017", first_date: "0830", domain: "http://cedec.cesa.or.jp/", cedil_tag_no: 713 },
+  { year: "2016", first_date: "0824", domain: "http://cedec.cesa.or.jp/", cedil_tag_no: 712 },
+  { year: "2015", first_date: "0826", domain: "http://cedec.cesa.or.jp/", cedil_tag_no: 709 },
+  { year: "2014", first_date: "0902", domain: "http://cedec.cesa.or.jp/", cedil_tag_no: 9 },
+  { year: "2013", first_date: "0821", domain: "http://cedec.cesa.or.jp/", cedil_tag_no: 8 },
+  { year: "2012", first_date: "0820", domain: "http://cedec.cesa.or.jp/", cedil_tag_no: 4 },
+  { year: "2011", first_date: "0906", domain: "http://cedec.cesa.or.jp/", cedil_tag_no: 6 },
 ];
 
 // データ取得タイムスタンプ（手動更新）
@@ -172,6 +155,9 @@ export const CASH_SETTING: Record<string, CashInfo> = {
   "2016": { time: "2026/05/16 12:00" },
   "2015": { time: "2026/05/16 12:00" },
   "2014": { time: "2026/05/16 12:00" },
+  "2013": { time: "2026/05/16 12:00" },
+  "2012": { time: "2026/05/16 12:00" },
+  "2011": { time: "2026/05/16 12:00" },
 };
 
 export const TIME_SPAN = 3;
