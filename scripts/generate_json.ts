@@ -14,7 +14,7 @@ import { dirname } from "node:path";
 import * as cheerio from "cheerio";
 import { abbreviateCompany, isEventOver, normalizeWhitespace } from "./lib/helpers";
 import { fetchLiveSessions } from "./lib/live";
-import { customHtmlPath, dayHtmlPath, liveHtmlPath, outputDir } from "./lib/paths";
+import { allHtmlPath, dayHtmlPath, liveHtmlPath, outputDir } from "./lib/paths";
 import type { RawSession } from "./lib/session";
 import { buildYoutubeMap, findYoutubeUrl } from "./lib/youtube";
 import { parseFormat2018 } from "./parsers/format_2018";
@@ -224,7 +224,7 @@ async function processYear(year: string, config: YearConfig): Promise<void> {
       sessions = sessions.concat(parseByFormat($, config.format, day, year, config.domain));
     }
   } else {
-    const path = customHtmlPath(year);
+    const path = allHtmlPath(year);
     if (!existsSync(path)) {
       console.log(`[SKIP] ${year}: ${path} が見つかりません`);
       return;
