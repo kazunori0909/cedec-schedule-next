@@ -25,7 +25,6 @@ export interface Session {
 export interface ScheduleData {
   year: number;
   first_date: string; // "MMDD"
-  domain: string;
   generated: string; // ISO 8601
   sessions: Session[];
 }

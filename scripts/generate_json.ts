@@ -36,7 +36,6 @@ type FormatName =
 
 interface YearConfig {
   first_date: string;
-  domain: string;
   format: FormatName;
   split_files?: boolean;
   live?: string;
@@ -44,21 +43,21 @@ interface YearConfig {
 
 // prettier-ignore
 const YEAR_CONFIGS: Record<string, YearConfig> = {
-  "2025": { first_date: "0722", domain: "https://cedec.cesa.or.jp/2025/", format: "format_2025",      split_files: true,  live: "https://cedec.cesa.or.jp/2025/timetable/free_lives/",  },
-  "2024": { first_date: "0821", domain: "https://cedec.cesa.or.jp/2024/", format: "format_2024" },
-  "2023": { first_date: "0823", domain: "https://cedec.cesa.or.jp/2023/", format: "format_2023" },
-  "2022": { first_date: "0823", domain: "https://cedec.cesa.or.jp/2022/", format: "format_2020" },
-  "2021": { first_date: "0824", domain: "https://cedec.cesa.or.jp/2021/", format: "format_2020" },
-  "2020": { first_date: "0902", domain: "https://cedec.cesa.or.jp/2020/", format: "format_2020" },
-  "2019": { first_date: "0904", domain: "https://cedec.cesa.or.jp/2019/", format: "format_2019" },
-  "2018": { first_date: "0822", domain: "https://2018.cedec.cesa.or.jp/", format: "format_2018" },
-  "2017": { first_date: "0830", domain: "http://cedec.cesa.or.jp/",       format: "format_before2017", split_files: true },
-  "2016": { first_date: "0824", domain: "http://cedec.cesa.or.jp/",       format: "format_before2017", split_files: true },
-  "2015": { first_date: "0826", domain: "http://cedec.cesa.or.jp/",       format: "format_before2017", split_files: true },
-  "2014": { first_date: "0902", domain: "http://cedec.cesa.or.jp/",       format: "format_before2017", split_files: true },
-  "2013": { first_date: "0821", domain: "http://cedec.cesa.or.jp/",       format: "format_before2017", split_files: true },
-  "2012": { first_date: "0820", domain: "http://cedec.cesa.or.jp/",       format: "format_before2017", split_files: true },
-  "2011": { first_date: "0906", domain: "http://cedec.cesa.or.jp/",       format: "format_before2017", split_files: true },
+  "2025": { first_date: "0722", format: "format_2025",      split_files: true,  live: "https://cedec.cesa.or.jp/2025/timetable/free_lives/" },
+  "2024": { first_date: "0821", format: "format_2024" },
+  "2023": { first_date: "0823", format: "format_2023" },
+  "2022": { first_date: "0823", format: "format_2020" },
+  "2021": { first_date: "0824", format: "format_2020" },
+  "2020": { first_date: "0902", format: "format_2020" },
+  "2019": { first_date: "0904", format: "format_2019" },
+  "2018": { first_date: "0822", format: "format_2018" },
+  "2017": { first_date: "0830", format: "format_before2017", split_files: true },
+  "2016": { first_date: "0824", format: "format_before2017", split_files: true },
+  "2015": { first_date: "0826", format: "format_before2017", split_files: true },
+  "2014": { first_date: "0902", format: "format_before2017", split_files: true },
+  "2013": { first_date: "0821", format: "format_before2017", split_files: true },
+  "2012": { first_date: "0820", format: "format_before2017", split_files: true },
+  "2011": { first_date: "0906", format: "format_before2017", split_files: true },
 };
 
 function loadHtml(path: string): cheerio.CheerioAPI {
@@ -70,8 +69,7 @@ function parseByFormat(
   $: cheerio.CheerioAPI,
   format: FormatName,
   day?: number,
-  year?: string,
-  domain?: string
+  year?: string
 ): RawSession[] {
   switch (format) {
     case "format_2025":
@@ -87,7 +85,7 @@ function parseByFormat(
     case "format_2018":
       return parseFormat2018($);
     case "format_before2017":
-      return parseFormatBefore2017($, day ?? 1, domain ?? "", year ?? "");
+      return parseFormatBefore2017($, day ?? 1, year ?? "");
   }
 }
 
@@ -135,7 +133,6 @@ function generateJson(year: string, config: YearConfig, sessions: RawSession[]):
   const data = {
     year: parseInt(year, 10),
     first_date: config.first_date,
-    domain: config.domain,
     generated: new Date().toISOString(),
     sessions: sessions
       .filter((s) => s.title !== "")
@@ -181,7 +178,7 @@ async function processYear(year: string, config: YearConfig): Promise<void> {
         continue;
       }
       const $ = loadHtml(path);
-      sessions = sessions.concat(parseByFormat($, config.format, day, year, config.domain));
+      sessions = sessions.concat(parseByFormat($, config.format, day, year));
     }
   } else {
     const path = allHtmlPath(year);
@@ -190,7 +187,7 @@ async function processYear(year: string, config: YearConfig): Promise<void> {
       return;
     }
     const $ = loadHtml(path);
-    sessions = parseByFormat($, config.format, undefined, year, config.domain);
+    sessions = parseByFormat($, config.format, undefined, year);
   }
 
   let liveMap = new Map<string, string>();

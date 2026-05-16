@@ -73,7 +73,9 @@ function extractCategories(classStr: string): { category: string; subCategories:
   return { category, subCategories };
 }
 
-function resolveAbsoluteUrl(href: string, domain: string, year: string): string {
+const BASE_URL = "https://cedec.cesa.or.jp";
+
+function resolveAbsoluteUrl(href: string, year: string): string {
   if (!href) return "";
   if (href.startsWith("http")) return href;
   if (href.startsWith("../")) {
@@ -83,12 +85,12 @@ function resolveAbsoluteUrl(href: string, domain: string, year: string): string 
     // 2017: ../KN/xxx.html（ディレクトリ名なし → session/ を補完）
     const hasKnownDir = path.startsWith("session/") || path.startsWith("program/");
     const prefix = hasKnownDir ? "" : "session/";
-    return domain + year + "/" + prefix + path;
+    return `${BASE_URL}/${year}/${prefix}${path}`;
   }
   if (href.startsWith("/")) {
-    return domain.replace(/\/$/, "") + href;
+    return BASE_URL + href;
   }
-  return domain + href;
+  return `${BASE_URL}/${year}/${href}`;
 }
 
 function extractSessionId(href: string): string {
@@ -98,12 +100,7 @@ function extractSessionId(href: string): string {
   return last.replace(/\.[^.]+$/, "");
 }
 
-export function parseFormatBefore2017(
-  $: CheerioAPI,
-  day: number,
-  domain: string,
-  year: string
-): RawSession[] {
+export function parseFormatBefore2017($: CheerioAPI, day: number, year: string): RawSession[] {
   const sessions: RawSession[] = [];
 
   $("div.schedule_session").each((_, el) => {
@@ -127,7 +124,7 @@ export function parseFormatBefore2017(
 
     const rawHref = $titleLink.attr("href") ?? "";
     const sessionId = rawHref ? extractSessionId(rawHref) : "";
-    const detailUrl = resolveAbsoluteUrl(rawHref, domain, year);
+    const detailUrl = resolveAbsoluteUrl(rawHref, year);
 
     const speakers: Speaker[] = [];
     $el.find("p.schedule_speaker").each((_, sp) => {
