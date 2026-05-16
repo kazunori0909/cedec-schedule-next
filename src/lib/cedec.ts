@@ -80,6 +80,65 @@ export const SCHEDULE_SETTING: YearSetting[] = [
     domain: "https://cedec.cesa.or.jp/2020/",
     cedil_tag_no: 728,
   },
+  {
+    year: "2019",
+    first_date: "0904",
+    domain: "https://cedec.cesa.or.jp/2019/",
+    cedil_tag_no: 720,
+    events: [
+      {
+        title: "CEDEC AWARDS",
+        day_index: 1,
+        start_time: "17:50",
+        end_time: "19:25",
+        room_no: "メインホール",
+        colspan: "all" as const,
+        html: "※公式サイトに終了時間は明記されていません<br/>",
+      },
+      {
+        title: "Developer's Night",
+        day_index: 1,
+        start_time: "19:30",
+        end_time: "21:30",
+        room_no: "501＋502",
+        colspan: "all" as const,
+        html: "※CEDEC AWARDS終了後に開始<br/>※会期中、2F総合受付にてチケットを販売<br/>",
+      },
+    ],
+  },
+  {
+    year: "2018",
+    first_date: "0822",
+    domain: "https://2018.cedec.cesa.or.jp/",
+    cedil_tag_no: 717,
+    events: [
+      {
+        title: "CEDEC AWARDS",
+        day_index: 1,
+        start_time: "17:50",
+        end_time: "19:25",
+        room_no: "メインホール",
+        colspan: "all" as const,
+        html: "※公式サイトに終了時間は明記されていません<br/>",
+      },
+      {
+        title: "Developer's Night",
+        day_index: 1,
+        start_time: "19:30",
+        end_time: "21:30",
+        room_no: "501＋502",
+        colspan: "all" as const,
+        html: "※CEDEC AWARDS終了後に開始<br/>※会期中、2F総合受付にてチケットを販売<br/>",
+      },
+    ],
+  },
+  { year: "2017", first_date: "0830", domain: "http://cedec.cesa.or.jp/", cedil_tag_no: 713 },
+  { year: "2016", first_date: "0824", domain: "http://cedec.cesa.or.jp/", cedil_tag_no: 712 },
+  { year: "2015", first_date: "0826", domain: "http://cedec.cesa.or.jp/", cedil_tag_no: 709 },
+  { year: "2014", first_date: "0902", domain: "http://cedec.cesa.or.jp/", cedil_tag_no: 9 },
+  { year: "2013", first_date: "0821", domain: "http://cedec.cesa.or.jp/", cedil_tag_no: 8 },
+  { year: "2012", first_date: "0820", domain: "http://cedec.cesa.or.jp/", cedil_tag_no: 4 },
+  { year: "2011", first_date: "0906", domain: "http://cedec.cesa.or.jp/", cedil_tag_no: 6 },
 ];
 
 // データ取得タイムスタンプ（手動更新）
@@ -90,6 +149,15 @@ export const CASH_SETTING: Record<string, CashInfo> = {
   "2022": { time: "2022/08/28 16:00" },
   "2021": { time: "2021/08/24 00:30" },
   "2020": { time: "2020/09/07 16:00" },
+  "2019": { time: "2026/05/16 12:00" },
+  "2018": { time: "2026/05/16 12:00" },
+  "2017": { time: "2026/05/16 12:00" },
+  "2016": { time: "2026/05/16 12:00" },
+  "2015": { time: "2026/05/16 12:00" },
+  "2014": { time: "2026/05/16 12:00" },
+  "2013": { time: "2026/05/16 12:00" },
+  "2012": { time: "2026/05/16 12:00" },
+  "2011": { time: "2026/05/16 12:00" },
 };
 
 export const TIME_SPAN = 3;
@@ -174,7 +242,7 @@ export function resolveDetailUrl(detailUrl: string, domain: string): string {
   if (detailUrl.startsWith("http")) return detailUrl;
   // javascript: / data: 等の危険スキームを弾く（そのまま base に連結すると safeExternalUrl をすり抜けるため）
   if (/^[a-zA-Z][a-zA-Z0-9+\-.]*:/.test(detailUrl)) return "";
-  const base = domain.replace(/\/[0-9]{4}\/$/, "");
+  const base = domain.replace(/\/[0-9]{4}\/$/, "").replace(/\/$/, "");
   return base + (detailUrl.startsWith("/") ? detailUrl : "/" + detailUrl);
 }
 

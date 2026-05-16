@@ -94,12 +94,15 @@ async function main(): Promise<void> {
       // 削除済み動画はスキップ
       if (title === "Deleted video" || title === "Private video") continue;
 
+      // CEDEC+KYUSHU / CEDEC+ シリーズはスキップ（メイン開催のみ対象）
+      if (/【CEDEC[+＋]/.test(title)) continue;
+
       // 【CEDEC20XX】プレフィックスから年度を抽出
       const m = title.match(/【CEDEC(\d{4})】/);
       const year = m ? m[1] : null;
 
-      // 2019年以前・年度不明はスキップ
-      if (year === null || parseInt(year, 10) < 2020) continue;
+      // 年度不明・2014年以前はスキップ（チャンネルの動画は2014年から）
+      if (year === null || parseInt(year, 10) < 2014) continue;
 
       // プレフィックスを除いたセッションタイトル
       const sessionTitle = title.replace(/^【CEDEC\d{4}】\s*/, "").trim();

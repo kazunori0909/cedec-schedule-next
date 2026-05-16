@@ -17,12 +17,22 @@ import { fetchLiveSessions } from "./lib/live";
 import { customHtmlPath, dayHtmlPath, liveHtmlPath, outputDir } from "./lib/paths";
 import type { RawSession } from "./lib/session";
 import { buildYoutubeMap, findYoutubeUrl } from "./lib/youtube";
+import { parseFormat2018 } from "./parsers/format_2018";
+import { parseFormat2019 } from "./parsers/format_2019";
 import { parseFormat2020 } from "./parsers/format_2020";
 import { parseFormat2023 } from "./parsers/format_2023";
 import { parseFormat2024 } from "./parsers/format_2024";
 import { parseFormat2025 } from "./parsers/format_2025";
+import { parseFormatBefore2017 } from "./parsers/format_before2017";
 
-type FormatName = "format_2020" | "format_2023" | "format_2024" | "format_2025";
+type FormatName =
+  | "format_before2017"
+  | "format_2018"
+  | "format_2019"
+  | "format_2020"
+  | "format_2023"
+  | "format_2024"
+  | "format_2025";
 
 interface YearConfig {
   first_date: string;
@@ -33,17 +43,61 @@ interface YearConfig {
 }
 
 const YEAR_CONFIGS: Record<string, YearConfig> = {
-  "2020": { first_date: "0902", domain: "https://cedec.cesa.or.jp/2020/", format: "format_2020" },
-  "2021": { first_date: "0824", domain: "https://cedec.cesa.or.jp/2021/", format: "format_2020" },
-  "2022": { first_date: "0823", domain: "https://cedec.cesa.or.jp/2022/", format: "format_2020" },
-  "2023": { first_date: "0823", domain: "https://cedec.cesa.or.jp/2023/", format: "format_2023" },
-  "2024": { first_date: "0821", domain: "https://cedec.cesa.or.jp/2024/", format: "format_2024" },
   "2025": {
     first_date: "0722",
     domain: "https://cedec.cesa.or.jp/2025/",
     format: "format_2025",
     split_files: true,
     live: "https://cedec.cesa.or.jp/2025/timetable/free_lives/",
+  },
+  "2024": { first_date: "0821", domain: "https://cedec.cesa.or.jp/2024/", format: "format_2024" },
+  "2023": { first_date: "0823", domain: "https://cedec.cesa.or.jp/2023/", format: "format_2023" },
+  "2022": { first_date: "0823", domain: "https://cedec.cesa.or.jp/2022/", format: "format_2020" },
+  "2021": { first_date: "0824", domain: "https://cedec.cesa.or.jp/2021/", format: "format_2020" },
+  "2020": { first_date: "0902", domain: "https://cedec.cesa.or.jp/2020/", format: "format_2020" },
+  "2019": { first_date: "0904", domain: "https://cedec.cesa.or.jp/2019/", format: "format_2019" },
+  "2018": { first_date: "0822", domain: "https://2018.cedec.cesa.or.jp/", format: "format_2018" },
+  "2017": {
+    first_date: "0830",
+    domain: "http://cedec.cesa.or.jp/",
+    format: "format_before2017",
+    split_files: true,
+  },
+  "2016": {
+    first_date: "0824",
+    domain: "http://cedec.cesa.or.jp/",
+    format: "format_before2017",
+    split_files: true,
+  },
+  "2015": {
+    first_date: "0826",
+    domain: "http://cedec.cesa.or.jp/",
+    format: "format_before2017",
+    split_files: true,
+  },
+  "2014": {
+    first_date: "0902",
+    domain: "http://cedec.cesa.or.jp/",
+    format: "format_before2017",
+    split_files: true,
+  },
+  "2013": {
+    first_date: "0821",
+    domain: "http://cedec.cesa.or.jp/",
+    format: "format_before2017",
+    split_files: true,
+  },
+  "2012": {
+    first_date: "0820",
+    domain: "http://cedec.cesa.or.jp/",
+    format: "format_before2017",
+    split_files: true,
+  },
+  "2011": {
+    first_date: "0906",
+    domain: "http://cedec.cesa.or.jp/",
+    format: "format_before2017",
+    split_files: true,
   },
 };
 
@@ -52,16 +106,28 @@ function loadHtml(path: string): cheerio.CheerioAPI {
   return cheerio.load(html);
 }
 
-function parseByFormat($: cheerio.CheerioAPI, format: FormatName, day?: number): RawSession[] {
+function parseByFormat(
+  $: cheerio.CheerioAPI,
+  format: FormatName,
+  day?: number,
+  year?: string,
+  domain?: string
+): RawSession[] {
   switch (format) {
-    case "format_2020":
-      return parseFormat2020($);
-    case "format_2023":
-      return parseFormat2023($);
-    case "format_2024":
-      return parseFormat2024($);
     case "format_2025":
       return parseFormat2025($, day);
+    case "format_2024":
+      return parseFormat2024($);
+    case "format_2023":
+      return parseFormat2023($);
+    case "format_2020":
+      return parseFormat2020($);
+    case "format_2019":
+      return parseFormat2019($);
+    case "format_2018":
+      return parseFormat2018($);
+    case "format_before2017":
+      return parseFormatBefore2017($, day ?? 1, domain ?? "", year ?? "");
   }
 }
 
@@ -155,7 +221,7 @@ async function processYear(year: string, config: YearConfig): Promise<void> {
         continue;
       }
       const $ = loadHtml(path);
-      sessions = sessions.concat(parseByFormat($, config.format, day));
+      sessions = sessions.concat(parseByFormat($, config.format, day, year, config.domain));
     }
   } else {
     const path = customHtmlPath(year);
@@ -164,7 +230,7 @@ async function processYear(year: string, config: YearConfig): Promise<void> {
       return;
     }
     const $ = loadHtml(path);
-    sessions = parseByFormat($, config.format);
+    sessions = parseByFormat($, config.format, undefined, year, config.domain);
   }
 
   let liveMap = new Map<string, string>();

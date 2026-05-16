@@ -59,7 +59,7 @@ describe("isValidYear", () => {
   });
 
   it("存在しない年度は false を返す", () => {
-    expect(isValidYear("2019")).toBe(false);
+    expect(isValidYear("2010")).toBe(false);
     expect(isValidYear("9999")).toBe(false);
     expect(isValidYear("")).toBe(false);
   });
@@ -147,6 +147,13 @@ describe("resolveDetailUrl", () => {
 
   it("data: スキームは空文字を返す（XSS 対策）", () => {
     expect(resolveDetailUrl("data:text/html,<h1>xss</h1>", domain)).toBe("");
+  });
+
+  it("年パスを含まないドメイン（2018年形式）でも正しく絶対 URL を返す", () => {
+    const domain2018 = "https://2018.cedec.cesa.or.jp/";
+    expect(resolveDetailUrl("/session/detail/123", domain2018)).toBe(
+      "https://2018.cedec.cesa.or.jp/session/detail/123"
+    );
   });
 });
 
