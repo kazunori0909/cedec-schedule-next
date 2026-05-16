@@ -69,6 +69,18 @@ const YEAR_CONFIGS: Record<string, YearConfig> = {
     format: "format_before2017",
     split_files: true,
   },
+  "2015": {
+    first_date: "0826",
+    domain: "http://cedec.cesa.or.jp/",
+    format: "format_before2017",
+    split_files: true,
+  },
+  "2014": {
+    first_date: "0902",
+    domain: "http://cedec.cesa.or.jp/",
+    format: "format_before2017",
+    split_files: true,
+  },
 };
 
 function loadHtml(path: string): cheerio.CheerioAPI {
