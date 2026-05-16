@@ -29,6 +29,9 @@ export function useScheduleData(year: string, dateList: Date[]): UseScheduleData
     setLoading(true);
     setError(null);
     setScheduleData(null);
+    setCedilUpdate(undefined);
+    setCedilCount(0);
+    setCedilLookup({});
     fetchSchedule(year)
       .then((data) => {
         if (cancelled) return;
