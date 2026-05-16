@@ -14,7 +14,7 @@ import { dirname } from "node:path";
 import * as cheerio from "cheerio";
 import { abbreviateCompany, isEventOver, normalizeWhitespace } from "./lib/helpers";
 import { fetchLiveSessions } from "./lib/live";
-import { customHtmlPath, dayHtmlPath, liveHtmlPath, outputDir } from "./lib/paths";
+import { allHtmlPath, dayHtmlPath, liveHtmlPath, outputDir } from "./lib/paths";
 import type { RawSession } from "./lib/session";
 import { buildYoutubeMap, findYoutubeUrl } from "./lib/youtube";
 import { parseFormat2018 } from "./parsers/format_2018";
@@ -24,6 +24,7 @@ import { parseFormat2023 } from "./parsers/format_2023";
 import { parseFormat2024 } from "./parsers/format_2024";
 import { parseFormat2025 } from "./parsers/format_2025";
 import { parseFormatBefore2017 } from "./parsers/format_before2017";
+import { findYearSetting } from "../src/lib/cedec";
 
 type FormatName =
   | "format_before2017"
@@ -35,70 +36,28 @@ type FormatName =
   | "format_2025";
 
 interface YearConfig {
-  first_date: string;
-  domain: string;
   format: FormatName;
   split_files?: boolean;
   live?: string;
 }
 
+// prettier-ignore
 const YEAR_CONFIGS: Record<string, YearConfig> = {
-  "2025": {
-    first_date: "0722",
-    domain: "https://cedec.cesa.or.jp/2025/",
-    format: "format_2025",
-    split_files: true,
-    live: "https://cedec.cesa.or.jp/2025/timetable/free_lives/",
-  },
-  "2024": { first_date: "0821", domain: "https://cedec.cesa.or.jp/2024/", format: "format_2024" },
-  "2023": { first_date: "0823", domain: "https://cedec.cesa.or.jp/2023/", format: "format_2023" },
-  "2022": { first_date: "0823", domain: "https://cedec.cesa.or.jp/2022/", format: "format_2020" },
-  "2021": { first_date: "0824", domain: "https://cedec.cesa.or.jp/2021/", format: "format_2020" },
-  "2020": { first_date: "0902", domain: "https://cedec.cesa.or.jp/2020/", format: "format_2020" },
-  "2019": { first_date: "0904", domain: "https://cedec.cesa.or.jp/2019/", format: "format_2019" },
-  "2018": { first_date: "0822", domain: "https://2018.cedec.cesa.or.jp/", format: "format_2018" },
-  "2017": {
-    first_date: "0830",
-    domain: "http://cedec.cesa.or.jp/",
-    format: "format_before2017",
-    split_files: true,
-  },
-  "2016": {
-    first_date: "0824",
-    domain: "http://cedec.cesa.or.jp/",
-    format: "format_before2017",
-    split_files: true,
-  },
-  "2015": {
-    first_date: "0826",
-    domain: "http://cedec.cesa.or.jp/",
-    format: "format_before2017",
-    split_files: true,
-  },
-  "2014": {
-    first_date: "0902",
-    domain: "http://cedec.cesa.or.jp/",
-    format: "format_before2017",
-    split_files: true,
-  },
-  "2013": {
-    first_date: "0821",
-    domain: "http://cedec.cesa.or.jp/",
-    format: "format_before2017",
-    split_files: true,
-  },
-  "2012": {
-    first_date: "0820",
-    domain: "http://cedec.cesa.or.jp/",
-    format: "format_before2017",
-    split_files: true,
-  },
-  "2011": {
-    first_date: "0906",
-    domain: "http://cedec.cesa.or.jp/",
-    format: "format_before2017",
-    split_files: true,
-  },
+  "2025": { format: "format_2025", split_files: true, live: "https://cedec.cesa.or.jp/2025/timetable/free_lives/" },
+  "2024": { format: "format_2024" },
+  "2023": { format: "format_2023" },
+  "2022": { format: "format_2020" },
+  "2021": { format: "format_2020" },
+  "2020": { format: "format_2020" },
+  "2019": { format: "format_2019" },
+  "2018": { format: "format_2018" },
+  "2017": { format: "format_before2017", split_files: true },
+  "2016": { format: "format_before2017", split_files: true },
+  "2015": { format: "format_before2017", split_files: true },
+  "2014": { format: "format_before2017", split_files: true },
+  "2013": { format: "format_before2017", split_files: true },
+  "2012": { format: "format_before2017", split_files: true },
+  "2011": { format: "format_before2017", split_files: true },
 };
 
 function loadHtml(path: string): cheerio.CheerioAPI {
@@ -110,8 +69,7 @@ function parseByFormat(
   $: cheerio.CheerioAPI,
   format: FormatName,
   day?: number,
-  year?: string,
-  domain?: string
+  year?: string
 ): RawSession[] {
   switch (format) {
     case "format_2025":
@@ -127,7 +85,7 @@ function parseByFormat(
     case "format_2018":
       return parseFormat2018($);
     case "format_before2017":
-      return parseFormatBefore2017($, day ?? 1, domain ?? "", year ?? "");
+      return parseFormatBefore2017($, day ?? 1, year ?? "");
   }
 }
 
@@ -170,12 +128,12 @@ function postprocessSessions(
   return sessions;
 }
 
-function generateJson(year: string, config: YearConfig, sessions: RawSession[]): string {
+function generateJson(year: string, sessions: RawSession[]): string {
+  const { first_date } = findYearSetting(year);
   // PHP の `'year' => $year` は数値変換されてJSONに出るため、ここでも数値化する
   const data = {
     year: parseInt(year, 10),
-    first_date: config.first_date,
-    domain: config.domain,
+    first_date,
     generated: new Date().toISOString(),
     sessions: sessions
       .filter((s) => s.title !== "")
@@ -209,6 +167,7 @@ function generateJson(year: string, config: YearConfig, sessions: RawSession[]):
 }
 
 async function processYear(year: string, config: YearConfig): Promise<void> {
+  const { first_date } = findYearSetting(year);
   console.log(`[INFO] ${year} 処理開始 (format=${config.format})`);
 
   let sessions: RawSession[] = [];
@@ -221,30 +180,30 @@ async function processYear(year: string, config: YearConfig): Promise<void> {
         continue;
       }
       const $ = loadHtml(path);
-      sessions = sessions.concat(parseByFormat($, config.format, day, year, config.domain));
+      sessions = sessions.concat(parseByFormat($, config.format, day, year));
     }
   } else {
-    const path = customHtmlPath(year);
+    const path = allHtmlPath(year);
     if (!existsSync(path)) {
       console.log(`[SKIP] ${year}: ${path} が見つかりません`);
       return;
     }
     const $ = loadHtml(path);
-    sessions = parseByFormat($, config.format, undefined, year, config.domain);
+    sessions = parseByFormat($, config.format, undefined, year);
   }
 
   let liveMap = new Map<string, string>();
   if (config.live) {
-    liveMap = await fetchLiveSessions(config.live, config.first_date, liveHtmlPath(year));
+    liveMap = await fetchLiveSessions(config.live, first_date, liveHtmlPath(year));
     console.log(`[INFO] LIVE配信URL: ${liveMap.size} 件取得`);
   }
 
   const youtubeMap = buildYoutubeMap(year);
-  const eventOver = isEventOver(parseInt(year, 10), config.first_date);
+  const eventOver = isEventOver(parseInt(year, 10), first_date);
   if (eventOver) console.log("[INFO] 会期終了後モード: liveパラメータを処理します");
 
   const processed = postprocessSessions(sessions, liveMap, youtubeMap, eventOver);
-  const jsonContent = generateJson(year, config, processed);
+  const jsonContent = generateJson(year, processed);
 
   const dir = outputDir(year);
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });

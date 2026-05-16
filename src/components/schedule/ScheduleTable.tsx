@@ -122,7 +122,8 @@ export function ScheduleTable({
                       className={cn(
                         "border border-border align-top p-2 rounded-md",
                         isFav ? "bg-pink-100" : "bg-zinc-100",
-                        session.kind === "event" && "bg-orange-100",
+                        session.kind === "event" && session.isCustom && "bg-orange-100",
+                        session.kind === "event" && !session.isCustom && "bg-white",
                         cell.isFullSpan && "text-center"
                       )}
                     >

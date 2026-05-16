@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CASH_SETTING, DEFAULT_YEAR, findYearSetting, getDateList, isValidYear } from "@/lib/cedec";
+import {
+  CASH_SETTING,
+  DEFAULT_YEAR,
+  findYearSetting,
+  getDateList,
+  getDomain,
+  isValidYear,
+} from "@/lib/cedec";
 import { useCurrentYearState, useScheduleStore } from "@/store/scheduleStore";
 import { useCurrentTimeRow } from "@/components/CurrentTimeHighlight";
 import { useScheduleData } from "@/hooks/useScheduleData";
@@ -171,7 +178,7 @@ function ScheduleViewInner({
               timeRange={timeRange}
               dayIndex={dayIndex}
               year={year}
-              domain={setting.domain}
+              domain={getDomain(year)}
               favorites={favorites}
               hideSpecs={hideSpecs}
               cedilLookup={cedilLookup}

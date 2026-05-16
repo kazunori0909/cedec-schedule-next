@@ -25,7 +25,6 @@ export interface Session {
 export interface ScheduleData {
   year: number;
   first_date: string; // "MMDD"
-  domain: string;
   generated: string; // ISO 8601
   sessions: Session[];
 }
@@ -44,12 +43,21 @@ export interface ExtraEvent {
   youtube?: string;
 }
 
+export interface DevNightConfig {
+  rel_path: string; // domain からの相対パス（例: "event/developer/"）
+  room_no: string;
+  // 以下は省略時デフォルト値を使用
+  day_index?: number; // 省略時: 1
+  start_time?: string; // 省略時: "19:30"
+  end_time?: string; // 省略時: "21:30"
+}
+
 export interface YearSetting {
   year: string;
   first_date: string; // "MMDD"
-  domain: string;
-  cedil_tag_no: number;
   events?: ExtraEvent[];
+  dev_night?: DevNightConfig;
+  cedil_tag_no: number;
 }
 
 export interface CashInfo {

@@ -22,9 +22,9 @@ export function outputDir(year: string): string {
   return resolve(WEB_DATA_OUTPUT, year);
 }
 
-/** 年度別の入力HTMLパス（旧フォーマット） */
-export function customHtmlPath(year: string): string {
-  return resolve(WEB_DATA_ORIGINAL, year, "custom.html");
+/** 年度別の入力HTMLパス（全セッションをまとめた1ファイル） */
+export function allHtmlPath(year: string): string {
+  return resolve(WEB_DATA_ORIGINAL, year, "all.html");
 }
 
 /** 年度別の日別HTMLパス（新フォーマット） */
