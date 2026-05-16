@@ -1,49 +1,31 @@
-import type { YearSetting, CashInfo, CategoryCode } from "@/types/schedule";
+import type {
+  YearSetting,
+  CashInfo,
+  CategoryCode,
+  ExtraEvent,
+  DevNightConfig,
+} from "@/types/schedule";
 
-// 年度別設定（impl/cedec.js の SCHEDULE_SETTING を移植）
+// 年度別設定
+// 　※eventsは、2022年以前は、CEDEC AWARDSなどのイベントのために利用
+// 　 以降はセッション一覧に表記されるようになったため、未使用
 export const SCHEDULE_SETTING: YearSetting[] = [
   {
     year: "2025",
     first_date: "0722",
-    domain: "https://cedec.cesa.or.jp/2025/",
+    dev_night: { rel_path: "event/developer/", room_no: "多目的ホール" },
     cedil_tag_no: 756,
-    events: [
-      {
-        title: "Developers' Night",
-        day_index: 1,
-        start_time: "19:30",
-        end_time: "21:30",
-        room_no: "多目的ホール",
-        html: '※会場で先着500名の限定販売<br/><a href="https://cedec.cesa.or.jp/2025/event/developer/" target="_blank" rel="noopener">詳細</a>',
-      },
-    ],
   },
   {
     year: "2024",
     first_date: "0821",
-    domain: "https://cedec.cesa.or.jp/2024/",
+    dev_night: { rel_path: "event/developer/", room_no: "多目的ホール" },
     cedil_tag_no: 752,
-    events: [
-      {
-        title: "Developers' Night",
-        day_index: 1,
-        start_time: "19:30",
-        end_time: "21:30",
-        room_no: "多目的ホール",
-        html: '※会場で先着500名の限定販売<br/><a href="https://cedec.cesa.or.jp/2024/event/developer/" target="_blank" rel="noopener">詳細</a>',
-      },
-    ],
   },
-  {
-    year: "2023",
-    first_date: "0823",
-    domain: "https://cedec.cesa.or.jp/2023/",
-    cedil_tag_no: 748,
-  },
+  { year: "2023", first_date: "0823", cedil_tag_no: 748 },
   {
     year: "2022",
     first_date: "0823",
-    domain: "https://cedec.cesa.or.jp/2022/",
     cedil_tag_no: 743,
     events: [
       {
@@ -60,7 +42,6 @@ export const SCHEDULE_SETTING: YearSetting[] = [
   {
     year: "2021",
     first_date: "0824",
-    domain: "https://cedec.cesa.or.jp/2021/",
     cedil_tag_no: 740,
     events: [
       {
@@ -74,16 +55,11 @@ export const SCHEDULE_SETTING: YearSetting[] = [
       },
     ],
   },
-  {
-    year: "2020",
-    first_date: "0902",
-    domain: "https://cedec.cesa.or.jp/2020/",
-    cedil_tag_no: 728,
-  },
+  { year: "2020", first_date: "0902", cedil_tag_no: 728 },
   {
     year: "2019",
     first_date: "0904",
-    domain: "https://cedec.cesa.or.jp/2019/",
+    dev_night: { rel_path: "event/developer.html", room_no: "501＋502" },
     cedil_tag_no: 720,
     events: [
       {
@@ -95,21 +71,12 @@ export const SCHEDULE_SETTING: YearSetting[] = [
         colspan: "all" as const,
         html: "※公式サイトに終了時間は明記されていません<br/>",
       },
-      {
-        title: "Developer's Night",
-        day_index: 1,
-        start_time: "19:30",
-        end_time: "21:30",
-        room_no: "501＋502",
-        colspan: "all" as const,
-        html: "※CEDEC AWARDS終了後に開始<br/>※会期中、2F総合受付にてチケットを販売<br/>",
-      },
     ],
   },
   {
     year: "2018",
     first_date: "0822",
-    domain: "https://2018.cedec.cesa.or.jp/",
+    dev_night: { rel_path: "event/developer.html", room_no: "501＋502" },
     cedil_tag_no: 717,
     events: [
       {
@@ -121,24 +88,15 @@ export const SCHEDULE_SETTING: YearSetting[] = [
         colspan: "all" as const,
         html: "※公式サイトに終了時間は明記されていません<br/>",
       },
-      {
-        title: "Developer's Night",
-        day_index: 1,
-        start_time: "19:30",
-        end_time: "21:30",
-        room_no: "501＋502",
-        colspan: "all" as const,
-        html: "※CEDEC AWARDS終了後に開始<br/>※会期中、2F総合受付にてチケットを販売<br/>",
-      },
     ],
   },
-  { year: "2017", first_date: "0830", domain: "http://cedec.cesa.or.jp/", cedil_tag_no: 713 },
-  { year: "2016", first_date: "0824", domain: "http://cedec.cesa.or.jp/", cedil_tag_no: 712 },
-  { year: "2015", first_date: "0826", domain: "http://cedec.cesa.or.jp/", cedil_tag_no: 709 },
-  { year: "2014", first_date: "0902", domain: "http://cedec.cesa.or.jp/", cedil_tag_no: 9 },
-  { year: "2013", first_date: "0821", domain: "http://cedec.cesa.or.jp/", cedil_tag_no: 8 },
-  { year: "2012", first_date: "0820", domain: "http://cedec.cesa.or.jp/", cedil_tag_no: 4 },
-  { year: "2011", first_date: "0906", domain: "http://cedec.cesa.or.jp/", cedil_tag_no: 6 },
+  { year: "2017", first_date: "0830", cedil_tag_no: 713 },
+  { year: "2016", first_date: "0824", cedil_tag_no: 712 },
+  { year: "2015", first_date: "0826", cedil_tag_no: 709 },
+  { year: "2014", first_date: "0902", cedil_tag_no: 9 },
+  { year: "2013", first_date: "0821", cedil_tag_no: 8 },
+  { year: "2012", first_date: "0820", cedil_tag_no: 4 },
+  { year: "2011", first_date: "0906", cedil_tag_no: 6 },
 ];
 
 // データ取得タイムスタンプ（手動更新）
@@ -164,6 +122,11 @@ export const TIME_SPAN = 3;
 export const MIN_MINUTES = 5;
 export const DEFAULT_YEAR = "2025";
 
+// 年度から公式サイトのドメインを導出する（全年度 https://cedec.cesa.or.jp/{year}/ に統一）
+export function getDomain(year: string): string {
+  return `https://cedec.cesa.or.jp/${year}/`;
+}
+
 // カテゴリーコード → CSS変数名のマッピング
 export const SPEC_CLASS: Record<string, string> = {
   ENG: "cat-eng",
@@ -175,6 +138,23 @@ export const SPEC_CLASS: Record<string, string> = {
   AC: "cat-ac",
   基調講演: "cat-keynote",
 };
+
+// dev_night 設定を ExtraEvent に展開する
+export function resolveDevNight(setting: YearSetting): ExtraEvent | null {
+  const dn: DevNightConfig | undefined = setting.dev_night;
+  if (!dn) return null;
+  const url = getDomain(setting.year) + dn.rel_path;
+  return {
+    title: "Developers' Night",
+    day_index: dn.day_index ?? 1,
+    start_time: dn.start_time ?? "19:30",
+    end_time: dn.end_time ?? "21:30",
+    room_no: dn.room_no,
+    colspan: "all",
+    detail_url: url,
+    html: "※会場で先着販売",
+  };
+}
 
 export function findYearSetting(year: string): YearSetting {
   return SCHEDULE_SETTING.find((s) => s.year === year) ?? SCHEDULE_SETTING[0];
@@ -242,7 +222,11 @@ export function resolveDetailUrl(detailUrl: string, domain: string): string {
   if (detailUrl.startsWith("http")) return detailUrl;
   // javascript: / data: 等の危険スキームを弾く（そのまま base に連結すると safeExternalUrl をすり抜けるため）
   if (/^[a-zA-Z][a-zA-Z0-9+\-.]*:/.test(detailUrl)) return "";
-  const base = domain.replace(/\/[0-9]{4}\/$/, "").replace(/\/$/, "");
+  // detail_url が /YYYY/ で始まる場合（2024/2025 形式）は domain から年号を除去してベースを作る
+  // それ以外の相対パス（2018/2019 形式）は domain をそのままベースとして使う
+  const base = /^\/[0-9]{4}\//.test(detailUrl)
+    ? domain.replace(/\/[0-9]{4}\/$/, "").replace(/\/$/, "")
+    : domain.replace(/\/$/, "");
   return base + (detailUrl.startsWith("/") ? detailUrl : "/" + detailUrl);
 }
 

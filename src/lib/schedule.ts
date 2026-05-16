@@ -6,7 +6,7 @@ import type {
   UnifiedSession,
   YearSetting,
 } from "@/types/schedule";
-import { findYearSetting, parseTimeToMinutes, MIN_MINUTES } from "@/lib/cedec";
+import { findYearSetting, parseTimeToMinutes, MIN_MINUTES, resolveDevNight } from "@/lib/cedec";
 import { CUSTOM_SETTING } from "@/lib/custom";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -101,6 +101,12 @@ export function buildRoomColumns(data: ScheduleData, dayIndex: number, year: str
       if (ev.day_index !== dayIndex) continue;
       columns[0].sessions.push({ kind: "event", data: ev });
     }
+  }
+
+  // dev_night を ExtraEvent に展開して注入
+  const devNight = resolveDevNight(setting);
+  if (devNight && devNight.day_index === dayIndex && columns.length > 0) {
+    columns[0].sessions.push({ kind: "event", data: devNight });
   }
 
   // 非公式イベント（CUSTOM_SETTING）— 重複しない部屋にプッシュ
