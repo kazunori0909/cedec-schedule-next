@@ -125,15 +125,15 @@ describe("resolveDetailUrl", () => {
     );
   });
 
-  it("/ から始まる相対パスはドメインのベースに連結する", () => {
+  it("/ から始まる相対パスはドメイン（年度パス含む）に連結する", () => {
     expect(resolveDetailUrl("/session/detail/123", domain)).toBe(
-      "https://cedec.cesa.or.jp/session/detail/123"
+      "https://cedec.cesa.or.jp/2025/session/detail/123"
     );
   });
 
-  it("/ なしの相対パスは / を補完して連結する", () => {
+  it("/ なしの相対パスは / を補完してドメインに連結する", () => {
     expect(resolveDetailUrl("session/detail/456", domain)).toBe(
-      "https://cedec.cesa.or.jp/session/detail/456"
+      "https://cedec.cesa.or.jp/2025/session/detail/456"
     );
   });
 
@@ -149,10 +149,9 @@ describe("resolveDetailUrl", () => {
     expect(resolveDetailUrl("data:text/html,<h1>xss</h1>", domain)).toBe("");
   });
 
-  it("年パスを含まないドメイン（2018年形式）でも正しく絶対 URL を返す", () => {
-    const domain2018 = "https://2018.cedec.cesa.or.jp/";
-    expect(resolveDetailUrl("/session/detail/123", domain2018)).toBe(
-      "https://2018.cedec.cesa.or.jp/session/detail/123"
+  it("/YYYY/ で始まる URL はドメインから年パスを除去して連結する", () => {
+    expect(resolveDetailUrl("/2025/program/KN/xxx.html", domain)).toBe(
+      "https://cedec.cesa.or.jp/2025/program/KN/xxx.html"
     );
   });
 });

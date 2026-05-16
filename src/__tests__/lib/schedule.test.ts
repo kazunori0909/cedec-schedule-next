@@ -36,7 +36,6 @@ function makeScheduleData(sessions: Session[]): ScheduleData {
   return {
     year: 2020,
     first_date: "0902",
-    domain: "https://cedec.cesa.or.jp/2020/",
     generated: "2020-09-07T16:00:00Z",
     sessions,
   };
@@ -344,7 +343,6 @@ describe("buildRoomColumns", () => {
     const data: ScheduleData = {
       year: 2025,
       first_date: "0722",
-      domain: "https://cedec.cesa.or.jp/2025/",
       generated: "2026-05-03T22:00:00Z",
       sessions: [makeSession({ day: "2", room: "1" })],
     };
@@ -360,7 +358,6 @@ describe("buildRoomColumns", () => {
     const data: ScheduleData = {
       year: 2025,
       first_date: "0722",
-      domain: "https://cedec.cesa.or.jp/2025/",
       generated: "2026-05-03T22:00:00Z",
       sessions: [makeSession({ day: "1", room: "1" })],
     };
@@ -376,7 +373,6 @@ describe("buildRoomColumns", () => {
     const data: ScheduleData = {
       year: 2024,
       first_date: "0821",
-      domain: "https://cedec.cesa.or.jp/2024/",
       generated: "2024-08-19T23:00:00Z",
       sessions: [makeSession({ day: "3", room: "1" })],
     };
