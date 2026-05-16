@@ -65,7 +65,7 @@ cedec_schedule/
 │   ├── generate_cedil.ts       CEDiL JSONデータ生成スクリプト
 │   ├── generate_youtube.ts     YouTube動画リスト生成スクリプト
 │   ├── lib/                    共通ユーティリティ
-│   └── parsers/                年度別フォーマットパーサー（format_2020・2023〜2025）
+│   └── parsers/                年度別フォーマットパーサー（before2017・2018〜2020・2023〜2025）
 ├── web_data_original/          公式サイトから取得したHTMLキャッシュ
 │   ├── {year}/
 │   │   ├── day1.html           公式スケジュールHTML（2025年以降）
@@ -156,27 +156,39 @@ npm run generate:json
 [src/lib/cedec.ts](src/lib/cedec.ts) の `SCHEDULE_SETTING` 配列の**先頭**に新年度の設定を追加する。
 
 ```typescript
-{ year: "2026", first_date: "MMDD", domain: "https://cedec.cesa.or.jp/2026/", cedil_tag_no: XXX },
+{ year: "2026", first_date: "MMDD", cedil_tag_no: XXX },
 ```
 
-| パラメータ     | 説明                                          |
-| -------------- | --------------------------------------------- |
-| `year`         | 開催年度                                      |
-| `first_date`   | 初日の日付（MMDD形式）例: `"0820"`            |
-| `domain`       | 公式サイトURL                                 |
-| `cedil_tag_no` | CEDiL検索タグID（CEDiLサイトで確認）          |
-| `live`         | 無料Live配信ページURL（任意、会期中のみ有効） |
-| `events`       | 公式付随イベント設定（任意、後述）            |
+| パラメータ     | 説明                                                  |
+| -------------- | ----------------------------------------------------- |
+| `year`         | 開催年度                                              |
+| `first_date`   | 初日の日付（MMDD形式）例: `"0820"`                    |
+| `cedil_tag_no` | CEDiL検索タグID（CEDiLサイトで確認）                  |
+| `dev_night`    | Developers' Night 設定（任意、後述）                  |
+| `events`       | その他の公式付随イベント設定（任意、CEDEC AWARDS 等） |
 
-公式イベント（Developers' Night等）がある場合は `events` に追加する:
+公式サイトURLは `getDomain(year)` が `https://cedec.cesa.or.jp/{year}/` として自動導出するため設定不要。
+
+**Developers' Night がある場合** は `dev_night` 短縮形で追加する:
 
 ```typescript
 {
-  year: "2026", first_date: "MMDD", domain: "https://cedec.cesa.or.jp/2026/", cedil_tag_no: XXX,
+  year: "2026", first_date: "MMDD", cedil_tag_no: XXX,
+  dev_night: { rel_path: "event/developer/", room_no: "多目的ホール" },
+},
+```
+
+`day_index`（省略時: 1）・`start_time`（省略時: `"19:30"`）・`end_time`（省略時: `"21:30"`）は自動補完される。
+
+**CEDEC AWARDS 等の不定期イベント**は `events` に追加する:
+
+```typescript
+{
+  year: "2026", first_date: "MMDD", cedil_tag_no: XXX,
   events: [
     {
-      title: "Developers' Night", day_index: 1, start_time: "19:30", end_time: "21:30", room_no: "多目的ホール",
-      html: '<a href="..." target="_blank">詳細</a>'
+      title: "CEDEC AWARDS", day_index: 1, start_time: "17:30", end_time: "19:00",
+      room_no: "メインホール", colspan: "all",
     }
   ]
 },

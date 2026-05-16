@@ -66,7 +66,7 @@ cedec_schedule/
 │   │   ├── useRoomColumns.ts   # 部屋カラム・フィルタリング・時刻軸計算
 │   │   └── useScheduleData.ts  # スケジュール・CEDiLデータ取得
 │   ├── lib/
-│   │   ├── cedec.ts            # 年度別設定（SCHEDULE_SETTING）
+│   │   ├── cedec.ts            # 年度別設定（SCHEDULE_SETTING）・getDomain・resolveDevNight・resolveDetailUrl
 │   │   ├── cedil.ts            # CEDiL資料リンク付与
 │   │   ├── custom.ts           # 非公式イベント定義
 │   │   ├── schedule.ts         # JSONフェッチ・パース
@@ -80,7 +80,7 @@ cedec_schedule/
 │   ├── generate_cedil.ts       # CEDiLサイトを解析しcedil.jsonを生成
 │   ├── generate_youtube.ts     # CEDECチャンネル動画リストをキャッシュ
 │   ├── lib/                    # 共通ユーティリティ
-│   └── parsers/                # 年度別フォーマットパーサー（format_2020・2023〜2025）
+│   └── parsers/                # 年度別フォーマットパーサー（before2017・2018〜2020・2023〜2025）
 ├── web_data_original/          # 公式サイトHTMLのローカルキャッシュ（コミット対象外）
 └── .claude/                    # Claude Code 設定
 ```
