@@ -1,5 +1,18 @@
 // schedule.json の型定義
-export type CategoryCode = "ENG" | "VA" | "PRD" | "BP" | "SND" | "GD" | "AC" | "基調講演" | "";
+export type CategoryCode =
+  | "ENG"
+  | "VA"
+  | "PRD"
+  | "BP"
+  | "SND"
+  | "GD"
+  | "AC"
+  | "NW"
+  | "PG"
+  | "PD"
+  | "BM"
+  | "基調講演"
+  | "";
 
 export interface Speaker {
   name: string;
