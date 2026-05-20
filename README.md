@@ -40,6 +40,11 @@ cedec_schedule/
 │   │   ├── FilterPanel.tsx     フィルター（デスクトップ用）
 │   │   ├── InfoTooltip.tsx     データ取得日時ツールチップ
 │   │   ├── SideMenu.tsx        年度切り替えサイドメニュー
+│   │   ├── ui/                 スタイルプリミティブ（cva バリアント・共有UI）
+│   │   │   ├── RoomLink.tsx              部屋名リンク共有コンポーネント
+│   │   │   ├── categoryBadgeVariants.ts  カテゴリバッジ cva
+│   │   │   ├── sessionVariants.ts        セッションセル cva
+│   │   │   └── tableVariants.ts          テーブル th/td cva
 │   │   └── schedule/
 │   │       ├── ScheduleTable.tsx  部屋別タイムテーブル
 │   │       └── SessionCell.tsx    個別セッションセル
@@ -229,6 +234,7 @@ export const CASH_SETTING = {
 
 ## 更新履歴
 
+- 2026年 UIレイヤー分離リファクタリング（デザイントークン統一・cva バリアント導入）
 - 2026年 next-app/ サブディレクトリを廃止しリポジトリルートに統合
 - 2026年 データ生成スクリプトを PHP から TypeScript (tsx + cheerio) に移行
 - 2026年 Next.js + React + TypeScript への全面リプレース（旧jQuery版を破棄）
