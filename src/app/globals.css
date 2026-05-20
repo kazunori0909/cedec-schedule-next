@@ -74,6 +74,41 @@
   --radius-xl: calc(var(--radius) + 4px);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* セッションセル固有のセマンティックカラー（:root の変数を参照） */
+  --color-session-default: var(--session-default);
+  --color-session-favorite: var(--session-favorite);
+  --color-session-custom: var(--session-custom);
+  --color-session-highlight: var(--session-highlight);
+  --color-session-text: var(--session-text);
+  --color-session-meta: var(--session-meta);
+  --color-session-subtle: var(--session-subtle);
+  --color-session-dim: var(--session-dim);
+  --color-session-link: var(--session-link);
+  --color-session-link-sub: var(--session-link-sub);
+  --color-session-media: var(--session-media);
+  --color-session-cedil: var(--session-cedil);
+  --color-session-divider: var(--session-divider);
+
+  /* お気に入り★カラー（Tailwind デフォルトパレットの yellow-* を参照） */
+  --color-star: var(--color-yellow-500); /* 星アイコン */
+  --color-fav-bg: var(--color-yellow-100); /* お気に入りボタン背景 */
+  --color-fav-border: var(--color-yellow-400); /* お気に入りボタン枠 */
+  --color-fav-text: var(--color-yellow-800); /* お気に入りボタン文字 */
+
+  /* カテゴリーカラー（既存サイト main.css と同一） */
+  --color-cat-eng: var(--cat-eng);
+  --color-cat-va: var(--cat-va);
+  --color-cat-prd: var(--cat-prd);
+  --color-cat-bp: var(--cat-bp);
+  --color-cat-snd: var(--cat-snd);
+  --color-cat-gd: var(--cat-gd);
+  --color-cat-ac: var(--cat-ac);
+  --color-cat-int: var(--cat-int);
+  --color-cat-keynote: var(--cat-keynote);
+  --color-cat-default: var(--cat-default);
+  --color-cat-hidden: var(--cat-hidden);
+  --color-cat-nw: var(--cat-nw);
 }
 
 @layer base {
@@ -85,8 +120,9 @@
   }
 }
 
-/* CEDEC固有のカテゴリーカラー（既存サイト main.css と同一） */
+/* CEDEC固有のカラー定義 */
 :root {
+  /* カテゴリーカラー（既存サイト main.css と同一） */
   --cat-eng: #ea966f; /* エンジニアリング */
   --cat-va: #dbc25a; /* ビジュアルアーツ */
   --cat-prd: #5f77dd; /* プロダクション */
@@ -99,4 +135,19 @@
   --cat-default: #999999;
   --cat-hidden: #c0c0c0; /* フィルター非表示時 */
   --cat-nw: #188b42; /* ネットワーク（2011/2012） */
+
+  /* セッションセルのセマンティックカラー */
+  --session-default: oklch(0.967 0.001 286); /* bg-zinc-100 */
+  --session-favorite: oklch(0.948 0.028 342); /* bg-pink-100 */
+  --session-custom: oklch(0.954 0.038 75); /* bg-orange-100 */
+  --session-highlight: oklch(0.956 0.045 203); /* bg-cyan-100（現在時刻行） */
+  --session-text: oklch(0.434 0.009 286); /* text-zinc-700 */
+  --session-meta: oklch(0.552 0.016 286); /* text-zinc-500 */
+  --session-subtle: oklch(0.492 0.018 286); /* text-zinc-600 */
+  --session-dim: oklch(0.705 0.015 286); /* text-zinc-400 */
+  --session-link: oklch(0.488 0.243 264); /* text-blue-700（詳細URL） */
+  --session-link-sub: oklch(0.546 0.245 263); /* text-blue-600（小リンク） */
+  --session-media: oklch(0.577 0.245 27); /* text-red-600（YouTube） */
+  --session-cedil: oklch(0.527 0.154 150); /* text-green-700（CEDiL） */
+  --session-divider: oklch(0.839 0.007 286); /* border-zinc-300 */
 }

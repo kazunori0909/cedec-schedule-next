@@ -53,7 +53,7 @@ export function SideMenu({ currentYear, onYearChange }: Props) {
       {mounted &&
         open &&
         createPortal(
-          <div className="fixed inset-0 z-[1000]">
+          <div className="fixed inset-0 z-1000">
             <div
               className="absolute inset-0 bg-black/40"
               onClick={() => setOpen(false)}
@@ -117,7 +117,7 @@ export function SideMenu({ currentYear, onYearChange }: Props) {
                       href={`https://cedec.cesa.or.jp/${currentYear}/`}
                       target="_blank"
                       rel="noopener"
-                      className="inline-flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-blue-600"
+                      className="inline-flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-session-link-sub"
                     >
                       CEDEC {currentYear} 公式
                       <ExternalLink className="w-3 h-3" />
@@ -128,7 +128,7 @@ export function SideMenu({ currentYear, onYearChange }: Props) {
                       href="https://cedil.cesa.or.jp/"
                       target="_blank"
                       rel="noopener"
-                      className="inline-flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-blue-600"
+                      className="inline-flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-session-link-sub"
                     >
                       CEDiL（資料公開）
                       <ExternalLink className="w-3 h-3" />
