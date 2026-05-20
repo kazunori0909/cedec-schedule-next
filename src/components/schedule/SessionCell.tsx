@@ -67,9 +67,7 @@ export function SessionCell({
           <Star
             className={cn(
               "w-4 h-4 transition-colors",
-              isFavorite
-                ? "fill-yellow-500 text-yellow-500"
-                : "text-session-dim hover:text-yellow-500"
+              isFavorite ? "fill-star text-star" : "text-session-dim hover:text-star"
             )}
           />
         </button>

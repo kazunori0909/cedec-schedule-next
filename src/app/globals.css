@@ -90,6 +90,12 @@
   --color-session-cedil: var(--session-cedil);
   --color-session-divider: var(--session-divider);
 
+  /* お気に入り★カラー（Tailwind デフォルトパレットの yellow-* を参照） */
+  --color-star: var(--color-yellow-500); /* 星アイコン */
+  --color-fav-bg: var(--color-yellow-100); /* お気に入りボタン背景 */
+  --color-fav-border: var(--color-yellow-400); /* お気に入りボタン枠 */
+  --color-fav-text: var(--color-yellow-800); /* お気に入りボタン文字 */
+
   /* カテゴリーカラー（既存サイト main.css と同一） */
   --color-cat-eng: var(--cat-eng);
   --color-cat-va: var(--cat-va);
