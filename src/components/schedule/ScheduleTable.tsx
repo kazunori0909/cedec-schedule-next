@@ -11,6 +11,8 @@ import {
 } from "@/lib/schedule";
 import { getFloorURL } from "@/lib/cedec";
 import { SessionCell } from "@/components/schedule/SessionCell";
+import { RoomLink } from "@/components/ui/RoomLink";
+import { sessionTdVariants, resolveSessionState } from "@/components/ui/sessionVariants";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -70,18 +72,7 @@ export function ScheduleTable({
                   key={col.key}
                   className="border border-border bg-secondary px-2 py-2 text-base font-semibold text-secondary-foreground min-w-[140px]"
                 >
-                  {floorURL ? (
-                    <a
-                      href={floorURL}
-                      target="_blank"
-                      rel="noopener"
-                      className="text-blue-600 hover:underline"
-                    >
-                      {col.name}
-                    </a>
-                  ) : (
-                    col.name
-                  )}
+                  <RoomLink name={col.name} url={floorURL ?? undefined} />
                 </th>
               );
             })}
@@ -95,7 +86,7 @@ export function ScheduleTable({
                 <td
                   className={cn(
                     "w-10 sticky left-0 bg-card z-10 border border-border text-center text-[11px] text-muted-foreground align-top",
-                    isCurrent && "bg-cyan-100 font-bold"
+                    isCurrent && "bg-session-highlight font-bold"
                   )}
                 >
                   {time}
@@ -107,7 +98,10 @@ export function ScheduleTable({
                     return (
                       <td
                         key={col.key}
-                        className={cn("border border-border align-top", isCurrent && "bg-cyan-100")}
+                        className={cn(
+                          "border border-border align-top",
+                          isCurrent && "bg-session-highlight"
+                        )}
                       ></td>
                     );
                   }
@@ -119,12 +113,10 @@ export function ScheduleTable({
                       key={col.key}
                       rowSpan={cell.rowSpan}
                       colSpan={cell.colSpan}
-                      className={cn(
-                        "border border-border align-top p-2 rounded-md",
-                        isFav ? "bg-pink-100" : "bg-zinc-100",
-                        session.kind === "event" && session.isCustom && "bg-orange-100",
-                        cell.isFullSpan && "text-center"
-                      )}
+                      className={sessionTdVariants({
+                        state: resolveSessionState(session, isFav),
+                        fullSpan: cell.isFullSpan,
+                      })}
                     >
                       <SessionCell
                         session={session}

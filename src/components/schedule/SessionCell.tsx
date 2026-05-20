@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ExternalLink, Star } from "lucide-react";
 import type { UnifiedSession, ExtraEvent } from "@/types/schedule";
 import { CategoryBadge } from "@/components/CategoryBadge";
+import { RoomLink } from "@/components/ui/RoomLink";
 import { resolveDetailUrl, getYoutubeURL, getFloorURL } from "@/lib/cedec";
 import { cn, safeExternalUrl } from "@/lib/utils";
 
@@ -54,20 +55,8 @@ export function SessionCell({
       )}
     >
       <div className="flex items-center justify-between gap-1">
-        <p className="font-semibold text-zinc-700">
-          Room:{" "}
-          {floorURL ? (
-            <a
-              href={floorURL}
-              target="_blank"
-              rel="noopener"
-              className="text-blue-600 hover:underline"
-            >
-              {roomName}
-            </a>
-          ) : (
-            roomName
-          )}
+        <p className="font-semibold text-session-text">
+          Room: <RoomLink name={roomName} url={floorURL ?? undefined} />
         </p>
         <button
           type="button"
@@ -78,13 +67,15 @@ export function SessionCell({
           <Star
             className={cn(
               "w-4 h-4 transition-colors",
-              isFavorite ? "fill-yellow-500 text-yellow-500" : "text-zinc-400 hover:text-yellow-500"
+              isFavorite
+                ? "fill-yellow-500 text-yellow-500"
+                : "text-session-dim hover:text-yellow-500"
             )}
           />
         </button>
       </div>
 
-      <hr className="border-dashed border-zinc-300" />
+      <hr className="border-dashed border-session-divider" />
 
       {(s.category || (s.sub_category && s.sub_category.length > 0)) && (
         <div className="flex flex-wrap gap-1">
@@ -100,12 +91,12 @@ export function SessionCell({
           href={detailUrl}
           target="_blank"
           rel="noopener"
-          className="font-bold text-blue-700 hover:underline border-b border-dashed border-zinc-300 pb-1"
+          className="font-bold text-session-link hover:underline border-b border-dashed border-session-divider pb-1"
         >
           {s.title}
         </a>
       ) : (
-        <p className="font-bold border-b border-dashed border-zinc-300 pb-1">{s.title}</p>
+        <p className="font-bold border-b border-dashed border-session-divider pb-1">{s.title}</p>
       )}
 
       <SpeakerList speakers={s.speakers} />
@@ -117,7 +108,7 @@ export function SessionCell({
             href={youtubeUrl}
             target="_blank"
             rel="noopener"
-            className="inline-flex items-center gap-1 text-red-600 hover:underline"
+            className="inline-flex items-center gap-1 text-session-media hover:underline"
           >
             <ExternalLink className="w-3 h-3" /> YouTube
           </a>
@@ -140,7 +131,7 @@ function SpeakerList({ speakers }: { speakers: { name: string; company: string }
         <button
           type="button"
           onClick={() => setExpanded(true)}
-          className="text-blue-600 underline text-[10px]"
+          className="text-session-link-sub underline text-[10px]"
         >
           ほか{rest.length}名
         </button>
@@ -163,22 +154,22 @@ function SpeakerList({ speakers }: { speakers: { name: string; company: string }
 function SpeakerItem({ speaker }: { speaker: { name: string; company: string } }) {
   return (
     <div className="flex flex-col">
-      <span className="text-zinc-700">{speaker.name}</span>
-      <span className="text-zinc-500 text-[10px]">{speaker.company}</span>
+      <span className="text-session-text">{speaker.name}</span>
+      <span className="text-session-meta text-[10px]">{speaker.company}</span>
     </div>
   );
 }
 
 function CedilStatus({ url }: { url?: string }) {
   if (!url) {
-    return <span className="text-zinc-400 text-[10px]">資料公開: 不明</span>;
+    return <span className="text-session-dim text-[10px]">資料公開: 不明</span>;
   }
   return (
     <a
       href={`${url}#breadcrumbs`}
       target="_blank"
       rel="noopener"
-      className="text-green-700 hover:underline text-[10px] inline-flex items-center gap-0.5"
+      className="text-session-cedil hover:underline text-[10px] inline-flex items-center gap-0.5"
     >
       資料公開: 公開済み
       <ExternalLink className="w-3 h-3" />
@@ -197,12 +188,12 @@ function EventCellContent({ event, isCustom }: { event: ExtraEvent; isCustom: bo
       )}
     >
       <h3 className={cn("font-bold", !isFullColspan && "text-sm")}>
-        {isCustom && <span className="text-zinc-500 text-[10px] block">【非公式】</span>}
+        {isCustom && <span className="text-session-meta text-[10px] block">【非公式】</span>}
         {event.title}
       </h3>
       {event.hash_tag &&
         event.hash_tag.split(",").map((tag) => (
-          <div key={tag} className="text-blue-600 text-[10px]">
+          <div key={tag} className="text-session-link-sub text-[10px]">
             #{tag}
           </div>
         ))}
@@ -211,18 +202,18 @@ function EventCellContent({ event, isCustom }: { event: ExtraEvent; isCustom: bo
           href={detailUrl}
           target="_blank"
           rel="noopener"
-          className="inline-flex items-center gap-1 text-blue-600 hover:underline text-[10px]"
+          className="inline-flex items-center gap-1 text-session-link-sub hover:underline text-[10px]"
         >
           <ExternalLink className="w-3 h-3" /> 詳細
         </a>
       )}
       {event.html && (
         <div
-          className="text-zinc-600 text-[10px]"
+          className="text-session-subtle text-[10px]"
           dangerouslySetInnerHTML={{ __html: event.html }}
         />
       )}
-      <div className="text-zinc-500 text-[10px] mt-auto">@ {event.room_no}</div>
+      <div className="text-session-meta text-[10px] mt-auto">@ {event.room_no}</div>
     </div>
   );
 }
