@@ -89,6 +89,20 @@
   --color-session-media: var(--session-media);
   --color-session-cedil: var(--session-cedil);
   --color-session-divider: var(--session-divider);
+
+  /* カテゴリーカラー（既存サイト main.css と同一） */
+  --color-cat-eng: var(--cat-eng);
+  --color-cat-va: var(--cat-va);
+  --color-cat-prd: var(--cat-prd);
+  --color-cat-bp: var(--cat-bp);
+  --color-cat-snd: var(--cat-snd);
+  --color-cat-gd: var(--cat-gd);
+  --color-cat-ac: var(--cat-ac);
+  --color-cat-int: var(--cat-int);
+  --color-cat-keynote: var(--cat-keynote);
+  --color-cat-default: var(--cat-default);
+  --color-cat-hidden: var(--cat-hidden);
+  --color-cat-nw: var(--cat-nw);
 }
 
 @layer base {
