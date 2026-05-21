@@ -79,6 +79,10 @@ cedec_schedule/
 │   │   ├── live.html           YouTube Live配信ページキャッシュ
 │   │   └── custom.html         公式スケジュールHTML（2020〜2024年）
 │   └── youtube_videos.json     CEDECチャンネル動画リスト（APIキャッシュ）
+├── .claude/                    Claude Code 設定（コミット対象）
+│   ├── settings.json           パーミッション設定
+│   └── skills/
+│       └── new-year/           新年度対応スキル（`/new-year` で起動）
 ├── .devcontainer/              開発環境定義
 ├── package.json
 └── .env.example                環境変数テンプレート
@@ -97,124 +101,98 @@ npm run generate:cedil {year}     # cedil.json 生成
 npm run generate:youtube          # YouTube動画リスト取得（要 .env の YOUTUBE_API_KEY）
 ```
 
-## 年度別対応方法
+## 年度別対応
 
-### 1. 公式HTMLの取得・配置
+新しい年度の CEDEC データを追加する手順。Claude Code を使う場合は `/new-year {year}` でも実行できる（手順定義: [.claude/skills/new-year/SKILL.md](.claude/skills/new-year/SKILL.md)）。
 
-CEDEC公式スケジュールページのHTMLをブラウザで保存し、以下のパスに配置する。
+### 1. 公式HTMLの配置
 
-**2025年以降（日別ファイル形式）:**
+CEDEC公式スケジュールページのHTMLをブラウザで保存し、以下のパスに配置する（`web_data_original/` は git 管理外）。
 
-```
-web_data_original/{year}/day1.html
-web_data_original/{year}/day2.html
-web_data_original/{year}/day3.html
-```
+- **2025年以降（日別ファイル形式）**: `web_data_original/{year}/day1.html`〜`day3.html`
+- **2020〜2024年（1ファイル形式）**: `web_data_original/{year}/custom.html`
 
-**2020〜2024年（1ファイル形式）:**
+### 2. 年度別設定の追加（2ファイル必須）
 
-```
-web_data_original/{year}/custom.html
-```
+年度別設定は **次の2ファイル両方** に追加する。片方だけでは動作しない。
 
-### 2. YouTube動画リストの生成（任意）
+#### 2-1. `src/lib/cedec.ts` の `SCHEDULE_SETTING`
 
-YouTube Data API v3 を使って CEDECチャンネルの動画一覧を取得し、`schedule.json` に動画URLを付与する。
-
-#### 2-1. 環境変数の設定
-
-`.env.example` をコピーして `.env` を作成し、YouTube Data API キーを設定する。
-
-```bash
-cp .env.example .env
-# .env を編集して YOUTUBE_API_KEY を設定
-```
-
-#### 2-2. 動画リストの生成
-
-```bash
-# キャッシュがあれば再利用
-npm run generate:youtube
-
-# 強制再取得
-npm run generate:youtube -- --force
-```
-
-生成結果は `web_data_original/youtube_videos.json` にキャッシュされる。  
-`generate:json` 実行時に自動参照し、セッションタイトルと照合して `youtube` フィールドに動画URLを付与する。
-
-### 3. schedule.json の生成
-
-```bash
-# 指定年度のみ生成
-npm run generate:json {year}
-
-# 全年度を一括生成
-npm run generate:json
-```
-
-生成結果は `public/web_data/{year}/schedule.json` に出力される。  
-公式サイトのHTMLフォーマットが変わった場合は、`scripts/parsers/format_{year}.ts` を更新する。
-
-### 4. SCHEDULE_SETTING への追加（cedec.ts）
-
-[src/lib/cedec.ts](src/lib/cedec.ts) の `SCHEDULE_SETTING` 配列の**先頭**に新年度の設定を追加する。
+配列の**先頭**に新年度の設定を追加する。新規作成時は `cedil_tag_no` を**指定しない**（理由は下記）。
 
 ```typescript
-{ year: "2026", first_date: "MMDD", cedil_tag_no: XXX },
+{ year: "2026", first_date: "MMDD" },
 ```
 
-| パラメータ     | 説明                                                  |
-| -------------- | ----------------------------------------------------- |
-| `year`         | 開催年度                                              |
-| `first_date`   | 初日の日付（MMDD形式）例: `"0820"`                    |
-| `cedil_tag_no` | CEDiL検索タグID（CEDiLサイトで確認）                  |
-| `dev_night`    | Developers' Night 設定（任意、後述）                  |
-| `events`       | その他の公式付随イベント設定（任意、CEDEC AWARDS 等） |
+| パラメータ     | 説明                                                     |
+| -------------- | -------------------------------------------------------- |
+| `year`         | 開催年度                                                 |
+| `first_date`   | 初日の日付（MMDD形式）例: `"0820"`                       |
+| `cedil_tag_no` | CEDiL検索タグID（任意）。未設定なら CEDiL 連携をスキップ |
+| `dev_night`    | Developers' Night 設定（任意、下記参照）                 |
 
 公式サイトURLは `getDomain(year)` が `https://cedec.cesa.or.jp/{year}/` として自動導出するため設定不要。
 
-**Developers' Night がある場合** は `dev_night` 短縮形で追加する:
+> **`cedil_tag_no` は新規作成時には指定しない。**
+> CEDiL検索タグIDは、セッション資料がCEDiLに登録される会期中〜翌週ごろになって、CEDiLのURLから判明する。
+> 新年度の追加時点ではまだ分からないため**省略する**。省略した年度は `generate:cedil` の対象外となり `cedil.json` も生成されない。判明後の手順は「8. CEDiLタグの更新」を参照。
+
+Developers' Night がある場合は `dev_night` を追加する（`day_index`=1・`start_time`=`"19:30"`・`end_time`=`"21:30"` は自動補完）。
 
 ```typescript
 {
-  year: "2026", first_date: "MMDD", cedil_tag_no: XXX,
+  year: "2026", first_date: "MMDD",
   dev_night: { rel_path: "event/developer/", room_no: "多目的ホール" },
 },
 ```
 
-`day_index`（省略時: 1）・`start_time`（省略時: `"19:30"`）・`end_time`（省略時: `"21:30"`）は自動補完される。
+#### 2-2. `scripts/generate_json.ts` の `YEAR_CONFIGS`
 
-**CEDEC AWARDS 等の不定期イベント**は `events` に追加する:
-
-```typescript
-{
-  year: "2026", first_date: "MMDD", cedil_tag_no: XXX,
-  events: [
-    {
-      title: "CEDEC AWARDS", day_index: 1, start_time: "17:30", end_time: "19:00",
-      room_no: "メインホール", colspan: "all",
-    }
-  ]
-},
-```
-
-### 5. キャッシュ設定の更新（cedec.ts）
-
-[src/lib/cedec.ts](src/lib/cedec.ts) の `CASH_SETTING` に、`web_data_original/` の公式HTMLを取得した日時を手動で記録する。  
-UIでデータ取得日時として表示される（CEDiLのような自動取得は未対応）。
+公式HTMLのパース設定を追加する。
 
 ```typescript
-export const CASH_SETTING = {
-  "2026": { time: "2026/xx/xx xx:xx" }, // HTMLを取得した日時を記録
-  "2025": { time: "2026/05/03 22:00" },
-  // ...
-};
+"2026": { format: "format_2025", split_files: true, live: "https://cedec.cesa.or.jp/2026/timetable/free_lives/" },
 ```
+
+| キー          | 説明                                                                    |
+| ------------- | ----------------------------------------------------------------------- |
+| `format`      | 使用するパーサー名。HTMLが前年と同形式なら既存の `format_YYYY` を再利用 |
+| `split_files` | 日別ファイル形式（`day1.html` 等）のとき `true`                         |
+| `live`        | YouTube Live配信ページのURL（任意）                                     |
+
+公式HTMLのフォーマットが前年と異なる場合は、`scripts/parsers/format_{year}.ts` を新規作成し、`generate_json.ts` で import して `FormatName` 型と `parseByFormat` の `switch` に分岐を追加する。
+
+### 3. 取得日時の記録（cedec.ts）
+
+`src/lib/cedec.ts` の `CASH_SETTING` に、公式HTMLを取得した日時を手動で記録する。UIの「データ取得日時」表示に使われる。
+
+```typescript
+"2026": { time: "2026/xx/xx xx:xx" },
+```
+
+### 4. YouTube動画リストの生成（任意）
+
+会期後セッションに動画URLを付与する場合、CEDECチャンネルの動画一覧を取得する（要 `.env` の `YOUTUBE_API_KEY`）。
+
+```bash
+npm run generate:youtube             # キャッシュがあれば再利用
+npm run generate:youtube -- --force  # 強制再取得
+```
+
+結果は `web_data_original/youtube_videos.json` にキャッシュされ、`generate:json` 実行時に自動参照される。
+
+### 5. JSONの生成
+
+```bash
+npm run generate:json {year}    # public/web_data/{year}/schedule.json を生成
+npm run generate:cedil {year}   # public/web_data/{year}/cedil.json を生成（cedil_tag_no 設定時のみ）
+```
+
+`cedil_tag_no` が未設定の年度は `generate:cedil` でスキップされ、`cedil.json` は生成されない。新規作成直後はこの状態が正常で、`generate:json` のみ実行すればよい。
 
 ### 6. 非公式イベントの追加（custom.ts、任意）
 
-[src/lib/custom.ts](src/lib/custom.ts) に非公式イベント（懇親会等）を追加する。
+`src/lib/custom.ts` に懇親会等の非公式イベントを追加する。
 
 ```typescript
 "2026": {
@@ -222,18 +200,29 @@ export const CASH_SETTING = {
     {
       title:      "イベント名",
       room_no:    "会場名",
-      day_index:  2,                    // 1〜3（CEDECの開催日）
+      day_index:  2,                  // 1〜3（CEDECの開催日）
       start_time: "19:00",
       end_time:   "21:00",
       html:       '<a href="..." target="_blank">詳細</a>',
-      hash_tag:   "ハッシュタグ"          // 任意: XリンクとXアイコンが自動生成される
-    }
-  ]
-}
+      hash_tag:   "ハッシュタグ",       // 任意: XリンクとXアイコンが自動生成される
+    },
+  ],
+},
 ```
+
+### 7. 動作確認
+
+`npm run dev` で開発サーバーを起動し、追加した年度がサイドメニューから選択でき、スケジュールが正しく表示されることを確認する。
+
+### 8. CEDiLタグの更新（会期中〜翌週ごろ）
+
+セッション資料がCEDiLに登録されると検索タグIDが判明する。CEDiLの年度別検索ページのURL（`https://cedil.cesa.or.jp/cedil_sessions/search_tag/{tag}` 形式）から末尾の `{tag}` を読み取る。
+
+判明したら `SCHEDULE_SETTING` の該当年度に `cedil_tag_no` を追記し、`npm run generate:cedil {year}` を実行して `cedil.json` を生成・資料リンクを付与する。
 
 ## 更新履歴
 
+- 2026年 `cedil_tag_no` を任意化し、新年度追加〜CEDiLタグ判明までのワークフローを整備
 - 2026年 UIレイヤー分離リファクタリング（デザイントークン統一・cva バリアント導入）
 - 2026年 next-app/ サブディレクトリを廃止しリポジトリルートに統合
 - 2026年 データ生成スクリプトを PHP から TypeScript (tsx + cheerio) に移行

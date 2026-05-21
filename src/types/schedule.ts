@@ -70,7 +70,8 @@ export interface YearSetting {
   first_date: string; // "MMDD"
   events?: ExtraEvent[];
   dev_night?: DevNightConfig;
-  cedil_tag_no: number;
+  // CEDiL検索タグID。新年度追加時は未定のため省略し、CEDiL登録後に追記する
+  cedil_tag_no?: number;
 }
 
 export interface CashInfo {

@@ -102,6 +102,12 @@ async function main(): Promise<void> {
   }
 
   for (const setting of targets) {
+    if (setting.cedil_tag_no === undefined) {
+      console.log(
+        `[SKIP] ${setting.year}: cedil_tag_no 未設定のためスキップ（CEDiL登録後に設定する）`
+      );
+      continue;
+    }
     await processYear(setting.year, setting.cedil_tag_no);
   }
 }

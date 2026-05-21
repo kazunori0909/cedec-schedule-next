@@ -47,6 +47,7 @@ next-env.d.ts
 # キャッシュ・一時ファイル
 web_data_original/
 
-# Claude Code — ローカル個人設定のみ除外（CLAUDE.md・settings.json・commands/ はコミット対象）
-.claude/settings.local.json
-.claude/CLAUDE.local.md
+# Claude Code — ローカル個人設定のみ除外（settings.json・skills/ はコミット対象）
+.claude/**/*.local.*
+.claude/cache/
+.claude/history/
