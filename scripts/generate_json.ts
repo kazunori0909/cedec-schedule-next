@@ -24,7 +24,7 @@ import { parseFormat2023 } from "./parsers/format_2023";
 import { parseFormat2024 } from "./parsers/format_2024";
 import { parseFormat2025 } from "./parsers/format_2025";
 import { parseFormatBefore2017 } from "./parsers/format_before2017";
-import { findYearSetting } from "../src/lib/cedec";
+import { getDomain, findYearSetting } from "../src/lib/cedec";
 
 type FormatName =
   | "format_before2017"
@@ -41,9 +41,14 @@ interface YearConfig {
   live?: string;
 }
 
+interface ParseContext {
+  day?: number;
+  year: string;
+}
+
 // prettier-ignore
 const YEAR_CONFIGS: Record<string, YearConfig> = {
-  "2025": { format: "format_2025", split_files: true, live: "https://cedec.cesa.or.jp/2025/timetable/free_lives/" },
+  "2025": { format: "format_2025", split_files: true, live: "timetable/free_lives/" },
   "2024": { format: "format_2024" },
   "2023": { format: "format_2023" },
   "2022": { format: "format_2020" },
@@ -65,15 +70,10 @@ function loadHtml(path: string): cheerio.CheerioAPI {
   return cheerio.load(html);
 }
 
-function parseByFormat(
-  $: cheerio.CheerioAPI,
-  format: FormatName,
-  day?: number,
-  year?: string
-): RawSession[] {
+function parseByFormat($: cheerio.CheerioAPI, format: FormatName, ctx: ParseContext): RawSession[] {
   switch (format) {
     case "format_2025":
-      return parseFormat2025($, day);
+      return parseFormat2025($, ctx.day);
     case "format_2024":
       return parseFormat2024($);
     case "format_2023":
@@ -85,7 +85,7 @@ function parseByFormat(
     case "format_2018":
       return parseFormat2018($);
     case "format_before2017":
-      return parseFormatBefore2017($, day ?? 1, year ?? "");
+      return parseFormatBefore2017($, ctx.day ?? 1, ctx.year);
   }
 }
 
@@ -180,7 +180,7 @@ async function processYear(year: string, config: YearConfig): Promise<void> {
         continue;
       }
       const $ = loadHtml(path);
-      sessions = sessions.concat(parseByFormat($, config.format, day, year));
+      sessions = sessions.concat(parseByFormat($, config.format, { day, year }));
     }
   } else {
     const path = allHtmlPath(year);
@@ -189,12 +189,16 @@ async function processYear(year: string, config: YearConfig): Promise<void> {
       return;
     }
     const $ = loadHtml(path);
-    sessions = parseByFormat($, config.format, undefined, year);
+    sessions = parseByFormat($, config.format, { year });
   }
 
   let liveMap = new Map<string, string>();
   if (config.live) {
-    liveMap = await fetchLiveSessions(config.live, first_date, liveHtmlPath(year));
+    liveMap = await fetchLiveSessions(
+      getDomain(year) + config.live,
+      first_date,
+      liveHtmlPath(year)
+    );
     console.log(`[INFO] LIVE配信URL: ${liveMap.size} 件取得`);
   }
 

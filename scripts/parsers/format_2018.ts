@@ -1,7 +1,8 @@
-import type { CheerioAPI } from "cheerio";
+import type { CheerioAPI, Cheerio } from "cheerio";
+import type { AnyNode } from "domhandler";
 import type { Speaker } from "../../src/types/schedule";
 import { buildSession, type RawSession } from "../lib/session";
-import { isCancelled as titleIsCancelled } from "../lib/helpers";
+import { CAT_CLASS_MAP, isCancelled as titleIsCancelled } from "../lib/helpers";
 
 /**
  * 2018 フォーマット
@@ -20,21 +21,22 @@ import { isCancelled as titleIsCancelled } from "../lib/helpers";
  *         .prof > p                       所属
  */
 
-const CAT_CLASS_MAP: Record<string, string> = {
-  en: "ENG",
-  va: "VA",
-  pd: "PRD",
-  bp: "BP",
-  sd: "SND",
-  gd: "GD",
-  ab: "AC",
-};
-
 function extractSessionIdFromHref(href: string): string {
   const clean = href.split("#")[0].replace(/\/$/, "");
   const parts = clean.split("/").filter(Boolean);
   const last = parts[parts.length - 1] ?? "";
   return last.replace(/\.[^.]+$/, "");
+}
+
+/** .speaker_info > .name / .prof p からスピーカー配列を返す */
+function extractSpeakers($: CheerioAPI, ctx: Cheerio<AnyNode>): Speaker[] {
+  const speakers: Speaker[] = [];
+  ctx.find(".speaker_info").each((_, info) => {
+    const name = $(info).find(".name").first().text().trim();
+    const company = $(info).find(".prof p").first().text().trim();
+    if (name !== "") speakers.push({ name, company });
+  });
+  return speakers;
 }
 
 export function parseFormat2018($: CheerioAPI): RawSession[] {
@@ -74,13 +76,7 @@ export function parseFormat2018($: CheerioAPI): RawSession[] {
         }
       });
 
-      // 2018 のスピーカー構造: .speaker_info > .name / .prof p
-      const speakers: Speaker[] = [];
-      $el.find(".speaker_info").each((_, info) => {
-        const name = $(info).find(".name").first().text().trim();
-        const company = $(info).find(".prof p").first().text().trim();
-        if (name !== "") speakers.push({ name, company });
-      });
+      const speakers = extractSpeakers($, $el);
 
       const cancelled = titleIsCancelled(title);
 

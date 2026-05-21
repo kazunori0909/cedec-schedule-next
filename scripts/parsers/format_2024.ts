@@ -1,7 +1,7 @@
-import type { CheerioAPI, Cheerio } from "cheerio";
-import type { AnyNode, Element } from "domhandler";
+import type { CheerioAPI } from "cheerio";
+import type { Element } from "domhandler";
 import { buildSession, type RawSession } from "../lib/session";
-import { roomNoFromText } from "../lib/helpers";
+import { roomNoFromText, txt } from "../lib/helpers";
 
 /**
  * 2024 フォーマット
@@ -28,8 +28,6 @@ const FILTER_ATTR_MAP: Array<[string, string]> = [
   ["data-platforms", "platform"],
   ["data-keywords", "keywords"],
 ];
-
-const txt = ($el: Cheerio<AnyNode>): string => $el.text().trim();
 
 /** 2024 の data-* 属性を "cat_1,format_2,difficulty_1" 形式に変換 */
 function buildDataFilter2024(item: Element): string {

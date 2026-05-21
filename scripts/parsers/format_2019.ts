@@ -2,7 +2,7 @@ import type { CheerioAPI, Cheerio } from "cheerio";
 import type { AnyNode } from "domhandler";
 import type { Speaker } from "../../src/types/schedule";
 import { buildSession, type RawSession } from "../lib/session";
-import { isCancelled as titleIsCancelled } from "../lib/helpers";
+import { CAT_CLASS_MAP, isCancelled as titleIsCancelled } from "../lib/helpers";
 
 /**
  * 2019 フォーマット
@@ -28,23 +28,12 @@ import { isCancelled as titleIsCancelled } from "../lib/helpers";
  * ※ 部屋情報は HTML に存在しないため room_no は空文字
  */
 
-// ボタンのクラス名 → カテゴリコードのマッピング
-const CAT_CLASS_MAP: Record<string, string> = {
-  en: "ENG",
-  va: "VA",
-  pd: "PRD",
-  bp: "BP",
-  sd: "SND",
-  gd: "GD",
-  ab: "AC",
-};
-
-function extractSpeakers($: CheerioAPI, $ctx: Cheerio<AnyNode>): Speaker[] {
+/** li.media > .name / .prof p からスピーカー配列を返す */
+function extractSpeakers($: CheerioAPI, ctx: Cheerio<AnyNode>): Speaker[] {
   const speakers: Speaker[] = [];
-  $ctx.find("li.media").each((_, li) => {
-    const $li = $(li);
-    const name = $li.find(".name").first().text().trim();
-    const company = $li.find(".prof p").first().text().trim();
+  ctx.find("li.media").each((_, li) => {
+    const name = $(li).find(".name").first().text().trim();
+    const company = $(li).find(".prof p").first().text().trim();
     if (name !== "") speakers.push({ name, company });
   });
   return speakers;

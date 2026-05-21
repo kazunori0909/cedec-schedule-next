@@ -7,6 +7,23 @@
  *     （\s だと全角スペースも対象になり、会社名区切り等の意味のある空白を壊すため）
  */
 
+import type { Cheerio } from "cheerio";
+import type { AnyNode } from "domhandler";
+
+/** cheerio 要素からテキストを取得してトリムする */
+export const txt = ($el: Cheerio<AnyNode>): string => $el.text().trim();
+
+/** 2018/2019 フォーマット: CSS クラス名 → カテゴリーコード */
+export const CAT_CLASS_MAP: Record<string, string> = {
+  en: "ENG",
+  va: "VA",
+  pd: "PRD",
+  bp: "BP",
+  sd: "SND",
+  gd: "GD",
+  ab: "AC",
+};
+
 /** "第3会場" → "3"、"第12会場" → "12" */
 export function roomNoFromText(text: string): string {
   return text.replace(/第|会場/g, "").trim();
