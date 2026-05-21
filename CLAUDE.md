@@ -1,6 +1,5 @@
 @AGENTS.md
 @SECURITY.md
-@.claude/CLAUDE.local.md
 
 # 開発方針
 
