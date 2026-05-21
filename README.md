@@ -1,6 +1,6 @@
 # cedec_schedule
 
-CEDEC非公式タイムスケジュール。CEDEC公式スケジュールページのデータを部屋別タイムテーブル形式で整形・表示します。  
+CEDEC非公式タイムテーブル。CEDEC公式スケジュールページのデータを部屋別タイムテーブル形式で整形・表示します。  
 CEDiLに登録済みの資料リンクも自動付与します。
 
 ## 機能
@@ -151,14 +151,14 @@ Developers' Night がある場合は `dev_night` を追加する（`day_index`=1
 公式HTMLのパース設定を追加する。
 
 ```typescript
-"2026": { format: "format_2025", split_files: true, live: "https://cedec.cesa.or.jp/2026/timetable/free_lives/" },
+"2026": { format: "format_2025", split_files: true, live: "timetable/free_lives/" },
 ```
 
 | キー          | 説明                                                                    |
 | ------------- | ----------------------------------------------------------------------- |
 | `format`      | 使用するパーサー名。HTMLが前年と同形式なら既存の `format_YYYY` を再利用 |
 | `split_files` | 日別ファイル形式（`day1.html` 等）のとき `true`                         |
-| `live`        | YouTube Live配信ページのURL（任意）                                     |
+| `live`        | YouTube Live配信ページのパス（任意）。`getDomain(year)` からの相対パス  |
 
 公式HTMLのフォーマットが前年と異なる場合は、`scripts/parsers/format_{year}.ts` を新規作成し、`generate_json.ts` で import して `FormatName` 型と `parseByFormat` の `switch` に分岐を追加する。
 

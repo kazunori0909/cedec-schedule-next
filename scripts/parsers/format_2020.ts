@@ -1,7 +1,11 @@
-import type { CheerioAPI, Cheerio } from "cheerio";
-import type { AnyNode } from "domhandler";
+import type { CheerioAPI } from "cheerio";
 import { buildSession, type RawSession } from "../lib/session";
-import { isCancelled as titleIsCancelled, parseTimeRange, roomNoFromText } from "../lib/helpers";
+import {
+  isCancelled as titleIsCancelled,
+  parseTimeRange,
+  roomNoFromText,
+  txt,
+} from "../lib/helpers";
 import { extractDetailUrlLegacy, extractSpeakersLegacy } from "../lib/legacy_extract";
 
 /**
@@ -22,8 +26,6 @@ import { extractDetailUrlLegacy, extractSpeakersLegacy } from "../lib/legacy_ext
  */
 
 const EXCLUDED_SESSION_TYPES = ["公募", "招待"];
-
-const txt = ($el: Cheerio<AnyNode>): string => $el.text().trim();
 
 export function parseFormat2020($: CheerioAPI): RawSession[] {
   const sessions: RawSession[] = [];

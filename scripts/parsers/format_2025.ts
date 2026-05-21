@@ -1,7 +1,6 @@
-import type { CheerioAPI, Cheerio } from "cheerio";
-import type { AnyNode } from "domhandler";
+import type { CheerioAPI } from "cheerio";
 import { buildSession, type RawSession } from "../lib/session";
-import { roomNoFromText } from "../lib/helpers";
+import { roomNoFromText, txt } from "../lib/helpers";
 
 /**
  * 2025 フォーマット
@@ -29,8 +28,6 @@ const GENERIC_FORMATS = [
   "主催者挨拶",
   "事前収録講演",
 ];
-
-const txt = ($el: Cheerio<AnyNode>): string => $el.text().trim();
 
 /** $day が指定された場合はそのファイルが単一日のHTMLとみなし Day{N} ラッパーなしで解析する */
 export function parseFormat2025($: CheerioAPI, day?: number): RawSession[] {
