@@ -13,8 +13,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CEDEC スケジュール（非公式）",
+  title: "CEDEC非公式タイムテーブル",
   description: "CEDEC（ゲーム開発者向けカンファレンス）の非公式タイムテーブルビューア",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function RootLayout({

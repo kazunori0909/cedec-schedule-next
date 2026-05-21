@@ -193,7 +193,9 @@ function ScheduleViewInner({
       </main>
 
       <footer className="border-t border-border py-4 px-4 text-xs text-muted-foreground text-center">
-        CEDEC スケジュール（非公式） — このサイトはコミュニティ運営の非公式ビューアです
+        CEDEC非公式タイムテーブル
+        <br />
+        このサイトはコミュニティ運営の非公式ビューアです
       </footer>
     </div>
   );
