@@ -48,4 +48,6 @@ next-env.d.ts
 web_data_original/
 
 # Claude Code — ローカル個人設定のみ除外（settings.json・skills/ はコミット対象）
-.claude/settings.local.json
+.claude/**/*.local.*
+.claude/cache/
+.claude/history/
