@@ -23,15 +23,21 @@ export function useScheduleData(year: string, dateList: Date[]): UseScheduleData
   const [cedilUpdate, setCedilUpdate] = useState<string | undefined>();
   const [cedilCount, setCedilCount] = useState<number>(0);
 
-  useEffect(() => {
-    // year 切り替え時の古いフェッチ結果で state を上書きさせないためのフラグ
-    let cancelled = false;
+  // year 切り替え時は描画中に state をリセットする（古いデータが一瞬表示されるのを防ぐ）
+  const [prevYear, setPrevYear] = useState(year);
+  if (year !== prevYear) {
+    setPrevYear(year);
     setLoading(true);
     setError(null);
     setScheduleData(null);
     setCedilUpdate(undefined);
     setCedilCount(0);
     setCedilLookup({});
+  }
+
+  useEffect(() => {
+    // year 切り替え時の古いフェッチ結果で state を上書きさせないためのフラグ
+    let cancelled = false;
     fetchSchedule(year)
       .then((data) => {
         if (cancelled) return;
