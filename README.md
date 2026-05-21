@@ -79,6 +79,10 @@ cedec_schedule/
 │   │   ├── live.html           YouTube Live配信ページキャッシュ
 │   │   └── custom.html         公式スケジュールHTML（2020〜2024年）
 │   └── youtube_videos.json     CEDECチャンネル動画リスト（APIキャッシュ）
+├── .claude/                    Claude Code 設定（コミット対象）
+│   ├── settings.json           パーミッション設定
+│   └── skills/
+│       └── new-year/           新年度対応スキル（`/new-year` で起動）
 ├── .devcontainer/              開発環境定義
 ├── package.json
 └── .env.example                環境変数テンプレート
@@ -218,6 +222,7 @@ npm run generate:cedil {year}   # public/web_data/{year}/cedil.json を生成（
 
 ## 更新履歴
 
+- 2026年 `cedil_tag_no` を任意化し、新年度追加〜CEDiLタグ判明までのワークフローを整備
 - 2026年 UIレイヤー分離リファクタリング（デザイントークン統一・cva バリアント導入）
 - 2026年 next-app/ サブディレクトリを廃止しリポジトリルートに統合
 - 2026年 データ生成スクリプトを PHP から TypeScript (tsx + cheerio) に移行
