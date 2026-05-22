@@ -169,11 +169,12 @@ export function getFloorURL(roomName: string, year: string): string | undefined 
 }
 
 // セッション詳細URLを絶対URL化
-export function resolveDetailUrl(detailUrl: string, domain: string): string {
+export function resolveDetailUrl(detailUrl: string, year: string): string {
   if (!detailUrl) return "";
   if (detailUrl.startsWith("http")) return detailUrl;
   // javascript: / data: 等の危険スキームを弾く（そのまま base に連結すると safeExternalUrl をすり抜けるため）
   if (/^[a-zA-Z][a-zA-Z0-9+\-.]*:/.test(detailUrl)) return "";
+  const domain = getDomain(year);
   // detail_url が /YYYY/ で始まる場合（2024/2025 形式）は domain から年号を除去してベースを作る
   // それ以外の相対パス（2018/2019 形式）は domain をそのままベースとして使う
   const base = /^\/[0-9]{4}\//.test(detailUrl)

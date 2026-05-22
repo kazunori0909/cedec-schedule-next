@@ -117,40 +117,40 @@ describe("getDateList", () => {
 // resolveDetailUrl
 // ---------------------------------------------------------------------------
 describe("resolveDetailUrl", () => {
-  const domain = "https://cedec.cesa.or.jp/2025/";
+  const year = "2025";
 
   it("絶対 URL はそのまま返す", () => {
-    expect(resolveDetailUrl("https://external.example.com/page", domain)).toBe(
+    expect(resolveDetailUrl("https://external.example.com/page", year)).toBe(
       "https://external.example.com/page"
     );
   });
 
   it("/ から始まる相対パスはドメイン（年度パス含む）に連結する", () => {
-    expect(resolveDetailUrl("/session/detail/123", domain)).toBe(
+    expect(resolveDetailUrl("/session/detail/123", year)).toBe(
       "https://cedec.cesa.or.jp/2025/session/detail/123"
     );
   });
 
   it("/ なしの相対パスは / を補完してドメインに連結する", () => {
-    expect(resolveDetailUrl("session/detail/456", domain)).toBe(
+    expect(resolveDetailUrl("session/detail/456", year)).toBe(
       "https://cedec.cesa.or.jp/2025/session/detail/456"
     );
   });
 
   it("空文字は空文字を返す", () => {
-    expect(resolveDetailUrl("", domain)).toBe("");
+    expect(resolveDetailUrl("", year)).toBe("");
   });
 
   it("javascript: スキームは空文字を返す（XSS 対策）", () => {
-    expect(resolveDetailUrl("javascript:alert(1)", domain)).toBe("");
+    expect(resolveDetailUrl("javascript:alert(1)", year)).toBe("");
   });
 
   it("data: スキームは空文字を返す（XSS 対策）", () => {
-    expect(resolveDetailUrl("data:text/html,<h1>xss</h1>", domain)).toBe("");
+    expect(resolveDetailUrl("data:text/html,<h1>xss</h1>", year)).toBe("");
   });
 
   it("/YYYY/ で始まる URL はドメインから年パスを除去して連結する", () => {
-    expect(resolveDetailUrl("/2025/program/KN/xxx.html", domain)).toBe(
+    expect(resolveDetailUrl("/2025/program/KN/xxx.html", year)).toBe(
       "https://cedec.cesa.or.jp/2025/program/KN/xxx.html"
     );
   });

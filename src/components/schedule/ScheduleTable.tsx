@@ -20,7 +20,6 @@ interface Props {
   timeRange: { min: number; max: number };
   dayIndex: number;
   year: string;
-  domain: string;
   favorites: Record<string, boolean>;
   hideSpecs: Record<string, boolean>;
   cedilLookup: Record<string, string>;
@@ -41,7 +40,6 @@ export function ScheduleTable({
   timeRange,
   dayIndex,
   year,
-  domain,
   favorites,
   hideSpecs,
   cedilLookup,
@@ -110,7 +108,6 @@ export function ScheduleTable({
                       <SessionCell
                         session={session}
                         year={year}
-                        domain={domain}
                         isFavorite={isFav}
                         onToggleFavorite={() => onToggleFavorite(sessionId)}
                         cedilUrl={cedilLookup[sessionId]}

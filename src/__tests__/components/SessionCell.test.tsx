@@ -6,8 +6,6 @@ import { describe, expect, it, vi } from "vitest";
 import type { Session, UnifiedSession } from "@/types/schedule";
 import { SessionCell } from "@/components/schedule/SessionCell";
 
-const DOMAIN = "https://cedec.cesa.or.jp/2025/";
-
 function makeSession(overrides: Partial<Session> = {}): Session {
   return {
     id: "s1",
@@ -25,7 +23,6 @@ function makeSession(overrides: Partial<Session> = {}): Session {
 
 const DEFAULT_PROPS = {
   year: "2025",
-  domain: DOMAIN,
   isFavorite: false,
   onToggleFavorite: vi.fn(),
   hideSpecs: {},

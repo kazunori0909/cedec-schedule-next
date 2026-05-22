@@ -89,20 +89,9 @@ export interface CedilData {
   update_date: string;
 }
 
-// 非公式イベント
-export interface CustomEvent {
-  title: string;
-  day_index: number;
-  start_time: string;
-  end_time: string;
-  room_no: string;
-  detail_url?: string;
-  html?: string;
-  hash_tag?: string;
-}
-
+// 非公式イベント（追加イベントと同じ ExtraEvent 型で表現する）
 export interface CustomYearSetting {
-  events: CustomEvent[];
+  events: ExtraEvent[];
 }
 
 // セッション統合型（公式 + 追加 + 非公式）
