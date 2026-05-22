@@ -33,7 +33,6 @@ const MOCK_SCHEDULE: ScheduleData = {
       start: "10:00",
       end: "11:00",
       category: "ENG",
-      data_filter: "",
       title: "テストセッション",
       speakers: [],
       detail_url: "",

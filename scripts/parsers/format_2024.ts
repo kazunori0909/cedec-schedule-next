@@ -1,5 +1,4 @@
 import type { CheerioAPI } from "cheerio";
-import type { Element } from "domhandler";
 import { buildSession, type RawSession } from "../lib/session";
 import { roomNoFromText, txt } from "../lib/helpers";
 
@@ -19,26 +18,6 @@ import { roomNoFromText, txt } from "../lib/helpers";
 
 const EXCLUDE_CATEGORIES_2024 = ["事前収録", "事前収録講演"];
 
-const FILTER_ATTR_MAP: Array<[string, string]> = [
-  ["data-category", "cat"],
-  ["data-subcategory", "subcat"],
-  ["data-format", "format"],
-  ["data-difficulty", "difficulty"],
-  ["data-sessiontype", "type"],
-  ["data-platforms", "platform"],
-  ["data-keywords", "keywords"],
-];
-
-/** 2024 の data-* 属性を "cat_1,format_2,difficulty_1" 形式に変換 */
-function buildDataFilter2024(item: Element): string {
-  const parts: string[] = [];
-  for (const [attr, key] of FILTER_ATTR_MAP) {
-    const v = item.attribs?.[attr] ?? "";
-    if (v !== "") parts.push(`${key}_${v}`);
-  }
-  return parts.join(",");
-}
-
 export function parseFormat2024($: CheerioAPI): RawSession[] {
   const sessions: RawSession[] = [];
 
@@ -56,7 +35,6 @@ export function parseFormat2024($: CheerioAPI): RawSession[] {
       $area.find(".c-timetable__item").each((_, item) => {
         const $item = $(item);
         const sessionId = $item.attr("data-uuid") || $item.attr("data-id") || "";
-        const dataFilter = buildDataFilter2024(item);
 
         const timeText = txt($item.find("div.timetable-time time").first());
         let start = "";
@@ -90,7 +68,6 @@ export function parseFormat2024($: CheerioAPI): RawSession[] {
             end,
             category,
             sub_category: "",
-            data_filter: dataFilter,
             title,
             speakers,
             detail_url: detailUrl,

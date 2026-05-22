@@ -1,11 +1,6 @@
 import type { CheerioAPI } from "cheerio";
 import { buildSession, type RawSession } from "../lib/session";
-import {
-  isCancelled as titleIsCancelled,
-  parseTimeRange,
-  roomNoFromText,
-  txt,
-} from "../lib/helpers";
+import { parseTimeRange, roomNoFromText, txt } from "../lib/helpers";
 import { extractDetailUrlLegacy, extractSpeakersLegacy } from "../lib/legacy_extract";
 
 /**
@@ -47,7 +42,6 @@ export function parseFormat2020($: CheerioAPI): RawSession[] {
       if (title === "") {
         title = txt($el.find(".session-title b").first());
       }
-      const dataFilter = $el.attr("data-filter") ?? "";
 
       // session-post 内の cate-type から分野を取得
       // (2020 モーダルは「主分野:」テキストが混入するため $el を使用)
@@ -64,8 +58,6 @@ export function parseFormat2020($: CheerioAPI): RawSession[] {
       if (speakers.length === 0) speakers = extractSpeakersLegacy($, $modal);
       const detailUrl = extractDetailUrlLegacy($, $modal);
 
-      const cancelled = titleIsCancelled(title);
-
       sessions.push(
         buildSession({
           session_id: sessionId,
@@ -75,11 +67,9 @@ export function parseFormat2020($: CheerioAPI): RawSession[] {
           end,
           category,
           sub_category: subCategory,
-          data_filter: dataFilter,
           title,
           speakers,
           detail_url: detailUrl,
-          cancelled,
         })
       );
     });

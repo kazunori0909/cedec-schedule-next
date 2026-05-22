@@ -3,7 +3,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   abbreviateCompany,
   dayIndexFromDate,
-  isCancelled,
   isEventOver,
   normalizeTitleForMatch,
   normalizeWhitespace,
@@ -82,19 +81,6 @@ describe("abbreviateCompany", () => {
 
   it("法人格を含まない場合はそのまま返す", () => {
     expect(abbreviateCompany("法人格なし企業")).toBe("法人格なし企業");
-  });
-});
-
-// ---------------------------------------------------------------------------
-// isCancelled
-// ---------------------------------------------------------------------------
-describe("isCancelled", () => {
-  it("【講演キャンセル】 を含むタイトルは true", () => {
-    expect(isCancelled("【講演キャンセル】ゲーム開発入門")).toBe(true);
-  });
-
-  it("含まないタイトルは false", () => {
-    expect(isCancelled("ゲーム開発入門")).toBe(false);
   });
 });
 

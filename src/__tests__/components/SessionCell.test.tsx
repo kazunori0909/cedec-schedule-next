@@ -16,7 +16,6 @@ function makeSession(overrides: Partial<Session> = {}): Session {
     start: "10:00",
     end: "11:00",
     category: "ENG",
-    data_filter: "",
     title: "テストセッションタイトル",
     speakers: [],
     detail_url: "",

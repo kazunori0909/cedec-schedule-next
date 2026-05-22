@@ -13,11 +13,9 @@ export interface RawSession {
   end: string;
   category: string;
   sub_category: string;
-  data_filter: string;
   title: string;
   speakers: Speaker[];
   detail_url: string;
-  cancelled: boolean;
   live?: string | null;
   youtube?: string | null;
 }
@@ -30,11 +28,9 @@ export interface BuildSessionArgs {
   end: string;
   category: string;
   sub_category?: string;
-  data_filter?: string;
   title: string;
   speakers: Speaker[];
   detail_url: string;
-  cancelled?: boolean;
 }
 
 export function buildSession(args: BuildSessionArgs): RawSession {
@@ -46,11 +42,9 @@ export function buildSession(args: BuildSessionArgs): RawSession {
     end: args.end,
     category: args.category,
     sub_category: args.sub_category ?? "",
-    data_filter: args.data_filter ?? "",
     title: args.title,
     speakers: args.speakers,
     detail_url: args.detail_url,
-    cancelled: args.cancelled ?? false,
     live: null,
     youtube: null,
   };

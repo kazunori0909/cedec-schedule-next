@@ -2,7 +2,7 @@ import type { CheerioAPI, Cheerio } from "cheerio";
 import type { AnyNode } from "domhandler";
 import type { Speaker } from "../../src/types/schedule";
 import { buildSession, type RawSession } from "../lib/session";
-import { CAT_CLASS_MAP, isCancelled as titleIsCancelled } from "../lib/helpers";
+import { CAT_CLASS_MAP } from "../lib/helpers";
 
 /**
  * 2019 フォーマット
@@ -66,7 +66,6 @@ export function parseFormat2019($: CheerioAPI): RawSession[] {
 
       const $collapse = $el.find(".session-item").first();
       const title = $el.find(".session-title a").first().text().trim();
-      const dataFilter = $el.attr("data-filter") ?? "";
 
       // 講演時間を .detail-session-meta-top テキストから取得
       // "□ 講演時間: 09月04日(水) 09:45 〜 11:05" → ["09:45", "11:05"]
@@ -96,7 +95,6 @@ export function parseFormat2019($: CheerioAPI): RawSession[] {
 
       const speakers = extractSpeakers($, $collapse);
       const detailUrl = $collapse.find(".ses-detail-link a").first().attr("href") ?? "";
-      const cancelled = titleIsCancelled(title);
 
       sessions.push(
         buildSession({
@@ -107,11 +105,9 @@ export function parseFormat2019($: CheerioAPI): RawSession[] {
           end,
           category,
           sub_category: subCategories.join(","),
-          data_filter: dataFilter,
           title,
           speakers,
           detail_url: detailUrl,
-          cancelled,
         })
       );
     });

@@ -150,20 +150,18 @@ function generateJson(year: string, sessions: RawSession[]): string {
           start: s.start,
           end: s.end,
           category: s.category,
-          data_filter: s.data_filter,
           title: s.title,
           speakers: s.speakers,
           detail_url: s.detail_url,
         };
         if (subCategory.length > 0) entry.sub_category = subCategory;
-        if (s.cancelled) entry.cancelled = true;
         if (s.live !== null && s.live !== undefined) entry.live = s.live;
         if (s.youtube !== null && s.youtube !== undefined) entry.youtube = s.youtube;
         return entry;
       }),
   };
 
-  return JSON.stringify(data, null, 4);
+  return JSON.stringify(data);
 }
 
 async function processYear(year: string, config: YearConfig): Promise<void> {
