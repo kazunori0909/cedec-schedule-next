@@ -7,86 +7,33 @@ import type {
 } from "@/types/schedule";
 
 // 年度別設定
-// 　※eventsは、2022年以前は、CEDEC AWARDSなどのイベントのために利用
+// 　※eventsは、2019年以前は、CEDEC AWARDSなどのイベントのために利用
 // 　 以降はセッション一覧に表記されるようになったため、未使用
+// prettier-ignore
 export const SCHEDULE_SETTING: YearSetting[] = [
-  {
-    year: "2025",
-    first_date: "0722",
-    dev_night: { rel_path: "event/developer/", room_no: "多目的ホール" },
-    cedil_tag_no: 756,
-  },
-  {
-    year: "2024",
-    first_date: "0821",
-    dev_night: { rel_path: "event/developer/", room_no: "多目的ホール" },
-    cedil_tag_no: 752,
-  },
+  { year: "2025", first_date: "0722", cedil_tag_no: 756,  dev_night: { rel_path: "event/developer/", room_no: "多目的ホール" }, },
+  { year: "2024", first_date: "0821", cedil_tag_no: 752,  dev_night: { rel_path: "event/developer/", room_no: "多目的ホール" }, },
   { year: "2023", first_date: "0823", cedil_tag_no: 748 },
-  {
-    year: "2022",
-    first_date: "0823",
-    cedil_tag_no: 743,
-    events: [
-      {
-        title: "CEDEC AWARDS",
-        day_index: 1,
-        start_time: "17:30",
-        end_time: "19:00",
-        room_no: "1",
-        colspan: "all",
-        html: "※公式サイトに終了時間は明記されていません<br/>",
-      },
-    ],
-  },
-  {
-    year: "2021",
-    first_date: "0824",
-    cedil_tag_no: 740,
-    events: [
-      {
-        title: "CEDEC AWARDS",
-        day_index: 1,
-        start_time: "17:30",
-        end_time: "19:00",
-        room_no: "1",
-        colspan: "all",
-        html: "※公式サイトに終了時間は明記されていません<br/>",
-      },
-    ],
-  },
+  { year: "2022", first_date: "0823", cedil_tag_no: 743,},
+  { year: "2021", first_date: "0824", cedil_tag_no: 740 },
   { year: "2020", first_date: "0902", cedil_tag_no: 728 },
   {
-    year: "2019",
-    first_date: "0904",
+    year: "2019", first_date: "0904", cedil_tag_no: 720,
     dev_night: { rel_path: "event/developer.html", room_no: "501＋502" },
-    cedil_tag_no: 720,
     events: [
-      {
-        title: "CEDEC AWARDS",
-        day_index: 1,
-        start_time: "17:50",
-        end_time: "19:25",
-        room_no: "メインホール",
-        colspan: "all" as const,
-        html: "※公式サイトに終了時間は明記されていません<br/>",
+      { 
+        title: "CEDEC AWARDS",  day_index: 1, start_time: "17:50",  end_time: "19:25", colspan: "all" as const,
+        room_no: "メインホール",  html: "※公式サイトに終了時間は明記されていません<br/>",
       },
     ],
   },
   {
-    year: "2018",
-    first_date: "0822",
+    year: "2018", first_date: "0822", cedil_tag_no: 717,
     dev_night: { rel_path: "event/developer.html", room_no: "501＋502" },
-    cedil_tag_no: 717,
     events: [
-      {
-        title: "CEDEC AWARDS",
-        day_index: 1,
-        start_time: "17:50",
-        end_time: "19:25",
-        room_no: "メインホール",
-        colspan: "all" as const,
-        html: "※公式サイトに終了時間は明記されていません<br/>",
+      { 
+        title: "CEDEC AWARDS",  day_index: 1, start_time: "17:50",  end_time: "19:25", colspan: "all" as const,
+        room_no: "メインホール",  html: "※公式サイトに終了時間は明記されていません<br/>",
       },
     ],
   },
