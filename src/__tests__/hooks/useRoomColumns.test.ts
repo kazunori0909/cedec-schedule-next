@@ -30,6 +30,8 @@ function makeScheduleData(sessions: Session[]): ScheduleData {
   };
 }
 
+// 変換ロジック（buildRoomColumns・getTimeRange 等）は schedule.test.ts で網羅済み。
+// ここはフック固有の null ガードと favoriteMode 分岐のみを検証する。
 describe("useRoomColumns", () => {
   it("scheduleData が null のとき全フィールドが空/デフォルト値", () => {
     const { result } = renderHook(() => useRoomColumns(null, "2020", 0, false, {}));
@@ -38,23 +40,6 @@ describe("useRoomColumns", () => {
     expect(result.current.allCategories).toHaveLength(0);
     // データなし → デフォルト範囲
     expect(result.current.timeRange).toEqual({ min: 9 * 60, max: 18 * 60 });
-  });
-
-  it("セッションデータが渡されると部屋カラムが生成される", () => {
-    const data = makeScheduleData([
-      makeSession({ room: "1", id: "s1" }),
-      makeSession({ room: "2", id: "s2" }),
-    ]);
-    const { result } = renderHook(() => useRoomColumns(data, "2020", 0, false, {}));
-    expect(result.current.columns).toHaveLength(2);
-    expect(result.current.displayColumns).toHaveLength(2);
-  });
-
-  it("timeRows は timeRange の min/max を 5 分刻みでカバーする", () => {
-    const data = makeScheduleData([makeSession({ start: "09:00", end: "09:10" })]);
-    const { result } = renderHook(() => useRoomColumns(data, "2020", 0, false, {}));
-    expect(result.current.timeRows[0]).toBe("09:00");
-    expect(result.current.timeRows.at(-1)).toBe("09:10");
   });
 
   it("favoriteMode=true かつお気に入りなしのとき displayColumns はプレースホルダー", () => {
