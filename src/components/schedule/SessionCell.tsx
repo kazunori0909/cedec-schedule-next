@@ -11,7 +11,6 @@ import { cn, safeExternalUrl } from "@/lib/utils";
 interface Props {
   session: UnifiedSession;
   year: string;
-  domain: string;
   isFavorite: boolean;
   onToggleFavorite: () => void;
   cedilUrl?: string;
@@ -22,7 +21,6 @@ interface Props {
 export function SessionCell({
   session,
   year,
-  domain,
   isFavorite,
   onToggleFavorite,
   cedilUrl,
@@ -35,7 +33,7 @@ export function SessionCell({
 
   const s = session.data;
   // 外部 URL は safeExternalUrl で http(s) スキームに限定し XSS を防ぐ
-  const detailUrl = safeExternalUrl(resolveDetailUrl(s.detail_url, domain));
+  const detailUrl = safeExternalUrl(resolveDetailUrl(s.detail_url, year));
   const youtubeUrl = safeExternalUrl(getYoutubeURL(s));
   const safeCedilUrl = safeExternalUrl(cedilUrl);
   const isCanceled = s.title.includes("【講演キャンセル】");

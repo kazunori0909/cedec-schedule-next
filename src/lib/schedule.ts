@@ -42,6 +42,21 @@ function isOverlap(a: { start: number; end: number }, b: { start: number; end: n
   return !(a.start >= b.end || a.end <= b.start);
 }
 
+// item を、既存セッションと時間が重複しないグループに追加する。
+// 重複しないグループが無ければ新規グループを作成する。追加先グループの index を返す。
+function placeInNonOverlappingGroup(groups: UnifiedSession[][], item: UnifiedSession): number {
+  const range = getSessionRange(item);
+  for (let i = 0; i < groups.length; i++) {
+    const overlaps = groups[i].some((u) => isOverlap(range, getSessionRange(u)));
+    if (!overlaps) {
+      groups[i].push(item);
+      return i;
+    }
+  }
+  groups.push([item]);
+  return groups.length - 1;
+}
+
 // 指定日のセッションを部屋ごとに振り分け、追加イベント・非公式イベントを統合
 export function buildRoomColumns(data: ScheduleData, dayIndex: number, year: string): RoomColumn[] {
   const dayStr = String(dayIndex + 1);
@@ -51,41 +66,19 @@ export function buildRoomColumns(data: ScheduleData, dayIndex: number, year: str
 
   // 部屋ごとにグルーピング
   const roomMap = new Map<string, UnifiedSession[]>();
-  let unknownCounter = 0;
+  // ルーム表記がないセッションは時間が重複しないグループに振り分ける
+  const unknownGroups: UnifiedSession[][] = [];
 
   for (const session of dayContent) {
+    const unified: UnifiedSession = { kind: "session", data: session };
     if (session.room && session.room !== "") {
       if (!roomMap.has(session.room)) roomMap.set(session.room, []);
-      roomMap.get(session.room)!.push({ kind: "session", data: session });
+      roomMap.get(session.room)!.push(unified);
     } else {
-      // ルーム表記がない場合は不明_N に詰める
-      const sStart = parseTimeToMinutes(session.start);
-      const sEnd = parseTimeToMinutes(session.end);
-      let placed = false;
-      for (const [roomName, list] of roomMap) {
-        if (!roomName.startsWith("不明_")) continue;
-        const overlaps = list.some((u) => {
-          if (u.kind !== "session") return false;
-          return isOverlap(
-            { start: sStart, end: sEnd },
-            {
-              start: parseTimeToMinutes(u.data.start),
-              end: parseTimeToMinutes(u.data.end),
-            }
-          );
-        });
-        if (!overlaps) {
-          list.push({ kind: "session", data: session });
-          placed = true;
-          break;
-        }
-      }
-      if (!placed) {
-        const newRoom = `不明_${unknownCounter++}`;
-        roomMap.set(newRoom, [{ kind: "session", data: session }]);
-      }
+      placeInNonOverlappingGroup(unknownGroups, unified);
     }
   }
+  unknownGroups.forEach((group, i) => roomMap.set(`不明_${i}`, group));
 
   // ソート済み部屋名でカラムを構築
   const sortedNames = sortRoomNames([...roomMap.keys()]);
@@ -119,29 +112,20 @@ export function buildRoomColumns(data: ScheduleData, dayIndex: number, year: str
   return columns;
 }
 
-function placeCustomEvent(
-  columns: RoomColumn[],
-  ev: { start_time: string; end_time: string }
-): void {
-  const evStart = parseTimeToMinutes(ev.start_time);
-  const evEnd = parseTimeToMinutes(ev.end_time);
-
-  for (const col of columns) {
-    const overlaps = col.sessions.some((u) => {
-      const range = getSessionRange(u);
-      return isOverlap({ start: evStart, end: evEnd }, range);
-    });
-    if (!overlaps) {
-      col.sessions.push({ kind: "event", data: ev as ExtraEvent, isCustom: true });
-      return;
-    }
-  }
+function placeCustomEvent(columns: RoomColumn[], ev: ExtraEvent): void {
+  const item: UnifiedSession = { kind: "event", data: ev, isCustom: true };
+  // columns.map で取り出した sessions 配列は参照が共有されるため、
+  // 既存カラムへの push はそのままカラムへ反映される。
+  const groups = columns.map((col) => col.sessions);
+  const idx = placeInNonOverlappingGroup(groups, item);
   // 既存カラムに収まらない場合は新カラムを追加
-  columns.push({
-    name: (ev as ExtraEvent).room_no || "非公式",
-    key: `custom_${columns.length}`,
-    sessions: [{ kind: "event", data: ev as ExtraEvent, isCustom: true }],
-  });
+  if (idx >= columns.length) {
+    columns.push({
+      name: ev.room_no || "非公式",
+      key: `custom_${idx}`,
+      sessions: groups[idx],
+    });
+  }
 }
 
 export function getSessionRange(u: UnifiedSession): { start: number; end: number } {
@@ -238,30 +222,15 @@ export function buildFavoriteColumns(
   if (favSessions.length === 0) {
     return [{ name: "お気に入り登録がありません", key: "fav_empty", sessions: [] }];
   }
-  const cols: RoomColumn[] = [];
+  const groups: UnifiedSession[][] = [];
   for (const u of favSessions) {
-    let placed = false;
-    for (const col of cols) {
-      const overlap = col.sessions.some((other) => {
-        const a = getSessionRange(u);
-        const b = getSessionRange(other);
-        return !(a.start >= b.end || a.end <= b.start);
-      });
-      if (!overlap) {
-        col.sessions.push(u);
-        placed = true;
-        break;
-      }
-    }
-    if (!placed) {
-      cols.push({
-        name: `お気に入り ${cols.length + 1}`,
-        key: `fav_${cols.length}`,
-        sessions: [u],
-      });
-    }
+    placeInNonOverlappingGroup(groups, u);
   }
-  return cols;
+  return groups.map((sessions, i) => ({
+    name: `お気に入り ${i + 1}`,
+    key: `fav_${i}`,
+    sessions,
+  }));
 }
 
 export type { RoomColumn, UnifiedSession, YearSetting, Session, ExtraEvent };
