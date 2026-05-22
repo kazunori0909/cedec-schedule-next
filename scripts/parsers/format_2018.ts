@@ -2,7 +2,7 @@ import type { CheerioAPI, Cheerio } from "cheerio";
 import type { AnyNode } from "domhandler";
 import type { Speaker } from "../../src/types/schedule";
 import { buildSession, type RawSession } from "../lib/session";
-import { CAT_CLASS_MAP, isCancelled as titleIsCancelled } from "../lib/helpers";
+import { CAT_CLASS_MAP } from "../lib/helpers";
 
 /**
  * 2018 フォーマット
@@ -78,8 +78,6 @@ export function parseFormat2018($: CheerioAPI): RawSession[] {
 
       const speakers = extractSpeakers($, $el);
 
-      const cancelled = titleIsCancelled(title);
-
       sessions.push(
         buildSession({
           session_id: sessionId,
@@ -89,11 +87,9 @@ export function parseFormat2018($: CheerioAPI): RawSession[] {
           end,
           category,
           sub_category: subCategories.join(","),
-          data_filter: "",
           title,
           speakers,
           detail_url: detailHref,
-          cancelled,
         })
       );
     });

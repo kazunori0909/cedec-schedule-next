@@ -1,7 +1,6 @@
 import type { CheerioAPI } from "cheerio";
 import type { Speaker } from "../../src/types/schedule";
 import { buildSession, type RawSession } from "../lib/session";
-import { isCancelled as titleIsCancelled } from "../lib/helpers";
 
 /**
  * 2011-2017 フォーマット
@@ -187,8 +186,6 @@ export function parseFormatBefore2017($: CheerioAPI, day: number, year: string):
       if (name) speakers.push({ name, company });
     });
 
-    const cancelled = titleIsCancelled(title);
-
     sessions.push(
       buildSession({
         session_id: sessionId,
@@ -198,11 +195,9 @@ export function parseFormatBefore2017($: CheerioAPI, day: number, year: string):
         end,
         category,
         sub_category: subCategories.join(","),
-        data_filter: "",
         title,
         speakers,
         detail_url: detailUrl,
-        cancelled,
       })
     );
   });

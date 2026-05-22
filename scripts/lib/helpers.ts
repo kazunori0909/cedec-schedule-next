@@ -56,11 +56,6 @@ export function abbreviateCompany(company: string): string {
   return result;
 }
 
-/** タイトルに「【講演キャンセル】」が含まれているかを返す */
-export function isCancelled(title: string): boolean {
-  return title.includes("【講演キャンセル】");
-}
-
 /** 開催最終日（初日+2日）の翌日以降であれば true を返す */
 export function isEventOver(year: number, firstDate: string): boolean {
   const month = parseInt(firstDate.slice(0, 2), 10);

@@ -26,7 +26,6 @@ export interface Session {
   start: string; // "HH:MM"
   end: string; // "HH:MM"
   category: CategoryCode;
-  data_filter: string;
   title: string;
   speakers: Speaker[];
   detail_url: string;

@@ -105,11 +105,9 @@ export function parseFormat2025($: CheerioAPI, day?: number): RawSession[] {
               end,
               category,
               sub_category: subCategory,
-              data_filter: "",
               title: finalTitle,
               speakers,
               detail_url: detailUrl,
-              cancelled,
             })
           );
         });

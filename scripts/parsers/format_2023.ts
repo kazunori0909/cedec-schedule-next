@@ -1,11 +1,6 @@
 import type { CheerioAPI } from "cheerio";
 import { buildSession, type RawSession } from "../lib/session";
-import {
-  isCancelled as titleIsCancelled,
-  parseTimeRange,
-  roomNoFromText,
-  txt,
-} from "../lib/helpers";
+import { parseTimeRange, roomNoFromText, txt } from "../lib/helpers";
 import { extractDetailUrlLegacy, extractSpeakersLegacy } from "../lib/legacy_extract";
 
 /**
@@ -39,7 +34,6 @@ export function parseFormat2023($: CheerioAPI): RawSession[] {
 
       const sessionId = $sp.attr("data-id") ?? "";
       const roomNo = roomNoFromText($sp.attr("data-room") ?? "");
-      const dataFilter = $sp.attr("data-filter") ?? "";
       const [start, end] = parseTimeRange(txt($sp.find(".session-time").first()));
       const title = txt($sp.find("b.fo-fa-initial").first());
 
@@ -59,8 +53,6 @@ export function parseFormat2023($: CheerioAPI): RawSession[] {
       const speakers = extractSpeakersLegacy($, $sp);
       const detailUrl = $modal.length > 0 ? extractDetailUrlLegacy($, $modal) : "";
 
-      const cancelled = titleIsCancelled(title);
-
       sessions.push(
         buildSession({
           session_id: sessionId,
@@ -70,11 +62,9 @@ export function parseFormat2023($: CheerioAPI): RawSession[] {
           end,
           category,
           sub_category: subCategory,
-          data_filter: dataFilter,
           title,
           speakers,
           detail_url: detailUrl,
-          cancelled,
         })
       );
     });
