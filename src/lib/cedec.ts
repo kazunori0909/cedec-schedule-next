@@ -11,6 +11,7 @@ import type {
 // 　 以降はセッション一覧に表記されるようになったため、未使用
 // prettier-ignore
 export const SCHEDULE_SETTING: YearSetting[] = [
+  { year: "2026", first_date: "0722",                     dev_night: { rel_path: "event/developer/", room_no: "1階「G7＋G8」" }, },
   { year: "2025", first_date: "0722", cedil_tag_no: 756,  dev_night: { rel_path: "event/developer/", room_no: "多目的ホール" }, },
   { year: "2024", first_date: "0821", cedil_tag_no: 752,  dev_night: { rel_path: "event/developer/", room_no: "多目的ホール" }, },
   { year: "2023", first_date: "0823", cedil_tag_no: 748 },
@@ -48,6 +49,7 @@ export const SCHEDULE_SETTING: YearSetting[] = [
 
 // データ取得タイムスタンプ（手動更新）
 export const CASH_SETTING: Record<string, CashInfo> = {
+  "2026": { time: "2026/06/01 18:04" },
   "2025": { time: "2026/05/03 22:00" },
   "2024": { time: "2024/08/19 23:00" },
   "2023": { time: "2023/08/23 01:23" },
@@ -67,7 +69,7 @@ export const CASH_SETTING: Record<string, CashInfo> = {
 
 export const TIME_SPAN = 3;
 export const MIN_MINUTES = 5;
-export const DEFAULT_YEAR = "2025";
+export const DEFAULT_YEAR = "2026";
 
 // 年度から公式サイトのドメインを導出する（全年度 https://cedec.cesa.or.jp/{year}/ に統一）
 export function getDomain(year: string): string {

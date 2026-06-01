@@ -48,6 +48,7 @@ interface ParseContext {
 
 // prettier-ignore
 const YEAR_CONFIGS: Record<string, YearConfig> = {
+  "2026": { format: "format_2025", split_files: true },
   "2025": { format: "format_2025", split_files: true, live: "timetable/free_lives/" },
   "2024": { format: "format_2024" },
   "2023": { format: "format_2023" },
