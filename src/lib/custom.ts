@@ -2,6 +2,61 @@ import type { CustomYearSetting } from "@/types/schedule";
 
 // 非公式イベント定義（impl/custom.js を移植）
 export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
+  "2026": {
+    events: [
+      //      {
+      //        title: "ProCEDEC 2025",
+      //        hash_tag: "ProCEDEC",
+      //        room_no: "L.A.S.T ワールドポーターズ店",
+      //        day_index: 2,
+      //        start_time: "19:45",
+      //        end_time: "21:45",
+      //        detail_url: "https://procedec2025.peatix.com/",
+      //      },
+      {
+        title: "CEDEC・GDGD #2026（CEDEC3日目ゲームデザイン懇親会）",
+        room_no: "橙家 横浜みなとみらい東急スクエア店",
+        day_index: 2,
+        start_time: "20:00",
+        end_time: "22:00",
+        detail_url: "https://cedec-gdgd-2026.peatix.com/",
+      },
+      //      {
+      //        title: "Artists Meet Technicals 2025 supported by TA Night",
+      //        room_no: "FISHERMAN'S MARKET",
+      //        day_index: 2,
+      //        start_time: "19:30",
+      //        end_time: "21:30",
+      //        detail_url: "https://area.autodesk.jp/event/autodesk/artists-meet-technicals-2025/",
+      //      },
+      //      {
+      //        title: "UI CEDEC ／UI・UX 懇親会",
+      //        hash_tag: "UICEDEC",
+      //        room_no: "パセラリゾーツ横浜関内店",
+      //        day_index: 2,
+      //        start_time: "20:00",
+      //        end_time: "22:00",
+      //        detail_url: "https://peatix.com/event/4493973",
+      //      },
+      //      {
+      //        title: "CEDECON2025",
+      //        room_no: "パセラリゾーツ横浜関内店",
+      //        day_index: 2,
+      //        start_time: "19:45",
+      //        end_time: "22:00",
+      //        detail_url: "https://cedecon2025.peatix.com/",
+      //      },
+      {
+        title: "ShaderGrill",
+        hash_tag: "ShaderGrill2026",
+        room_no: "詳細不明(時間は仮)",
+        day_index: 2,
+        start_time: "19:30",
+        end_time: "22:00",
+        detail_url: "https://x.com/ProjectAsura/status/2062511714479013947?s=20",
+      },
+    ],
+  },
   "2025": {
     events: [
       {
