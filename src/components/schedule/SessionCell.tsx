@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { ExternalLink, Star } from "lucide-react";
+import { ExternalLink, Hash, Star } from "lucide-react";
 import type { UnifiedSession, ExtraEvent } from "@/types/schedule";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { RoomLink } from "@/components/ui/RoomLink";
 import { resolveDetailUrl, getYoutubeURL, getFloorURL } from "@/lib/cedec";
-import { cn, safeExternalUrl } from "@/lib/utils";
+import { cn, safeExternalUrl, hashTagUrl } from "@/lib/utils";
 
 interface Props {
   session: UnifiedSession;
@@ -176,6 +176,13 @@ function CedilStatus({ url }: { url?: string }) {
 function EventCellContent({ event, isCustom }: { event: ExtraEvent; isCustom: boolean }) {
   const isFullColspan = event.colspan === "all";
   const detailUrl = safeExternalUrl(event.detail_url);
+  // ハッシュタグはカンマ区切り。各タグの X ハッシュタグページ URL を生成する
+  const hashTags = (event.hash_tag ?? "")
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter((tag) => tag !== "")
+    .map((tag) => ({ tag, url: safeExternalUrl(hashTagUrl(tag)) }));
+
   return (
     <div
       className={cn(
@@ -187,29 +194,53 @@ function EventCellContent({ event, isCustom }: { event: ExtraEvent; isCustom: bo
         {isCustom && <span className="text-session-meta text-[10px] block">【非公式】</span>}
         {event.title}
       </h3>
-      {event.hash_tag &&
-        event.hash_tag.split(",").map((tag) => (
-          <div key={tag} className="text-session-link-sub text-[10px]">
-            #{tag}
-          </div>
-        ))}
+
+      {/* 詳細リンクはタイトル直下にボタン風で配置し、タップ領域を広げて誤タップを防ぐ */}
       {detailUrl && (
         <a
           href={detailUrl}
           target="_blank"
           rel="noopener"
-          className="inline-flex items-center gap-1 text-session-link-sub hover:underline text-[10px]"
+          className="inline-flex w-fit items-center gap-1 rounded border border-session-divider px-2 py-1 text-[10px] text-session-link-sub hover:bg-session-divider/20 hover:underline"
         >
           <ExternalLink className="w-3 h-3" /> 詳細
         </a>
       )}
+
       {event.html && (
         <div
           className="text-session-subtle text-[10px]"
           dangerouslySetInnerHTML={{ __html: event.html }}
         />
       )}
-      <div className="text-session-meta text-[10px] mt-auto">@ {event.room_no}</div>
+
+      {/* 会場・ハッシュタグはセル最下部にまとめ、詳細リンクから物理的に離す。
+          ハッシュタグは会場表記の下に置き、詳細との距離を最大化して誤タップを防ぐ */}
+      <div className="mt-auto flex flex-col gap-1">
+        <div className="text-session-meta text-[10px]">@ {event.room_no}</div>
+        {hashTags.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {hashTags.map(({ tag, url }) =>
+              url ? (
+                <a
+                  key={tag}
+                  href={url}
+                  target="_blank"
+                  rel="noopener"
+                  className="inline-flex items-center gap-0.5 rounded-full bg-session-divider/30 px-2 py-0.5 text-[10px] text-session-link-sub hover:underline"
+                >
+                  <Hash className="w-3 h-3" />
+                  {tag}
+                </a>
+              ) : (
+                <span key={tag} className="text-[10px] text-session-link-sub">
+                  #{tag}
+                </span>
+              )
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

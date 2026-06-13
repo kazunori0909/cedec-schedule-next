@@ -29,3 +29,13 @@ export function safeExternalUrl(url: string | undefined | null): string | undefi
   }
   return undefined;
 }
+
+/**
+ * ハッシュタグ文字列から X（旧 Twitter）のハッシュタグページ URL を生成する。
+ * 先頭の `#` は付いていてもいなくても受け付け、空文字なら undefined を返す。
+ */
+export function hashTagUrl(tag: string): string | undefined {
+  const trimmed = tag.trim().replace(/^#+/, "");
+  if (trimmed === "") return undefined;
+  return `https://x.com/hashtag/${encodeURIComponent(trimmed)}`;
+}
