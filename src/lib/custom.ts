@@ -21,14 +21,14 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
         end_time: "22:00",
         detail_url: "https://cedec-gdgd-2026.peatix.com/",
       },
-      //      {
-      //        title: "Artists Meet Technicals 2025 supported by TA Night",
-      //        room_no: "FISHERMAN'S MARKET",
-      //        day_index: 2,
-      //        start_time: "19:30",
-      //        end_time: "21:30",
-      //        detail_url: "https://area.autodesk.jp/event/autodesk/artists-meet-technicals-2025/",
-      //      },
+      {
+        title: "Artists Meet Technicals 2026 supported by TA Night",
+        room_no: "世界のビール博物館 横浜店 （World BEER Museum）",
+        day_index: 2,
+        start_time: "20:00",
+        end_time: "22:00",
+        detail_url: "https://www.creativevillage.ne.jp/category/event-list/176115/",
+      },
       //      {
       //        title: "UI CEDEC ／UI・UX 懇親会",
       //        hash_tag: "UICEDEC",
