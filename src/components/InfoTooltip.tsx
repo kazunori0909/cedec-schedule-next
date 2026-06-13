@@ -38,7 +38,7 @@ export function InfoTooltip({ lines }: Props) {
       {open && (
         <div
           role="tooltip"
-          className="absolute top-full left-0 mt-1 z-50 bg-popover border border-border rounded-md shadow-md px-3 py-2 text-xs whitespace-nowrap text-popover-foreground"
+          className="absolute top-full right-0 mt-1 z-50 w-max max-w-[calc(100vw-2rem)] whitespace-normal wrap-break-word bg-popover border border-border rounded-md shadow-md px-3 py-2 text-xs text-popover-foreground"
         >
           {lines.map((line, i) => (
             <div key={i}>{line}</div>
