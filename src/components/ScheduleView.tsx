@@ -6,6 +6,7 @@ import { useCurrentYearState, useScheduleStore } from "@/store/scheduleStore";
 import { useCurrentTimeRow } from "@/components/CurrentTimeHighlight";
 import { useScheduleData } from "@/hooks/useScheduleData";
 import { useRoomColumns } from "@/hooks/useRoomColumns";
+import { getNow } from "@/lib/utils";
 
 import { DateSelector } from "@/components/DateSelector";
 import { FavoriteToggle } from "@/components/FavoriteToggle";
@@ -59,7 +60,7 @@ function ScheduleViewInner({
 
   // 開催期間中なら今日の dayIndex を自動選択
   const todayDayIndex = useMemo(() => {
-    const now = new Date();
+    const now = getNow();
     if (now.getFullYear() !== parseInt(year, 10)) return undefined;
     for (let i = 0; i < dateList.length; i++) {
       if (dateList[i].getMonth() === now.getMonth() && dateList[i].getDate() === now.getDate())

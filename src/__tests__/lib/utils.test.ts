@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+// @vitest-environment jsdom
+import { afterEach, describe, expect, it } from "vitest";
 
-import { hashTagUrl, safeExternalUrl } from "@/lib/utils";
+import { getDebugNow, getNow, hashTagUrl, safeExternalUrl } from "@/lib/utils";
 
 describe("safeExternalUrl", () => {
   describe("無効な入力", () => {
@@ -102,5 +103,49 @@ describe("hashTagUrl", () => {
   it("# のみ・空白のみは undefined を返す", () => {
     expect(hashTagUrl("#")).toBeUndefined();
     expect(hashTagUrl("   ")).toBeUndefined();
+  });
+});
+
+describe("getDebugNow（開発時の現在時刻上書き）", () => {
+  // 各テスト後にクエリをクリアして他テストへ影響しないようにする
+  afterEach(() => {
+    window.history.replaceState(null, "", window.location.pathname);
+  });
+
+  it("?now= 未指定なら null を返す", () => {
+    window.history.replaceState(null, "", "/");
+    expect(getDebugNow()).toBeNull();
+  });
+
+  it("?now=YYYY-MM-DDTHH:mm をローカル時刻として解釈する", () => {
+    window.history.replaceState(null, "", "/?now=2026-07-22T11:24");
+    const d = getDebugNow();
+    expect(d).not.toBeNull();
+    expect(d!.getFullYear()).toBe(2026);
+    expect(d!.getMonth()).toBe(6); // 0-based: 7月
+    expect(d!.getDate()).toBe(22);
+    expect(d!.getHours()).toBe(11);
+    expect(d!.getMinutes()).toBe(24);
+  });
+
+  it("空白区切り（YYYY-MM-DD HH:mm）も受け付ける", () => {
+    window.history.replaceState(null, "", "/?now=2026-07-22 09:05");
+    const d = getDebugNow();
+    expect(d!.getHours()).toBe(9);
+    expect(d!.getMinutes()).toBe(5);
+  });
+
+  it("形式不正な値は null を返す", () => {
+    window.history.replaceState(null, "", "/?now=2026/07/22");
+    expect(getDebugNow()).toBeNull();
+  });
+
+  it("getNow は上書きが無ければ実時刻に近い値を返す", () => {
+    window.history.replaceState(null, "", "/");
+    const before = Date.now();
+    const now = getNow().getTime();
+    const after = Date.now();
+    expect(now).toBeGreaterThanOrEqual(before);
+    expect(now).toBeLessThanOrEqual(after);
   });
 });

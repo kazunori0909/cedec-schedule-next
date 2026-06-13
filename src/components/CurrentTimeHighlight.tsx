@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { MIN_MINUTES } from "@/lib/cedec";
+import { getNow } from "@/lib/utils";
 
 // 現在時刻に対応する時刻ラベル（"HH:MM"）を返す
 // 1分間隔で更新する
@@ -27,7 +28,7 @@ export function useCurrentTimeRow(timeRows: string[], enabled: boolean): string 
 
 function findCurrentTimeRow(timeRows: string[]): string | undefined {
   if (timeRows.length === 0) return undefined;
-  const now = new Date();
+  const now = getNow();
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   // 現在時刻以下で最大の行を探す（5分単位に丸める）
   const rounded = Math.floor(nowMinutes / MIN_MINUTES) * MIN_MINUTES;
