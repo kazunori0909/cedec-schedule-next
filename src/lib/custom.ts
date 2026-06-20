@@ -4,15 +4,15 @@ import type { CustomYearSetting } from "@/types/schedule";
 export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
   "2026": {
     events: [
-      //      {
-      //        title: "ProCEDEC 2025",
-      //        hash_tag: "ProCEDEC",
-      //        room_no: "L.A.S.T ワールドポーターズ店",
-      //        day_index: 2,
-      //        start_time: "19:45",
-      //        end_time: "21:45",
-      //        detail_url: "https://procedec2025.peatix.com/",
-      //      },
+      {
+        title: "ProCEDEC 2026",
+        hash_tag: "ProCEDEC",
+        room_no: "L.A.S.T ワールドポーターズ店",
+        day_index: 2,
+        start_time: "19:45",
+        end_time: "21:45",
+        detail_url: "https://procedec2026.peatix.com/",
+      },
       {
         title: "CEDEC・GDGD #2026（CEDEC3日目ゲームデザイン懇親会）",
         room_no: "橙家 横浜みなとみらい東急スクエア店",
