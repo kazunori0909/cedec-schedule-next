@@ -3,9 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { CASH_SETTING, DEFAULT_YEAR, findYearSetting, getDateList, isValidYear } from "@/lib/cedec";
 import { useCurrentYearState, useScheduleStore } from "@/store/scheduleStore";
-import { useCurrentTimeRow } from "@/components/CurrentTimeHighlight";
+import { useCurrentTimeRow } from "@/hooks/useCurrentTimeRow";
 import { useScheduleData } from "@/hooks/useScheduleData";
 import { useRoomColumns } from "@/hooks/useRoomColumns";
+import { formatCedilDate } from "@/lib/cedil";
 import { getNow } from "@/lib/utils";
 
 import { DateSelector } from "@/components/DateSelector";
@@ -192,14 +193,4 @@ function ScheduleViewInner({
       </footer>
     </div>
   );
-}
-
-function formatCedilDate(iso: string): string {
-  const d = new Date(iso);
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  const hh = String(d.getHours()).padStart(2, "0");
-  const mi = String(d.getMinutes()).padStart(2, "0");
-  return `${yyyy}/${mm}/${dd} ${hh}:${mi}`;
 }
