@@ -52,7 +52,6 @@ cedec_schedule/
 │   ├── components/             # UIコンポーネント
 │   │   ├── ScheduleView.tsx    # メインビュー（年度・日付・フィルター統合）
 │   │   ├── CategoryBadge.tsx   # カテゴリバッジ（色付きラベル）
-│   │   ├── CurrentTimeHighlight.tsx # 現在時刻ハイライト（開催期間中1分更新）
 │   │   ├── DateSelector.tsx    # 日付選択タブ
 │   │   ├── FavoriteToggle.tsx  # お気に入りモード切替ボタン
 │   │   ├── FilterDrawer.tsx    # フィルター（モバイル用ボトムシート、sm未満で表示）
@@ -63,6 +62,7 @@ cedec_schedule/
 │   │       ├── ScheduleTable.tsx # 部屋別タイムテーブル
 │   │       └── SessionCell.tsx   # 個別セッションセル
 │   ├── hooks/                  # カスタムフック
+│   │   ├── useCurrentTimeRow.ts # 現在時刻ハイライト（開催期間中1分更新）
 │   │   ├── useRoomColumns.ts   # 部屋カラム・フィルタリング・時刻軸計算
 │   │   └── useScheduleData.ts  # スケジュール・CEDiLデータ取得
 │   ├── lib/

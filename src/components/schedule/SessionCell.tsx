@@ -6,6 +6,7 @@ import type { UnifiedSession, ExtraEvent } from "@/types/schedule";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { RoomLink } from "@/components/ui/RoomLink";
 import { resolveDetailUrl, getYoutubeURL, getFloorURL } from "@/lib/cedec";
+import { isCanceledSession } from "@/lib/schedule";
 import { cn, safeExternalUrl, hashTagUrl } from "@/lib/utils";
 
 interface Props {
@@ -36,7 +37,7 @@ export function SessionCell({
   const detailUrl = safeExternalUrl(resolveDetailUrl(s.detail_url, year));
   const youtubeUrl = safeExternalUrl(getYoutubeURL(s));
   const safeCedilUrl = safeExternalUrl(cedilUrl);
-  const isCanceled = s.title.includes("【講演キャンセル】");
+  const isCanceled = isCanceledSession(s.title);
   const isHidden = !!hideSpecs[s.category];
 
   if (isHidden) {

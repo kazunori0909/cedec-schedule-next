@@ -153,6 +153,11 @@ export function getSessionTitle(u: UnifiedSession): string {
   return u.data.title;
 }
 
+// タイトルに講演キャンセル表記を含むか（外部データ由来のマーカー判定）
+export function isCanceledSession(title: string): boolean {
+  return title.includes("【講演キャンセル】");
+}
+
 export function getSessionId(u: UnifiedSession, dayIndex: number): string {
   if (u.kind === "session") return u.data.id;
   // イベントは day + title から ID を生成（既存ロジックに合わせる）
