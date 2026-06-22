@@ -66,17 +66,25 @@ describe("normalizeWhitespace", () => {
 // abbreviateCompany
 // ---------------------------------------------------------------------------
 describe("abbreviateCompany", () => {
-  it("株式会社 を (株) に変換する", () => {
-    expect(abbreviateCompany("株式会社カプコン")).toBe("(株)カプコン");
-  });
-
   it("前後の半角スペースごと法人格を略称化する", () => {
     expect(abbreviateCompany("スクウェア・エニックス 株式会社")).toBe("スクウェア・エニックス(株)");
   });
 
-  it("有限会社・合同会社も略称化する", () => {
+  it("各種法人格を略称化する", () => {
+    expect(abbreviateCompany("株式会社テスト")).toBe("(株)テスト");
     expect(abbreviateCompany("有限会社テスト")).toBe("(有)テスト");
     expect(abbreviateCompany("合同会社テスト")).toBe("(同)テスト");
+    expect(abbreviateCompany("合名会社テスト")).toBe("(名)テスト");
+    expect(abbreviateCompany("合資会社テスト")).toBe("(資)テスト");
+    expect(abbreviateCompany("一般社団法人テスト")).toBe("(一社)テスト");
+    expect(abbreviateCompany("公益社団法人テスト")).toBe("(公社)テスト");
+    expect(abbreviateCompany("一般財団法人テスト")).toBe("(一財)テスト");
+    expect(abbreviateCompany("公益財団法人テスト")).toBe("(公財)テスト");
+    expect(abbreviateCompany("学校法人テスト")).toBe("(学)テスト");
+    expect(abbreviateCompany("社会福祉法人テスト")).toBe("(福)テスト");
+    expect(abbreviateCompany("宗教法人テスト")).toBe("(宗)テスト");
+    expect(abbreviateCompany("特定非営利活動法人テスト")).toBe("(特非)テスト");
+    expect(abbreviateCompany("独立行政法人テスト")).toBe("(独)テスト");
   });
 
   it("法人格を含まない場合はそのまま返す", () => {
