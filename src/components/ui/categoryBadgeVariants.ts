@@ -30,7 +30,7 @@ export const categoryBadgeVariants = cva(
     variants: {
       variant: {
         main: "text-xs",
-        sub: "text-[10px]",
+        sub: "text-xs",
       },
     },
     defaultVariants: {

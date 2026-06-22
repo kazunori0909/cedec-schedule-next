@@ -127,7 +127,7 @@ function SpeakerList({ speakers }: { speakers: { name: string; company: string }
         <button
           type="button"
           onClick={() => setExpanded(true)}
-          className="text-session-link-sub underline text-[10px]"
+          className="text-session-link-sub underline text-[10px] cursor-pointer"
         >
           ほか{rest.length}名
         </button>
@@ -138,7 +138,7 @@ function SpeakerList({ speakers }: { speakers: { name: string; company: string }
             key={i}
             type="button"
             onClick={() => setExpanded(false)}
-            className="text-left w-full"
+            className="text-left w-full cursor-pointer"
           >
             <SpeakerItem speaker={sp} />
           </button>
