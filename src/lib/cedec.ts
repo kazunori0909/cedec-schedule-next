@@ -125,11 +125,10 @@ export function getAllYears(): string[] {
 export function getDateList(setting: YearSetting): Date[] {
   const month = parseInt(setting.first_date.slice(0, 2), 10);
   const firstDay = parseInt(setting.first_date.slice(2, 4), 10);
-  const list: Date[] = [];
-  for (let i = 0; i < TIME_SPAN; ++i) {
-    list.push(new Date(parseInt(setting.year, 10), month - 1, firstDay + i));
-  }
-  return list;
+  return Array.from(
+    { length: TIME_SPAN },
+    (_, i) => new Date(parseInt(setting.year, 10), month - 1, firstDay + i)
+  );
 }
 
 // "HH:MM" → 分（int）

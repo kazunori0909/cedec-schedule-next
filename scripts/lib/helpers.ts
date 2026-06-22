@@ -41,30 +41,32 @@ export function normalizeWhitespace(str: string): string {
   return str.replace(/[\r\n\t ]+/g, " ").trim();
 }
 
+// PHP の \s と互換性を持たせるため ASCII 空白のみ。全角スペースは保持する。
+const COMPANY_ABBREVIATIONS: [string, string][] = [
+  ["株式会社", "(株)"],
+  ["有限会社", "(有)"],
+  ["合同会社", "(同)"],
+  ["合名会社", "(名)"],
+  ["合資会社", "(資)"],
+  ["一般社団法人", "(一社)"],
+  ["公益社団法人", "(公社)"],
+  ["一般財団法人", "(一財)"],
+  ["公益財団法人", "(公財)"],
+  ["学校法人", "(学)"],
+  ["社会福祉法人", "(福)"],
+  ["宗教法人", "(宗)"],
+  ["特定非営利活動法人", "(特非)"],
+  ["独立行政法人", "(独)"],
+];
+
+const ASCII_SP = "[ \\t\\n\\r\\f\\v]*";
+
 /** 会社名の法人格を略称に変換（前後の半角スペースも除去） */
 export function abbreviateCompany(company: string): string {
-  // PHP の \s と互換性を持たせるため ASCII 空白のみ。全角スペースは保持する。
-  const map: Array<[RegExp, string]> = [
-    [/[ \t\n\r\f\v]*株式会社[ \t\n\r\f\v]*/g, "(株)"],
-    [/[ \t\n\r\f\v]*有限会社[ \t\n\r\f\v]*/g, "(有)"],
-    [/[ \t\n\r\f\v]*合同会社[ \t\n\r\f\v]*/g, "(同)"],
-    [/[ \t\n\r\f\v]*合名会社[ \t\n\r\f\v]*/g, "(名)"],
-    [/[ \t\n\r\f\v]*合資会社[ \t\n\r\f\v]*/g, "(資)"],
-    [/[ \t\n\r\f\v]*一般社団法人[ \t\n\r\f\v]*/g, "(一社)"],
-    [/[ \t\n\r\f\v]*公益社団法人[ \t\n\r\f\v]*/g, "(公社)"],
-    [/[ \t\n\r\f\v]*一般財団法人[ \t\n\r\f\v]*/g, "(一財)"],
-    [/[ \t\n\r\f\v]*公益財団法人[ \t\n\r\f\v]*/g, "(公財)"],
-    [/[ \t\n\r\f\v]*学校法人[ \t\n\r\f\v]*/g, "(学)"],
-    [/[ \t\n\r\f\v]*社会福祉法人[ \t\n\r\f\v]*/g, "(福)"],
-    [/[ \t\n\r\f\v]*宗教法人[ \t\n\r\f\v]*/g, "(宗)"],
-    [/[ \t\n\r\f\v]*特定非営利活動法人[ \t\n\r\f\v]*/g, "(特非)"],
-    [/[ \t\n\r\f\v]*独立行政法人[ \t\n\r\f\v]*/g, "(独)"],
-  ];
-  let result = company;
-  for (const [pattern, abbr] of map) {
-    result = result.replace(pattern, abbr);
-  }
-  return result;
+  return COMPANY_ABBREVIATIONS.reduce(
+    (s, [name, abbr]) => s.replace(new RegExp(`${ASCII_SP}${name}${ASCII_SP}`, "g"), abbr),
+    company
+  );
 }
 
 /** 開催最終日（初日+2日）の翌日以降であれば true を返す */

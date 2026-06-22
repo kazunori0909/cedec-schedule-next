@@ -6,7 +6,13 @@ import type {
   UnifiedSession,
   YearSetting,
 } from "@/types/schedule";
-import { findYearSetting, parseTimeToMinutes, MIN_MINUTES, resolveDevNight } from "@/lib/cedec";
+import {
+  findYearSetting,
+  parseTimeToMinutes,
+  formatMinutesToTime,
+  MIN_MINUTES,
+  resolveDevNight,
+} from "@/lib/cedec";
 import { CUSTOM_SETTING } from "@/lib/custom";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -129,16 +135,9 @@ function placeCustomEvent(columns: RoomColumn[], ev: ExtraEvent): void {
 }
 
 export function getSessionRange(u: UnifiedSession): { start: number; end: number } {
-  if (u.kind === "session") {
-    return {
-      start: parseTimeToMinutes(u.data.start),
-      end: parseTimeToMinutes(u.data.end),
-    };
-  }
-  return {
-    start: parseTimeToMinutes(u.data.start_time),
-    end: parseTimeToMinutes(u.data.end_time),
-  };
+  const startStr = u.kind === "session" ? u.data.start : u.data.start_time;
+  const endStr = u.kind === "session" ? u.data.end : u.data.end_time;
+  return { start: parseTimeToMinutes(startStr), end: parseTimeToMinutes(endStr) };
 }
 
 export function getSessionStartString(u: UnifiedSession): string {
@@ -183,13 +182,9 @@ export function getTimeRange(columns: RoomColumn[]): { min: number; max: number 
 
 // 5分刻みの時刻列を生成
 export function generateTimeRows(min: number, max: number): string[] {
-  const rows: string[] = [];
-  for (let t = min; t <= max; t += MIN_MINUTES) {
-    const h = Math.floor(t / 60);
-    const m = t % 60;
-    rows.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
-  }
-  return rows;
+  return Array.from({ length: Math.floor((max - min) / MIN_MINUTES) + 1 }, (_, i) =>
+    formatMinutesToTime(min + i * MIN_MINUTES)
+  );
 }
 
 // セッションが何行を占めるか（rowSpan）
@@ -217,13 +212,9 @@ export function buildFavoriteColumns(
   favorites: Record<string, boolean>,
   dayIndex: number
 ): RoomColumn[] {
-  const favSessions: UnifiedSession[] = [];
-  for (const col of columns) {
-    for (const u of col.sessions) {
-      const id = getSessionId(u, dayIndex);
-      if (favorites[id]) favSessions.push(u);
-    }
-  }
+  const favSessions = columns
+    .flatMap((col) => col.sessions)
+    .filter((u) => favorites[getSessionId(u, dayIndex)]);
   if (favSessions.length === 0) {
     return [{ name: "お気に入り登録がありません", key: "fav_empty", sessions: [] }];
   }
