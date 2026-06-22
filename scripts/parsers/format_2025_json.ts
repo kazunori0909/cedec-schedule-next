@@ -131,7 +131,7 @@ export function parseFormat2025Json(
     }
 
     // 前後空白（全角含む）は除去。HTML 方式の .text().trim() と挙動を揃える
-    const speakers: RawSpeaker[] = (post.speakers ?? []).flatMap((sid) => {
+    let speakers: RawSpeaker[] = (post.speakers ?? []).flatMap((sid) => {
       const sp = data.speakers[String(sid)];
       return sp?.name ? [{ name: sp.name.trim(), company: (sp.company ?? "").trim() }] : [];
     });
