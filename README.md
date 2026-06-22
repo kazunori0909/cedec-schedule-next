@@ -222,6 +222,7 @@ npm run generate:cedil {year}   # public/web_data/{year}/cedil.json を生成（
 
 ## 更新履歴
 
+- 2026年 2025・2026年のデータ取得を公式 `session/timetable.json` 直読み方式に切り替え（HTML描画とダウンロード用JSONが同一データのため。条件付き取得・取得日時の自動記録に対応）
 - 2026年 `cedil_tag_no` を任意化し、新年度追加〜CEDiLタグ判明までのワークフローを整備
 - 2026年 UIレイヤー分離リファクタリング（デザイントークン統一・cva バリアント導入）
 - 2026年 next-app/ サブディレクトリを廃止しリポジトリルートに統合

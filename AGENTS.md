@@ -15,11 +15,17 @@ Next.js + React + TypeScript で構築された静的サイト（`next build` �
 ## データフロー
 
 ```
-CEDEC公式サイトHTML
-  → (手動) web_data_original/{year}/ にキャッシュ保存
-  → scripts/generate_json.ts で解析（cheerio）
-  → public/web_data/{year}/schedule.json 生成
+【2025〜（標準）】CEDEC公式 session/timetable.json
+  → scripts/generate_json.ts が条件付き取得（If-Modified-Since）
+  → web_data_original/{year}/ にキャッシュ（timetable.json / cancel.json）
+  → JSON を解析（scripts/parsers/format_2025_json.ts）
+  → public/web_data/{year}/schedule.json 生成（取得日時 fetched 付き）
   → Next.jsアプリが fetch で取得 → テーブル描画
+
+【2024以前（旧方式）】CEDEC公式サイトHTML
+  → (手動) web_data_original/{year}/ にキャッシュ保存
+  → scripts/generate_json.ts で解析（cheerio・YEAR_CONFIGS で format 指定の年度）
+  → public/web_data/{year}/schedule.json 生成
 
 CEDiL公式サイト
   → scripts/generate_cedil.ts で解析
@@ -80,7 +86,7 @@ cedec_schedule/
 │   ├── generate_cedil.ts       # CEDiLサイトを解析しcedil.jsonを生成
 │   ├── generate_youtube.ts     # CEDECチャンネル動画リストをキャッシュ
 │   ├── lib/                    # 共通ユーティリティ
-│   └── parsers/                # 年度別フォーマットパーサー（before2017・2018〜2020・2023〜2025）
+│   └── parsers/                # 年度別パーサー（HTML: before2017・2018〜2020・2023・2024 / JSON: format_2025_json・cedec_taxonomy）
 ├── web_data_original/          # 公式サイトHTMLのローカルキャッシュ（コミット対象外）
 └── .claude/                    # Claude Code 設定
 ```

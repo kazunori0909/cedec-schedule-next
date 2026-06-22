@@ -22,8 +22,9 @@ import { parseFormat2019 } from "./parsers/format_2019";
 import { parseFormat2020 } from "./parsers/format_2020";
 import { parseFormat2023 } from "./parsers/format_2023";
 import { parseFormat2024 } from "./parsers/format_2024";
-import { parseFormat2025 } from "./parsers/format_2025";
+import { parseFormat2025Json } from "./parsers/format_2025_json";
 import { parseFormatBefore2017 } from "./parsers/format_before2017";
+import { loadTimetableSource } from "./lib/timetable_source";
 import { getDomain, findYearSetting } from "../src/lib/cedec";
 
 type FormatName =
@@ -32,11 +33,12 @@ type FormatName =
   | "format_2019"
   | "format_2020"
   | "format_2023"
-  | "format_2024"
-  | "format_2025";
+  | "format_2024";
 
 interface YearConfig {
-  format: FormatName;
+  // format を指定した年度は旧 HTML 方式（描画済みHTMLを cheerio で解析）。
+  // 省略した年度は JSON 方式（公式 session/timetable.json 直読み・2025〜 の標準）。
+  format?: FormatName;
   split_files?: boolean;
   live?: string;
 }
@@ -46,10 +48,12 @@ interface ParseContext {
   year: string;
 }
 
+// JSON 方式（format 省略）を標準とし、format を持つ年度のみ旧 HTML 方式で処理する。
+// live など毎年変わりうる設定は JSON 方式の年度でも引き続きここで指定する。
 // prettier-ignore
 const YEAR_CONFIGS: Record<string, YearConfig> = {
-  "2026": { format: "format_2025", split_files: true },
-  "2025": { format: "format_2025", split_files: true, live: "timetable/free_lives/" },
+  "2026": {}, // JSON方式（live URL公開後は { live: "timetable/free_lives/" } を追記）
+  "2025": { live: "timetable/free_lives/" }, // JSON方式（Epic部屋の表示は SCHEDULE_SETTING.room_overrides で対応）
   "2024": { format: "format_2024" },
   "2023": { format: "format_2023" },
   "2022": { format: "format_2020" },
@@ -73,8 +77,6 @@ function loadHtml(path: string): cheerio.CheerioAPI {
 
 function parseByFormat($: cheerio.CheerioAPI, format: FormatName, ctx: ParseContext): RawSession[] {
   switch (format) {
-    case "format_2025":
-      return parseFormat2025($, ctx.day);
     case "format_2024":
       return parseFormat2024($);
     case "format_2023":
@@ -129,13 +131,15 @@ function postprocessSessions(
   return sessions;
 }
 
-function generateJson(year: string, sessions: RawSession[]): string {
+function generateJson(year: string, sessions: RawSession[], fetched?: string): string {
   const { first_date } = findYearSetting(year);
   // PHP の `'year' => $year` は数値変換されてJSONに出るため、ここでも数値化する
-  const data = {
+  const data: Record<string, unknown> = {
     year: parseInt(year, 10),
     first_date,
     generated: new Date().toISOString(),
+    // JSON 方式の年度はデータ取得日時を記録する（フロントの「取得日時」表示に使用）
+    ...(fetched ? { fetched } : {}),
     sessions: sessions
       .filter((s) => s.title !== "")
       .map((s) => {
@@ -165,13 +169,27 @@ function generateJson(year: string, sessions: RawSession[]): string {
   return JSON.stringify(data);
 }
 
-async function processYear(year: string, config: YearConfig): Promise<void> {
+async function processYear(year: string, config: YearConfig, fetchRemote: boolean): Promise<void> {
   const { first_date } = findYearSetting(year);
-  console.log(`[INFO] ${year} 処理開始 (format=${config.format})`);
 
   let sessions: RawSession[] = [];
+  let fetched: string | undefined;
 
-  if (config.split_files) {
+  if (config.format === undefined) {
+    // JSON 方式（標準）: 公式 session/timetable.json を直読みする
+    console.log(`[INFO] ${year} 処理開始 (source=json)`);
+    const source = await loadTimetableSource(year, fetchRemote);
+    const { room_overrides } = findYearSetting(year);
+    sessions = parseFormat2025Json(
+      source.timetable,
+      source.cancel,
+      year,
+      first_date,
+      room_overrides
+    );
+    fetched = source.fetchedAt;
+  } else if (config.split_files) {
+    console.log(`[INFO] ${year} 処理開始 (format=${config.format})`);
     for (let day = 1; day <= 3; day++) {
       const path = dayHtmlPath(year, day);
       if (!existsSync(path)) {
@@ -182,6 +200,7 @@ async function processYear(year: string, config: YearConfig): Promise<void> {
       sessions = sessions.concat(parseByFormat($, config.format, { day, year }));
     }
   } else {
+    console.log(`[INFO] ${year} 処理開始 (format=${config.format})`);
     const path = allHtmlPath(year);
     if (!existsSync(path)) {
       console.log(`[SKIP] ${year}: ${path} が見つかりません`);
@@ -206,7 +225,7 @@ async function processYear(year: string, config: YearConfig): Promise<void> {
   if (eventOver) console.log("[INFO] 会期終了後モード: liveパラメータを処理します");
 
   const processed = postprocessSessions(sessions, liveMap, youtubeMap, eventOver);
-  const jsonContent = generateJson(year, processed);
+  const jsonContent = generateJson(year, processed, fetched);
 
   const dir = outputDir(year);
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
@@ -219,7 +238,11 @@ async function processYear(year: string, config: YearConfig): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  const target = process.argv[2];
+  const args = process.argv.slice(2);
+  // --no-fetch: ネットワーク取得をスキップし web_data_original のキャッシュのみ使用（JSON方式）
+  const fetchRemote = !args.includes("--no-fetch");
+  const target = args.find((a) => !a.startsWith("--"));
+
   let configs = YEAR_CONFIGS;
   if (target) {
     if (!YEAR_CONFIGS[target]) {
@@ -230,7 +253,7 @@ async function main(): Promise<void> {
   }
 
   for (const [year, config] of Object.entries(configs)) {
-    await processYear(year, config);
+    await processYear(year, config, fetchRemote);
   }
 }
 
