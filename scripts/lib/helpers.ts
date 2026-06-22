@@ -48,6 +48,17 @@ export function abbreviateCompany(company: string): string {
     [/[ \t\n\r\f\v]*株式会社[ \t\n\r\f\v]*/g, "(株)"],
     [/[ \t\n\r\f\v]*有限会社[ \t\n\r\f\v]*/g, "(有)"],
     [/[ \t\n\r\f\v]*合同会社[ \t\n\r\f\v]*/g, "(同)"],
+    [/[ \t\n\r\f\v]*合名会社[ \t\n\r\f\v]*/g, "(名)"],
+    [/[ \t\n\r\f\v]*合資会社[ \t\n\r\f\v]*/g, "(資)"],
+    [/[ \t\n\r\f\v]*一般社団法人[ \t\n\r\f\v]*/g, "(一社)"],
+    [/[ \t\n\r\f\v]*公益社団法人[ \t\n\r\f\v]*/g, "(公社)"],
+    [/[ \t\n\r\f\v]*一般財団法人[ \t\n\r\f\v]*/g, "(一財)"],
+    [/[ \t\n\r\f\v]*公益財団法人[ \t\n\r\f\v]*/g, "(公財)"],
+    [/[ \t\n\r\f\v]*学校法人[ \t\n\r\f\v]*/g, "(学)"],
+    [/[ \t\n\r\f\v]*社会福祉法人[ \t\n\r\f\v]*/g, "(福)"],
+    [/[ \t\n\r\f\v]*宗教法人[ \t\n\r\f\v]*/g, "(宗)"],
+    [/[ \t\n\r\f\v]*特定非営利活動法人[ \t\n\r\f\v]*/g, "(特非)"],
+    [/[ \t\n\r\f\v]*独立行政法人[ \t\n\r\f\v]*/g, "(独)"],
   ];
   let result = company;
   for (const [pattern, abbr] of map) {
