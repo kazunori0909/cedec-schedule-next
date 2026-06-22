@@ -121,12 +121,16 @@ function ScheduleViewInner({
           <SideMenu currentYear={year} onYearChange={handleYearChange} />
           <h1 className="text-xl font-bold">CEDEC {year} スケジュール</h1>
           <span className="text-xs text-muted-foreground hidden sm:inline">非公式</span>
-          {(CASH_SETTING[year] || cedilUpdate) && (
+          {(scheduleData?.fetched || CASH_SETTING[year] || cedilUpdate) && (
             <InfoTooltip
               lines={[
-                ...(CASH_SETTING[year]
-                  ? [`※セッション情報 取得日時：${CASH_SETTING[year].time}`]
-                  : []),
+                // JSON方式（2025〜）は schedule.json の取得日時を優先。
+                // それ以外は CASH_SETTING（手動更新）にフォールバックする。
+                ...(scheduleData?.fetched
+                  ? [`※セッション情報 取得日時：${scheduleData.fetched}`]
+                  : CASH_SETTING[year]
+                    ? [`※セッション情報 取得日時：${CASH_SETTING[year].time}`]
+                    : []),
                 ...(cedilUpdate
                   ? [`※CEDiL情報 ${cedilCount}件 取得日時：${formatCedilDate(cedilUpdate)}`]
                   : []),

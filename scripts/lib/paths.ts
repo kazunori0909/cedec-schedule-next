@@ -37,6 +37,21 @@ export function liveHtmlPath(year: string): string {
   return resolve(WEB_DATA_ORIGINAL, year, "live.html");
 }
 
+/** 公式タイムテーブルJSON（2025〜 の標準方式 / web_data_original にキャッシュ） */
+export function timetableJsonPath(year: string): string {
+  return resolve(WEB_DATA_ORIGINAL, year, "timetable.json");
+}
+
+/** 公式キャンセル情報JSON（2025〜 の標準方式） */
+export function cancelJsonPath(year: string): string {
+  return resolve(WEB_DATA_ORIGINAL, year, "cancel.json");
+}
+
+/** 取得メタ情報（Last-Modified・取得日時）のキャッシュ */
+export function sourceMetaPath(year: string): string {
+  return resolve(WEB_DATA_ORIGINAL, year, ".source_meta.json");
+}
+
 /** YouTube動画リストキャッシュ */
 export const YOUTUBE_CACHE = resolve(WEB_DATA_ORIGINAL, "youtube_videos.json");
 

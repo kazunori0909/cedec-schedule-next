@@ -38,6 +38,9 @@ export interface ScheduleData {
   year: number;
   first_date: string; // "MMDD"
   generated: string; // ISO 8601
+  // データ取得日時（"YYYY/MM/DD HH:MM" JST）。JSON方式（2025〜）の年度のみ付与され、
+  // フロントの「取得日時」表示に使う。未付与の年度は CASH_SETTING にフォールバックする。
+  fetched?: string;
   sessions: Session[];
 }
 
@@ -64,6 +67,13 @@ export interface DevNightConfig {
   end_time?: string; // 省略時: "21:30"
 }
 
+// 会場の表示名上書き（公式が特定日・特定会場をスポンサー名で表示するケース。例: 2025 day1 第13会場→Epic部屋）
+export interface RoomOverride {
+  room: string; // 公式 JSON の room 値（例: "第13会場"）
+  display: string; // 表示名（例: "Epic部屋"）
+  day?: number; // 対象の開催日（1〜3）。省略時は全日
+}
+
 export interface YearSetting {
   year: string;
   first_date: string; // "MMDD"
@@ -71,6 +81,8 @@ export interface YearSetting {
   dev_night?: DevNightConfig;
   // CEDiL検索タグID。新年度追加時は未定のため省略し、CEDiL登録後に追記する
   cedil_tag_no?: number;
+  // 会場表示名の上書き（JSON方式の年度のみ・公式のスポンサー会場名に追従するため）
+  room_overrides?: RoomOverride[];
 }
 
 export interface CashInfo {
