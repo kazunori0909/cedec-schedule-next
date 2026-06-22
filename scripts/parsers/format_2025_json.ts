@@ -130,13 +130,11 @@ export function parseFormat2025Json(
       }
     }
 
-    let speakers: RawSpeaker[] = [];
-    for (const sid of post.speakers ?? []) {
+    // 前後空白（全角含む）は除去。HTML 方式の .text().trim() と挙動を揃える
+    const speakers: RawSpeaker[] = (post.speakers ?? []).flatMap((sid) => {
       const sp = data.speakers[String(sid)];
-      // 前後空白（全角含む）は除去。HTML 方式の .text().trim() と挙動を揃える
-      if (sp && sp.name)
-        speakers.push({ name: sp.name.trim(), company: (sp.company ?? "").trim() });
-    }
+      return sp?.name ? [{ name: sp.name.trim(), company: (sp.company ?? "").trim() }] : [];
+    });
 
     // 中止セッションは公式描画と同様に分野・登壇者を伏せ、タイトルへ印を付ける
     const cancelled = showIds.has(String(post.id));
