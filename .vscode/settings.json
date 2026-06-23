@@ -1,0 +1,9 @@
+{
+  "typescript.tsserver.maxTsServerMemory": 1024,
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/.git/**": true,
+    "**/out/**": true,
+    "**/.next/**": true
+  }
+}
