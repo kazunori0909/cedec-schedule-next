@@ -10,6 +10,7 @@ import { formatCedilDate } from "@/lib/cedil";
 import { getNow } from "@/lib/utils";
 
 import { DateSelector } from "@/components/DateSelector";
+import { ExcelDownloadButton } from "@/components/ExcelDownloadButton";
 import { FavoriteToggle } from "@/components/FavoriteToggle";
 import { FilterDrawer } from "@/components/FilterDrawer";
 import { FilterPanel } from "@/components/FilterPanel";
@@ -137,6 +138,11 @@ function ScheduleViewInner({
               ]}
             />
           )}
+          <div className="ml-auto">
+            {scheduleData && (
+              <ExcelDownloadButton scheduleData={scheduleData} year={year} favorites={favorites} />
+            )}
+          </div>
         </div>
         <div className="px-4 pb-3 flex flex-col gap-2">
           <div className="flex items-center gap-3 flex-wrap">

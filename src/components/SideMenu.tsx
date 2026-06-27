@@ -44,7 +44,7 @@ export function SideMenu({ currentYear, onYearChange }: Props) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center justify-center w-10 h-10 rounded-md hover:bg-accent"
+        className="inline-flex items-center justify-center w-10 h-10 rounded-md hover:bg-accent cursor-pointer"
         aria-label="メニューを開く"
       >
         <Menu className="w-5 h-5" />
@@ -73,7 +73,7 @@ export function SideMenu({ currentYear, onYearChange }: Props) {
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="p-1 rounded hover:bg-accent"
+                  className="p-1 rounded hover:bg-accent cursor-pointer"
                   aria-label="メニューを閉じる"
                 >
                   <X className="w-4 h-4" />
@@ -94,7 +94,7 @@ export function SideMenu({ currentYear, onYearChange }: Props) {
                           setOpen(false);
                         }}
                         className={cn(
-                          "w-full text-left px-3 py-2 rounded-md transition-colors",
+                          "w-full text-left px-3 py-2 rounded-md transition-colors cursor-pointer",
                           s.year === currentYear
                             ? "bg-primary text-primary-foreground"
                             : "hover:bg-accent"

@@ -22,7 +22,7 @@ export function DateSelector({ dateList, selected, onSelect }: Props) {
             type="button"
             onClick={() => onSelect(i)}
             className={cn(
-              "px-5 py-2 rounded-md border text-base font-medium transition-colors",
+              "px-5 py-2 rounded-md border text-base font-medium transition-colors cursor-pointer",
               isActive
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-card text-card-foreground border-border hover:bg-accent"
