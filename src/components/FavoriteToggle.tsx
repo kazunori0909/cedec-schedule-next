@@ -14,7 +14,7 @@ export function FavoriteToggle({ active, onToggle }: Props) {
       type="button"
       onClick={onToggle}
       className={cn(
-        "inline-flex items-center gap-2 px-3 py-1.5 rounded-md border transition-colors",
+        "inline-flex items-center gap-2 px-3 py-1.5 rounded-md border transition-colors cursor-pointer",
         active
           ? "bg-fav-bg border-fav-border text-fav-text"
           : "bg-card border-border text-foreground hover:bg-accent"

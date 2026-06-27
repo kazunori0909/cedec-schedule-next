@@ -1,14 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import type { RoomColumn, UnifiedSession } from "@/types/schedule";
-import {
-  generateTimeRows,
-  getRowSpan,
-  getSessionStartString,
-  getSessionEndString,
-  getSessionId,
-} from "@/lib/schedule";
+import type { RoomColumn } from "@/types/schedule";
+import { generateTimeRows, getSessionId, buildMatrix } from "@/lib/schedule";
 import { getFloorURL } from "@/lib/cedec";
 import { SessionCell } from "@/components/schedule/SessionCell";
 import { RoomLink } from "@/components/ui/RoomLink";
@@ -25,14 +19,6 @@ interface Props {
   cedilLookup: Record<string, string>;
   currentTimeStr?: string; // ハイライト対象の時刻文字列
   onToggleFavorite: (sessionId: string) => void;
-}
-
-interface CellInfo {
-  kind: "session" | "event" | "empty" | "occupied";
-  session?: UnifiedSession;
-  rowSpan?: number;
-  colSpan?: number;
-  isFullSpan?: boolean;
 }
 
 export function ScheduleTable({
@@ -52,10 +38,7 @@ export function ScheduleTable({
   );
 
   // 2D マトリクス [rowIdx][colIdx] = CellInfo
-  const matrix = useMemo(
-    () => buildMatrix(timeRows, columns, dayIndex),
-    [timeRows, columns, dayIndex]
-  );
+  const matrix = useMemo(() => buildMatrix(timeRows, columns), [timeRows, columns]);
 
   return (
     <div className="overflow-x-auto">
@@ -124,49 +107,4 @@ export function ScheduleTable({
       </table>
     </div>
   );
-}
-
-// 2Dマトリクスを構築（rowspan/colspanの占有領域を計算）
-function buildMatrix(timeRows: string[], columns: RoomColumn[], _dayIndex: number): CellInfo[][] {
-  const rowCount = timeRows.length;
-  const colCount = columns.length;
-  const matrix: CellInfo[][] = Array.from({ length: rowCount }, () =>
-    Array.from({ length: colCount }, () => ({ kind: "empty" }) as CellInfo)
-  );
-  const timeIndex = new Map<string, number>();
-  timeRows.forEach((t, i) => timeIndex.set(t, i));
-
-  for (let colIdx = 0; colIdx < columns.length; colIdx++) {
-    const col = columns[colIdx];
-    for (const session of col.sessions) {
-      const startStr = getSessionStartString(session);
-      const endStr = getSessionEndString(session);
-      const startIdx = timeIndex.get(startStr);
-      if (startIdx === undefined) continue;
-      const rowSpan = getRowSpan(startStr, endStr);
-
-      const isFullSpan = session.kind === "event" && session.data.colspan === "all";
-      const colSpan = isFullSpan ? colCount : 1;
-
-      matrix[startIdx][colIdx] = {
-        kind: session.kind,
-        session,
-        rowSpan,
-        colSpan,
-        isFullSpan,
-      };
-
-      // rowSpan/colSpan の占有領域をマーク
-      for (let r = 0; r < rowSpan; r++) {
-        for (let c = 0; c < colSpan; c++) {
-          if (r === 0 && c === 0) continue;
-          if (startIdx + r >= rowCount) break;
-          if (colIdx + c >= colCount) break;
-          matrix[startIdx + r][colIdx + c] = { kind: "occupied" };
-        }
-      }
-    }
-  }
-
-  return matrix;
 }

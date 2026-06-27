@@ -31,7 +31,7 @@ export function FilterDrawer({ categories, hideSpecs, onToggle }: Props) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-muted text-sm text-muted-foreground"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-muted text-sm text-muted-foreground cursor-pointer"
         aria-label="フィルターを開く"
       >
         <Filter className="w-4 h-4" />
@@ -60,7 +60,7 @@ export function FilterDrawer({ categories, hideSpecs, onToggle }: Props) {
               <span className="font-semibold text-sm">フィルター</span>
               <button
                 onClick={() => setOpen(false)}
-                className="p-1 text-muted-foreground hover:text-foreground"
+                className="p-1 text-muted-foreground hover:text-foreground cursor-pointer"
                 aria-label="フィルターを閉じる"
               >
                 <X className="w-5 h-5" />
@@ -79,7 +79,7 @@ export function FilterDrawer({ categories, hideSpecs, onToggle }: Props) {
             </div>
             <button
               onClick={() => setOpen(false)}
-              className="w-full py-2.5 rounded-md bg-primary text-primary-foreground text-sm font-medium"
+              className="w-full py-2.5 rounded-md bg-primary text-primary-foreground text-sm font-medium cursor-pointer"
             >
               閉じる
             </button>

@@ -229,4 +229,57 @@ export function buildFavoriteColumns(
   }));
 }
 
+export interface CellInfo {
+  kind: "session" | "event" | "empty" | "occupied";
+  session?: UnifiedSession;
+  rowSpan?: number;
+  colSpan?: number;
+  isFullSpan?: boolean;
+}
+
+// 2D マトリクスを構築（rowspan/colspanの占有領域を計算）
+export function buildMatrix(timeRows: string[], columns: RoomColumn[]): CellInfo[][] {
+  const rowCount = timeRows.length;
+  const colCount = columns.length;
+  const matrix: CellInfo[][] = Array.from({ length: rowCount }, () =>
+    Array.from({ length: colCount }, () => ({ kind: "empty" }) as CellInfo)
+  );
+  const timeIndex = new Map<string, number>();
+  timeRows.forEach((t, i) => timeIndex.set(t, i));
+
+  for (let colIdx = 0; colIdx < columns.length; colIdx++) {
+    const col = columns[colIdx];
+    for (const session of col.sessions) {
+      const startStr = getSessionStartString(session);
+      const endStr = getSessionEndString(session);
+      const startIdx = timeIndex.get(startStr);
+      if (startIdx === undefined) continue;
+      const rowSpan = getRowSpan(startStr, endStr);
+
+      const isFullSpan = session.kind === "event" && session.data.colspan === "all";
+      const colSpan = isFullSpan ? colCount : 1;
+
+      matrix[startIdx][colIdx] = {
+        kind: session.kind,
+        session,
+        rowSpan,
+        colSpan,
+        isFullSpan,
+      };
+
+      // rowSpan/colSpan の占有領域をマーク
+      for (let r = 0; r < rowSpan; r++) {
+        for (let c = 0; c < colSpan; c++) {
+          if (r === 0 && c === 0) continue;
+          if (startIdx + r >= rowCount) break;
+          if (colIdx + c >= colCount) break;
+          matrix[startIdx + r][colIdx + c] = { kind: "occupied" };
+        }
+      }
+    }
+  }
+
+  return matrix;
+}
+
 export type { RoomColumn, UnifiedSession, YearSetting, Session, ExtraEvent };
