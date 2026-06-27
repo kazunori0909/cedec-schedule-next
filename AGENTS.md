@@ -59,6 +59,7 @@ cedec_schedule/
 │   │   ├── ScheduleView.tsx    # メインビュー（年度・日付・フィルター統合）
 │   │   ├── CategoryBadge.tsx   # カテゴリバッジ（色付きラベル）
 │   │   ├── DateSelector.tsx    # 日付選択タブ
+│   │   ├── ExcelDownloadButton.tsx # Excelダウンロードボタン（exceljs動的import）
 │   │   ├── FavoriteToggle.tsx  # お気に入りモード切替ボタン
 │   │   ├── FilterDrawer.tsx    # フィルター（モバイル用ボトムシート、sm未満で表示）
 │   │   ├── FilterPanel.tsx     # フィルター（デスクトップ用インライン、sm以上で表示）
@@ -75,7 +76,8 @@ cedec_schedule/
 │   │   ├── cedec.ts            # 年度別設定（SCHEDULE_SETTING）・getDomain・resolveDevNight・resolveDetailUrl
 │   │   ├── cedil.ts            # CEDiL資料リンク付与
 │   │   ├── custom.ts           # 非公式イベント定義
-│   │   ├── schedule.ts         # JSONフェッチ・パース
+│   │   ├── exportExcel.ts      # Excelエクスポートロジック（exceljs・buildMatrix利用）
+│   │   ├── schedule.ts         # JSONフェッチ・パース・buildMatrix（CellInfo型・タイムテーブル2Dマトリクス生成）
 │   │   └── utils.ts            # 共通ユーティリティ（safeExternalUrl 等）
 │   ├── store/scheduleStore.ts  # Zustandストア（永続化込み）
 │   ├── types/schedule.ts       # 型定義

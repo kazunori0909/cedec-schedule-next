@@ -13,6 +13,7 @@ CEDiLに登録済みの資料リンクも自動付与します。
 - 会期中セッションのYouTube Live配信リンク表示
 - 会期後セッションのYouTube動画リンク自動付与（YouTube Data API v3連携）
 - 非公式イベントの追加表示（`custom.ts` で設定）
+- Excelダウンロード（お気に入り状態を反映してタイムテーブル形式で出力）
 
 ## 技術構成
 
@@ -33,8 +34,8 @@ cedec_schedule/
 │   ├── components/             UIコンポーネント
 │   │   ├── ScheduleView.tsx    メインビュー
 │   │   ├── CategoryBadge.tsx   カテゴリバッジ
-│   │   ├── CurrentTimeHighlight.tsx  現在時刻ハイライト
 │   │   ├── DateSelector.tsx    日付選択タブ
+│   │   ├── ExcelDownloadButton.tsx  Excelダウンロードボタン
 │   │   ├── FavoriteToggle.tsx  お気に入りモード切替
 │   │   ├── FilterDrawer.tsx    フィルター（モバイル用）
 │   │   ├── FilterPanel.tsx     フィルター（デスクトップ用）
@@ -49,13 +50,15 @@ cedec_schedule/
 │   │       ├── ScheduleTable.tsx  部屋別タイムテーブル
 │   │       └── SessionCell.tsx    個別セッションセル
 │   ├── hooks/
+│   │   ├── useCurrentTimeRow.ts 現在時刻ハイライト（開催期間中1分更新）
 │   │   ├── useRoomColumns.ts   部屋カラム・フィルタリング・時刻軸
 │   │   └── useScheduleData.ts  スケジュール・CEDiLデータ取得
 │   ├── lib/
 │   │   ├── cedec.ts            年度設定（SCHEDULE_SETTING）
 │   │   ├── cedil.ts            CEDiL資料リンク付与
 │   │   ├── custom.ts           非公式イベント設定
-│   │   ├── schedule.ts         JSON取得・パース
+│   │   ├── exportExcel.ts      Excelエクスポートロジック（exceljs）
+│   │   ├── schedule.ts         JSON取得・パース・buildMatrix
 │   │   └── utils.ts            共通ユーティリティ（safeExternalUrl 等）
 │   ├── store/scheduleStore.ts  Zustandストア
 │   ├── types/schedule.ts       型定義
@@ -82,7 +85,8 @@ cedec_schedule/
 ├── .claude/                    Claude Code 設定（コミット対象）
 │   ├── settings.json           パーミッション設定
 │   └── skills/
-│       └── new-year/           新年度対応スキル（`/new-year` で起動）
+│       ├── new-year/           新年度対応スキル（`/new-year` で起動）
+│       └── update-timetable/   タイムテーブル更新スキル（`/update-timetable` で起動）
 ├── .devcontainer/              開発環境定義
 ├── package.json
 └── .env.example                環境変数テンプレート
@@ -222,6 +226,8 @@ npm run generate:cedil {year}   # public/web_data/{year}/cedil.json を生成（
 
 ## 更新履歴
 
+- 2026年 Excelダウンロード機能を追加（お気に入り状態を反映・カテゴリ色を背景に表示）
+- 2026年 カテゴリ色を2026年公式サイトの配色に更新
 - 2026年 2025・2026年のデータ取得を公式 `session/timetable.json` 直読み方式に切り替え（HTML描画とダウンロード用JSONが同一データのため。条件付き取得・取得日時の自動記録に対応）
 - 2026年 `cedil_tag_no` を任意化し、新年度追加〜CEDiLタグ判明までのワークフローを整備
 - 2026年 UIレイヤー分離リファクタリング（デザイントークン統一・cva バリアント導入）
