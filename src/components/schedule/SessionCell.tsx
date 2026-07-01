@@ -177,12 +177,10 @@ function CedilStatus({ url }: { url?: string }) {
 function EventCellContent({ event, isCustom }: { event: ExtraEvent; isCustom: boolean }) {
   const isFullColspan = event.colspan === "all";
   const detailUrl = safeExternalUrl(event.detail_url);
-  // ハッシュタグはカンマ区切り。各タグの X ハッシュタグページ URL を生成する
-  const hashTags = (event.hash_tag ?? "")
-    .split(",")
-    .map((tag) => tag.trim())
-    .filter((tag) => tag !== "")
-    .map((tag) => ({ tag, url: safeExternalUrl(hashTagUrl(tag)) }));
+  const hashTags = (event.hash_tag ?? []).map((tag) => ({
+    tag,
+    url: safeExternalUrl(hashTagUrl(tag)),
+  }));
 
   return (
     <div

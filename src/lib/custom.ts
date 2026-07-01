@@ -5,8 +5,17 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
   "2026": {
     events: [
       {
+        title: "AiCEDEC2026@三宅ゲームAI懇親会",
+        hash_tag: ["AiCEDEC", "AiCEDEC2026"],
+        room_no: "Aging beef & Specialty coffee THE三本",
+        day_index: 0,
+        start_time: "20:00",
+        end_time: "22:00",
+        detail_url: "https://aicedec2026.peatix.com/",
+      },
+      {
         title: "ProCEDEC 2026",
-        hash_tag: "ProCEDEC",
+        hash_tag: ["ProCEDEC"],
         room_no: "L.A.S.T ワールドポーターズ店",
         day_index: 2,
         start_time: "19:45",
@@ -31,7 +40,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
       },
       //      {
       //        title: "UI CEDEC ／UI・UX 懇親会",
-      //        hash_tag: "UICEDEC",
+      //        hash_tag: ["UICEDEC"],
       //        room_no: "パセラリゾーツ横浜関内店",
       //        day_index: 2,
       //        start_time: "20:00",
@@ -48,7 +57,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
       //      },
       {
         title: "ShaderGrill",
-        hash_tag: "ShaderGrill2026",
+        hash_tag: ["ShaderGrill2026"],
         room_no: "詳細不明(時間は仮)",
         day_index: 2,
         start_time: "19:30",
@@ -60,8 +69,17 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
   "2025": {
     events: [
       {
+        title: "【復活！】AiCEDEC2025 【久々にお会いしましょう】",
+        hash_tag: ["AiCEDEC", "AiCEDEC2025"],
+        room_no: "横浜シンフォステージ1F Aging beef & Specialty coffee THE三本",
+        day_index: 0,
+        start_time: "19:30",
+        end_time: "21:30",
+        detail_url: "https://passmarket.yahoo.co.jp/event/show/detail/02pfm1rpawi41.html",
+      },
+      {
         title: "ProCEDEC 2025",
-        hash_tag: "ProCEDEC",
+        hash_tag: ["ProCEDEC"],
         room_no: "L.A.S.T ワールドポーターズ店",
         day_index: 2,
         start_time: "19:45",
@@ -86,7 +104,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
       },
       {
         title: "UI CEDEC ／UI・UX 懇親会",
-        hash_tag: "UICEDEC",
+        hash_tag: ["UICEDEC"],
         room_no: "パセラリゾーツ横浜関内店",
         day_index: 2,
         start_time: "20:00",
@@ -107,7 +125,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
     events: [
       {
         title: "ProCEDEC 2024",
-        hash_tag: "ProCEDEC",
+        hash_tag: ["ProCEDEC"],
         room_no: "L.A.S.T ワールドポーターズ店",
         day_index: 2,
         start_time: "19:45",
@@ -132,7 +150,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
       },
       {
         title: "UI CEDEC 2024【UI懇親会】",
-        hash_tag: "UICEDEC",
+        hash_tag: ["UICEDEC"],
         room_no: "パセラリゾーツ横浜関内店",
         day_index: 2,
         start_time: "19:30",
@@ -161,7 +179,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
     events: [
       {
         title: "ProCEDEC 2023",
-        hash_tag: "ProCEDEC",
+        hash_tag: ["ProCEDEC"],
         room_no: "健康中華 青蓮 みなとみらい店",
         day_index: 2,
         start_time: "19:30",
@@ -230,7 +248,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
       },
       {
         title: "ProCEDEC",
-        hash_tag: "ProCEDEC",
+        hash_tag: ["ProCEDEC"],
         room_no: "Discord",
         day_index: 2,
         start_time: "19:30",
@@ -251,7 +269,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
       },
       {
         title: "ProCEDEC2019",
-        hash_tag: "ProCEDEC",
+        hash_tag: ["ProCEDEC"],
         room_no: "ニューヨークグランドキッチン",
         day_index: 2,
         start_time: "19:30",
@@ -260,7 +278,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
       },
       {
         title: "UI CEDEC 2019",
-        hash_tag: "UICEDEC",
+        hash_tag: ["UICEDEC"],
         room_no: "未定",
         day_index: 2,
         start_time: "19:30",
@@ -286,7 +304,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
       },
       {
         title: "CEDECON 2019",
-        hash_tag: "cedecon",
+        hash_tag: ["cedecon"],
         room_no: "パセラリゾーツ 横浜関内 グレースバリ 3F",
         day_index: 2,
         start_time: "19:30",
@@ -295,7 +313,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
       },
       {
         title: "AiCEDEC2019",
-        hash_tag: "AiCEDEC,AiCEDEC2019",
+        hash_tag: ["AiCEDEC", "AiCEDEC2019"],
         room_no: "横浜モノリス",
         day_index: 2,
         start_time: "19:45",
@@ -316,7 +334,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
     events: [
       {
         title: "ProCEDEC2018",
-        hash_tag: "ProCEDEC",
+        hash_tag: ["ProCEDEC"],
         room_no: "ニューヨークグランドキッチン",
         day_index: 2,
         start_time: "19:30",
@@ -333,7 +351,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
       },
       {
         title: "UI CEDEC 2018",
-        hash_tag: "UICEDEC",
+        hash_tag: ["UICEDEC"],
         room_no: "HUB Colette・Mare みなとみらい店",
         day_index: 2,
         start_time: "19:30",
@@ -358,7 +376,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
       },
       {
         title: "CEDECON 2018",
-        hash_tag: "cedecon",
+        hash_tag: ["cedecon"],
         room_no: "HUB Colette・Mare みなとみらい店",
         day_index: 2,
         start_time: "19:30",
@@ -367,7 +385,7 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
       },
       {
         title: "AiCEDEC2018",
-        hash_tag: "AiCEDEC",
+        hash_tag: ["AiCEDEC"],
         room_no: "横浜モノリス",
         day_index: 2,
         start_time: "19:45",

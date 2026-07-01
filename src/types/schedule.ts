@@ -53,7 +53,7 @@ export interface ExtraEvent {
   room_no: string;
   detail_url?: string;
   html?: string;
-  hash_tag?: string;
+  hash_tag?: string[];
   colspan?: "all" | number;
   youtube?: string;
 }
