@@ -27,12 +27,12 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
         day_index: 2, start_time: "20:00", end_time: "22:00", room_no: "世界のビール博物館 横浜店 （World BEER Museum）",
         detail_url: "https://www.creativevillage.ne.jp/category/event-list/176115/",
       },
-      // {
-      //   title: "UI CEDEC ／UI・UX 懇親会",
-      //   day_index: 2, start_time: "20:00", end_time: "22:00", room_no: "パセラリゾーツ横浜関内店",
-      //   detail_url: "https://peatix.com/event/4493973",
-      //   hash_tag: ["UICEDEC"],
-      // },
+      {
+        title: "ＵＩ・ＵＸ交流会／ＵＩ　ＣＥＤＥＣ２０２６",
+        day_index: 2, start_time: "20:00", end_time: "22:30", room_no: "グレースバリ横浜関内店",
+        detail_url: "https://peatix.com/event/5074207",
+        hash_tag: ["UICEDEC"],
+      },
       // {
       //   title: "CEDECON2025",
       //   day_index: 2, start_time: "19:45", end_time: "22:00", room_no: "パセラリゾーツ横浜関内店",
