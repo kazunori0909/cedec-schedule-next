@@ -59,6 +59,9 @@ const GENERIC_FORMATS = [
 // 公式の描画ロジックに合わせ、種別バッジは type_id 3(スポンサー)/4(協賛)/9(主催者) のみ採用する
 const TYPE_AS_CATEGORY = new Set([3, 4, 9]);
 
+// 招待系種別: 招待(2)/特別招待(5)/団体招待(6)/海外招待(7)
+const INVITED_TYPE_IDS = new Set([2, 5, 6, 7]);
+
 /** "2026/07/22 09:30:00" → "09:30"（不正値は ""） */
 function toHHMM(datetime: string | null): string {
   if (!datetime) return "";
@@ -136,6 +139,8 @@ export function parseFormat2025Json(
       return sp?.name ? [{ name: sp.name.trim(), company: (sp.company ?? "").trim() }] : [];
     });
 
+    let isInvited = INVITED_TYPE_IDS.has(post.type_id ?? -1);
+
     // 中止セッションは公式描画と同様に分野・登壇者を伏せ、タイトルへ印を付ける
     const cancelled = showIds.has(String(post.id));
     let title = post.title;
@@ -144,6 +149,7 @@ export function parseFormat2025Json(
       category = "";
       subCategory = "";
       speakers = [];
+      isInvited = false;
     }
 
     // 会場名: 原則 "第N会場" → "N"。年度固有のスポンサー会場名があれば上書きする
@@ -165,6 +171,7 @@ export function parseFormat2025Json(
         title,
         speakers,
         detail_url: `/${year}/timetable/detail/${post.uuid}/`,
+        is_invited: isInvited,
       })
     );
   }

@@ -32,6 +32,8 @@ export interface Session {
   sub_category?: CategoryCode[];
   youtube?: string;
   live?: string;
+  // 招待・特別招待・団体招待・海外招待のいずれか（JSON方式の年度のみ判定可能）
+  is_invited?: boolean;
 }
 
 export interface ScheduleData {
