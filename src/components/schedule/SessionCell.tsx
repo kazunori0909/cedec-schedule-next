@@ -54,8 +54,13 @@ export function SessionCell({
       )}
     >
       <div className="flex items-center justify-between gap-1">
-        <p className="font-semibold text-session-text">
+        <p className="font-semibold text-session-text inline-flex items-center gap-1">
           Room: <RoomLink name={roomName} url={floorURL ?? undefined} />
+          {s.is_invited && (
+            <span className="inline-block rounded border border-amber-500 px-1 py-0.5 text-[10px] font-bold leading-none text-amber-600">
+              招待
+            </span>
+          )}
         </p>
         <button
           type="button"

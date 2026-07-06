@@ -48,6 +48,24 @@ describe("SessionCell - セッション表示", () => {
     expect(screen.getByText("ENG")).toBeInTheDocument();
   });
 
+  it("is_invited が true のとき 招待 バッジを表示する", () => {
+    const session: UnifiedSession = {
+      kind: "session",
+      data: makeSession({ is_invited: true }),
+    };
+    render(<SessionCell {...DEFAULT_PROPS} session={session} />);
+    expect(screen.getByText("招待")).toBeInTheDocument();
+  });
+
+  it("is_invited が未設定のとき 招待 バッジを表示しない", () => {
+    const session: UnifiedSession = {
+      kind: "session",
+      data: makeSession(),
+    };
+    render(<SessionCell {...DEFAULT_PROPS} session={session} />);
+    expect(screen.queryByText("招待")).not.toBeInTheDocument();
+  });
+
   it("カテゴリーが hideSpecs に含まれるとフィルター表示になる", () => {
     const session: UnifiedSession = {
       kind: "session",

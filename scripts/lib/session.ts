@@ -18,6 +18,7 @@ export interface RawSession {
   detail_url: string;
   live?: string | null;
   youtube?: string | null;
+  is_invited?: boolean;
 }
 
 export interface BuildSessionArgs {
@@ -31,6 +32,7 @@ export interface BuildSessionArgs {
   title: string;
   speakers: Speaker[];
   detail_url: string;
+  is_invited?: boolean;
 }
 
 export function buildSession(args: BuildSessionArgs): RawSession {
@@ -47,5 +49,6 @@ export function buildSession(args: BuildSessionArgs): RawSession {
     detail_url: args.detail_url,
     live: null,
     youtube: null,
+    is_invited: args.is_invited,
   };
 }

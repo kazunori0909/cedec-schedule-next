@@ -162,6 +162,7 @@ function generateJson(year: string, sessions: RawSession[], fetched?: string): s
         if (subCategory.length > 0) entry.sub_category = subCategory;
         if (s.live !== null && s.live !== undefined) entry.live = s.live;
         if (s.youtube !== null && s.youtube !== undefined) entry.youtube = s.youtube;
+        if (s.is_invited) entry.is_invited = true;
         return entry;
       }),
   };
