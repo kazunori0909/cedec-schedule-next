@@ -26,7 +26,7 @@ description: 完了済み開発フェーズの圧縮。docs/phase<N>-*/ の内�
 
 ### Step 2: 統合テキストの作成
 
-各対象フェーズのフォルダ内**全ファイル**（PLAN.md・TASKS.md・KNOWLEDGE.md・`decision-*.md` 等）を読み、
+各対象フェーズのフォルダ内**全ファイル**（PLAN.md・TASKS.md・KNOWLEDGE.md 等）を読み、
 `docs/phases.md` の既存スタイルに凝縮する:
 
 ```markdown
