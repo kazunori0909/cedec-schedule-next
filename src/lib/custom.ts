@@ -33,11 +33,12 @@ export const CUSTOM_SETTING: Record<string, CustomYearSetting> = {
         detail_url: "https://peatix.com/event/5074207",
         hash_tag: ["UICEDEC"],
       },
-      // {
-      //   title: "CEDECON2025",
-      //   day_index: 2, start_time: "19:45", end_time: "22:00", room_no: "パセラリゾーツ横浜関内店",
-      //   detail_url: "https://cedecon2025.peatix.com/",
-      // },
+      {
+        title: "CEDECON2026",
+        day_index: 2, start_time: "20:00", end_time: "22:00", room_no: "パセラリゾーツ横浜関内店",
+        detail_url: "https://cedecon2026.peatix.com/",
+        hash_tag: ["CEDECON"],
+      },
       {
         title: "ShaderGrill",
         day_index: 2, start_time: "19:30", end_time: "22:00", room_no: "詳細不明(時間は仮)",

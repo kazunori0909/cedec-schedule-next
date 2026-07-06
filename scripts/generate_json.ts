@@ -52,7 +52,7 @@ interface ParseContext {
 // live など毎年変わりうる設定は JSON 方式の年度でも引き続きここで指定する。
 // prettier-ignore
 const YEAR_CONFIGS: Record<string, YearConfig> = {
-  "2026": {}, // JSON方式（live URL公開後は { live: "timetable/free_lives/" } を追記）
+  "2026": { live: "timetable/free_lives/" },
   "2025": { live: "timetable/free_lives/" }, // JSON方式（Epic部屋の表示は SCHEDULE_SETTING.room_overrides で対応）
   "2024": { format: "format_2024" },
   "2023": { format: "format_2023" },
