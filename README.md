@@ -73,14 +73,14 @@ cedec_schedule/
 │   ├── generate_cedil.ts       CEDiL JSONデータ生成スクリプト
 │   ├── generate_youtube.ts     YouTube動画リスト生成スクリプト
 │   ├── lib/                    共通ユーティリティ
-│   └── parsers/                年度別フォーマットパーサー（before2017・2018〜2020・2023〜2025）
-├── web_data_original/          公式サイトから取得したHTMLキャッシュ
+│   └── parsers/                年度別フォーマットパーサー（before2017・2018〜2024・2025年以降JSON）
+├── web_data_original/          公式サイトから取得したデータキャッシュ（コミット対象外）
 │   ├── {year}/
-│   │   ├── day1.html           公式スケジュールHTML（2025年以降）
-│   │   ├── day2.html
-│   │   ├── day3.html
-│   │   ├── live.html           YouTube Live配信ページキャッシュ
-│   │   └── custom.html         公式スケジュールHTML（2020〜2024年）
+│   │   ├── timetable.json      公式タイムテーブルJSON（2025年以降・generate:json実行時に自動取得）
+│   │   ├── cancel.json         公式キャンセル情報JSON（2025年以降・自動取得）
+│   │   ├── live.html           YouTube Live配信ページキャッシュ（live設定年度・自動取得）
+│   │   ├── day1.html〜day3.html 公式スケジュールHTML（2011〜2017年・手動配置）
+│   │   └── all.html            公式スケジュールHTML（2018〜2024年・手動配置）
 │   └── youtube_videos.json     CEDECチャンネル動画リスト（APIキャッシュ）
 ├── .claude/                    Claude Code 設定（コミット対象）
 │   ├── settings.json           パーミッション設定
@@ -109,12 +109,17 @@ npm run generate:youtube          # YouTube動画リスト取得（要 .env の 
 
 新しい年度の CEDEC データを追加する手順。Claude Code を使う場合は `/new-year {year}` でも実行できる（手順定義: [.claude/skills/new-year/SKILL.md](.claude/skills/new-year/SKILL.md)）。
 
-### 1. 公式HTMLの配置
+### 1. 公式データの準備
 
-CEDEC公式スケジュールページのHTMLをブラウザで保存し、以下のパスに配置する（`web_data_original/` は git 管理外）。
+**2025年以降（JSON方式・標準）は本手順は不要。** `npm run generate:json {year}` 実行時に、公式
+`session/timetable.json` / `cancel.json` を条件付き取得（If-Modified-Since）し
+`web_data_original/{year}/timetable.json` / `cancel.json` に自動キャッシュする（`scripts/lib/timetable_source.ts`）。
 
-- **2025年以降（日別ファイル形式）**: `web_data_original/{year}/day1.html`〜`day3.html`
-- **2020〜2024年（1ファイル形式）**: `web_data_original/{year}/custom.html`
+2024年以前（`YEAR_CONFIGS` で `format` を指定する旧HTML方式）のみ、CEDEC公式スケジュールページのHTMLを
+ブラウザで保存し、以下のパスに手動で配置する（`web_data_original/` は git 管理外）。
+
+- **2011〜2017年（日別ファイル形式）**: `web_data_original/{year}/day1.html`〜`day3.html`
+- **2018〜2024年（1ファイル形式）**: `web_data_original/{year}/all.html`
 
 ### 2. 年度別設定の追加（2ファイル必須）
 
@@ -152,26 +157,32 @@ Developers' Night がある場合は `dev_night` を追加する（`day_index`=1
 
 #### 2-2. `scripts/generate_json.ts` の `YEAR_CONFIGS`
 
-公式HTMLのパース設定を追加する。
+パース方式の設定を追加する。**`format` を省略すると JSON 方式（2025年以降の標準）になる。**
 
 ```typescript
-"2026": { format: "format_2025", split_files: true, live: "timetable/free_lives/" },
+"2026": { live: "timetable/free_lives/" },
 ```
 
-| キー          | 説明                                                                    |
-| ------------- | ----------------------------------------------------------------------- |
-| `format`      | 使用するパーサー名。HTMLが前年と同形式なら既存の `format_YYYY` を再利用 |
-| `split_files` | 日別ファイル形式（`day1.html` 等）のとき `true`                         |
-| `live`        | YouTube Live配信ページのパス（任意）。`getDomain(year)` からの相対パス  |
+| キー          | 説明                                                                                                                     |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `format`      | 旧HTML方式で使うパーサー名。**JSON方式（2025年以降）は指定しない。** HTMLが前年と同形式なら既存の `format_YYYY` を再利用 |
+| `split_files` | 旧HTML方式で日別ファイル形式（`day1.html` 等）のとき `true`。JSON方式では不要                                            |
+| `live`        | YouTube Live配信ページのパス（任意）。`getDomain(year)` からの相対パス                                                   |
 
-公式HTMLのフォーマットが前年と異なる場合は、`scripts/parsers/format_{year}.ts` を新規作成し、`generate_json.ts` で import して `FormatName` 型と `parseByFormat` の `switch` に分岐を追加する。
+公式サイトが JSON 方式に対応していない、または公式HTMLのフォーマットが前年と異なる場合のみ、
+`format` を指定した旧HTML方式で対応する。その場合 `scripts/parsers/format_{year}.ts` を新規作成し、
+`generate_json.ts` で import して `FormatName` 型と `parseByFormat` の `switch` に分岐を追加する。
 
-### 3. 取得日時の記録（cedec.ts）
+### 3. 取得日時の記録
 
-`src/lib/cedec.ts` の `CASH_SETTING` に、公式HTMLを取得した日時を手動で記録する。UIの「データ取得日時」表示に使われる。
+**2025年以降（JSON方式）は自動記録のため本手順は不要。** `generate_json.ts` が取得日時を
+`schedule.json` の `fetched` フィールドに自動で埋め込み、UIの「データ取得日時」表示に使われる。
+
+2024年以前（旧HTML方式）のみ、`src/lib/cedec.ts` の `CASH_SETTING` に、公式HTMLを取得した日時を
+手動で記録する。
 
 ```typescript
-"2026": { time: "2026/xx/xx xx:xx" },
+"2024": { time: "2024/xx/xx xx:xx" },
 ```
 
 ### 4. YouTube動画リストの生成（任意）
