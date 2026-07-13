@@ -1,4 +1,5 @@
-import { cva, type VariantProps } from "class-variance-authority";
+/** カテゴリーバッジの基本クラス（バリアントなし） */
+export const categoryBadgeClass = "inline-block px-1.5 py-0.5 mr-1 text-white text-xs leading-none";
 
 /** カテゴリーコード → Tailwind 背景クラスのマッピング */
 const CATEGORY_BG: Record<string, string> = {
@@ -23,22 +24,3 @@ export function resolveCategoryBg(category: string, hidden: boolean): string {
   if (hidden) return "bg-cat-hidden";
   return CATEGORY_BG[category] ?? "bg-cat-default";
 }
-
-export const categoryBadgeVariants = cva(
-  "inline-block px-1.5 py-0.5 mr-1 text-white leading-none",
-  {
-    variants: {
-      variant: {
-        main: "text-xs",
-        sub: "text-xs",
-      },
-    },
-    defaultVariants: {
-      variant: "main",
-    },
-  }
-);
-
-export type CategoryBadgeVariant = NonNullable<
-  VariantProps<typeof categoryBadgeVariants>["variant"]
->;

@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { ExternalLink, Hash, Star } from "lucide-react";
+import { Hash, Star } from "lucide-react";
 import type { UnifiedSession, ExtraEvent } from "@/types/schedule";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { RoomLink } from "@/components/ui/RoomLink";
+import { ExternalTextLink } from "@/components/ui/ExternalTextLink";
 import { resolveDetailUrl, getYoutubeURL, getFloorURL } from "@/lib/cedec";
 import { isCanceledSession } from "@/lib/schedule";
-import { cn, safeExternalUrl, hashTagUrl } from "@/lib/utils";
+import { cn, hashTagUrl } from "@/lib/utils";
 
 interface Props {
   session: UnifiedSession;
@@ -19,6 +20,7 @@ interface Props {
   roomName: string;
 }
 
+// 外部 URL の検証（safeExternalUrl）と rel="noopener" は ExternalTextLink / RoomLink 側で行う
 export function SessionCell({
   session,
   year,
@@ -33,18 +35,12 @@ export function SessionCell({
   }
 
   const s = session.data;
-  // 外部 URL は safeExternalUrl で http(s) スキームに限定し XSS を防ぐ
-  const detailUrl = safeExternalUrl(resolveDetailUrl(s.detail_url, year));
-  const youtubeUrl = safeExternalUrl(getYoutubeURL(s));
-  const safeCedilUrl = safeExternalUrl(cedilUrl);
   const isCanceled = isCanceledSession(s.title);
   const isHidden = !!hideSpecs[s.category];
 
   if (isHidden) {
     return <div className="text-xs text-muted-foreground italic">（フィルター中）</div>;
   }
-
-  const floorURL = safeExternalUrl(getFloorURL(roomName, year));
 
   return (
     <div
@@ -55,9 +51,9 @@ export function SessionCell({
     >
       <div className="flex items-center justify-between gap-1">
         <p className="font-semibold text-session-text inline-flex items-center gap-1">
-          Room: <RoomLink name={roomName} url={floorURL ?? undefined} />
+          Room: <RoomLink name={roomName} url={getFloorURL(roomName, year)} />
           {s.is_invited && (
-            <span className="inline-block rounded border border-amber-500 px-1 py-0.5 text-[10px] font-bold leading-none text-amber-600">
+            <span className="inline-block rounded border border-amber-500 px-1 py-0.5 text-2xs font-bold leading-none text-amber-600">
               招待
             </span>
           )}
@@ -66,7 +62,7 @@ export function SessionCell({
           type="button"
           onClick={onToggleFavorite}
           aria-label="お気に入り切替"
-          className="shrink-0"
+          className="shrink-0 cursor-pointer"
         >
           <Star
             className={cn(
@@ -83,38 +79,29 @@ export function SessionCell({
         <div className="flex flex-wrap gap-1">
           {s.category && <CategoryBadge category={s.category} />}
           {s.sub_category?.map((sub) => (
-            <CategoryBadge key={sub} category={sub} variant="sub" />
+            <CategoryBadge key={sub} category={sub} />
           ))}
         </div>
       )}
 
-      {detailUrl ? (
-        <a
-          href={detailUrl}
-          target="_blank"
-          rel="noopener"
-          className="font-bold text-session-link hover:underline border-b border-dashed border-session-divider pb-1"
-        >
-          {s.title}
-        </a>
-      ) : (
-        <p className="font-bold border-b border-dashed border-session-divider pb-1">{s.title}</p>
-      )}
+      <ExternalTextLink
+        href={resolveDetailUrl(s.detail_url, year)}
+        icon={false}
+        className="inline font-bold text-session-link border-b border-dashed border-session-divider pb-1"
+        fallback={
+          <p className="font-bold border-b border-dashed border-session-divider pb-1">{s.title}</p>
+        }
+      >
+        {s.title}
+      </ExternalTextLink>
 
       <SpeakerList speakers={s.speakers} />
 
       <div className="flex flex-wrap items-center gap-2 mt-auto">
-        <CedilStatus url={safeCedilUrl} />
-        {youtubeUrl && (
-          <a
-            href={youtubeUrl}
-            target="_blank"
-            rel="noopener"
-            className="inline-flex items-center gap-1 text-session-media hover:underline"
-          >
-            <ExternalLink className="w-3 h-3" /> YouTube
-          </a>
-        )}
+        <CedilStatus url={cedilUrl} />
+        <ExternalTextLink href={getYoutubeURL(s)} className="text-session-media">
+          YouTube
+        </ExternalTextLink>
       </div>
     </div>
   );
@@ -133,7 +120,7 @@ function SpeakerList({ speakers }: { speakers: { name: string; company: string }
         <button
           type="button"
           onClick={() => setExpanded(true)}
-          className="text-session-link-sub underline text-[10px] cursor-pointer"
+          className="text-session-link-sub underline text-2xs cursor-pointer"
         >
           ほか{rest.length}名
         </button>
@@ -157,35 +144,26 @@ function SpeakerItem({ speaker }: { speaker: { name: string; company: string } }
   return (
     <div className="flex flex-col">
       <span className="text-session-text">{speaker.name}</span>
-      <span className="text-session-meta text-[10px]">{speaker.company}</span>
+      <span className="text-session-meta text-2xs">{speaker.company}</span>
     </div>
   );
 }
 
 function CedilStatus({ url }: { url?: string }) {
-  if (!url) {
-    return <span className="text-session-dim text-[10px]">資料公開: 不明</span>;
-  }
   return (
-    <a
-      href={`${url}#breadcrumbs`}
-      target="_blank"
-      rel="noopener"
-      className="text-session-cedil hover:underline text-[10px] inline-flex items-center gap-0.5"
+    <ExternalTextLink
+      href={url ? `${url}#breadcrumbs` : undefined}
+      className="text-session-cedil text-2xs gap-0.5"
+      fallback={<span className="text-session-dim text-2xs">資料公開: 不明</span>}
     >
       資料公開: 公開済み
-      <ExternalLink className="w-3 h-3" />
-    </a>
+    </ExternalTextLink>
   );
 }
 
 function EventCellContent({ event, isCustom }: { event: ExtraEvent; isCustom: boolean }) {
   const isFullColspan = event.colspan === "all";
-  const detailUrl = safeExternalUrl(event.detail_url);
-  const hashTags = (event.hash_tag ?? []).map((tag) => ({
-    tag,
-    url: safeExternalUrl(hashTagUrl(tag)),
-  }));
+  const hashTags = event.hash_tag ?? [];
 
   return (
     <div
@@ -195,25 +173,21 @@ function EventCellContent({ event, isCustom }: { event: ExtraEvent; isCustom: bo
       )}
     >
       <h3 className={cn("font-bold", !isFullColspan && "text-sm")}>
-        {isCustom && <span className="text-session-meta text-[10px] block">【非公式】</span>}
+        {isCustom && <span className="text-session-meta text-2xs block">【非公式】</span>}
         {event.title}
       </h3>
 
       {/* 詳細リンクはタイトル直下にボタン風で配置し、タップ領域を広げて誤タップを防ぐ */}
-      {detailUrl && (
-        <a
-          href={detailUrl}
-          target="_blank"
-          rel="noopener"
-          className="inline-flex w-fit items-center gap-1 rounded border border-session-divider px-2 py-1 text-[10px] text-session-link-sub hover:bg-session-divider/20 hover:underline"
-        >
-          <ExternalLink className="w-3 h-3" /> 詳細
-        </a>
-      )}
+      <ExternalTextLink
+        href={event.detail_url}
+        className="w-fit rounded border border-session-divider px-2 py-1 text-2xs text-session-link-sub hover:bg-session-divider/20"
+      >
+        詳細
+      </ExternalTextLink>
 
       {event.html && (
         <div
-          className="text-session-subtle text-[10px]"
+          className="text-session-subtle text-2xs"
           dangerouslySetInnerHTML={{ __html: event.html }}
         />
       )}
@@ -221,27 +195,21 @@ function EventCellContent({ event, isCustom }: { event: ExtraEvent; isCustom: bo
       {/* 会場・ハッシュタグはセル最下部にまとめ、詳細リンクから物理的に離す。
           ハッシュタグは会場表記の下に置き、詳細との距離を最大化して誤タップを防ぐ */}
       <div className="mt-auto flex flex-col gap-1">
-        <div className="text-session-meta text-[10px]">@ {event.room_no}</div>
+        <div className="text-session-meta text-2xs">@ {event.room_no}</div>
         {hashTags.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {hashTags.map(({ tag, url }) =>
-              url ? (
-                <a
-                  key={tag}
-                  href={url}
-                  target="_blank"
-                  rel="noopener"
-                  className="inline-flex items-center gap-0.5 rounded-full bg-session-divider/30 px-2 py-0.5 text-[10px] text-session-link-sub hover:underline"
-                >
-                  <Hash className="w-3 h-3" />
-                  {tag}
-                </a>
-              ) : (
-                <span key={tag} className="text-[10px] text-session-link-sub">
-                  #{tag}
-                </span>
-              )
-            )}
+            {hashTags.map((tag) => (
+              <ExternalTextLink
+                key={tag}
+                href={hashTagUrl(tag)}
+                icon={false}
+                className="gap-0.5 rounded-full bg-session-divider/30 px-2 py-0.5 text-2xs text-session-link-sub"
+                fallback={<span className="text-2xs text-session-link-sub">#{tag}</span>}
+              >
+                <Hash className="size-3" />
+                {tag}
+              </ExternalTextLink>
+            ))}
           </div>
         )}
       </div>

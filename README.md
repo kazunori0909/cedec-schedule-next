@@ -41,9 +41,13 @@ cedec_schedule/
 │   │   ├── FilterPanel.tsx     フィルター（デスクトップ用）
 │   │   ├── InfoTooltip.tsx     データ取得日時ツールチップ
 │   │   ├── SideMenu.tsx        年度切り替えサイドメニュー
-│   │   ├── ui/                 スタイルプリミティブ（cva バリアント・共有UI）
+│   │   ├── ui/                 UIプリミティブ（shadcn/ui・cva バリアント・共有UI）
+│   │   │   ├── button.tsx                ボタン（shadcn/ui・Radix）
+│   │   │   ├── sheet.tsx                 ドロワー/モーダル（shadcn/ui・Radix Dialog）
+│   │   │   ├── popover.tsx               ポップオーバー（shadcn/ui・Radix Popover）
+│   │   │   ├── ExternalTextLink.tsx      外部リンク共有（safeExternalUrl + rel=noopener 内包）
 │   │   │   ├── RoomLink.tsx              部屋名リンク共有コンポーネント
-│   │   │   ├── categoryBadgeVariants.ts  カテゴリバッジ cva
+│   │   │   ├── categoryBadgeVariants.ts  カテゴリバッジ基本クラス・背景色マッピング
 │   │   │   ├── sessionVariants.ts        セッションセル cva
 │   │   │   └── tableVariants.ts          テーブル th/td cva
 │   │   └── schedule/
@@ -237,6 +241,7 @@ npm run generate:cedil {year}   # public/web_data/{year}/cedil.json を生成（
 
 ## 更新履歴
 
+- 2026年 UIプリミティブを shadcn/ui（Radix ベース）に統合（手書きボタン→`Button`、ドロワー/サイドメニュー→`Sheet`、ツールチップ→Popover、外部リンク→`ExternalTextLink`。フォーカストラップ等のアクセシビリティを改善）
 - 2026年 Excelダウンロード機能を追加（お気に入り状態を反映・カテゴリ色を背景に表示）
 - 2026年 カテゴリ色を2026年公式サイトの配色に更新
 - 2026年 2025・2026年のデータ取得を公式 `session/timetable.json` 直読み方式に切り替え（HTML描画とダウンロード用JSONが同一データのため。条件付き取得・取得日時の自動記録に対応）

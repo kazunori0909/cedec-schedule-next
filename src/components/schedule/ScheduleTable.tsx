@@ -46,14 +46,11 @@ export function ScheduleTable({
         <thead>
           <tr>
             <th className={tableHeaderVariants({ kind: "time" })}></th>
-            {columns.map((col) => {
-              const floorURL = getFloorURL(col.name, year);
-              return (
-                <th key={col.key} className={tableHeaderVariants({ kind: "room" })}>
-                  <RoomLink name={col.name} url={floorURL ?? undefined} />
-                </th>
-              );
-            })}
+            {columns.map((col) => (
+              <th key={col.key} className={tableHeaderVariants({ kind: "room" })}>
+                <RoomLink name={col.name} url={getFloorURL(col.name, year)} />
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
