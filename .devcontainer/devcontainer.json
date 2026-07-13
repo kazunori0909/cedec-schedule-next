@@ -19,7 +19,8 @@
   ],
   "containerEnv": {
     "DISABLE_AUTOUPDATER": "1",
-    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+    "DISABLE_TELEMETRY": "1",
+    "DISABLE_ERROR_REPORTING": "1"
   },
   "postCreateCommand": "bash .devcontainer/setup.sh",
   "customizations": {
