@@ -18,6 +18,11 @@ fi
 # Node.js 依存パッケージをインストール
 npm install
 
+# Claude Code CLI を最新化する
+# devcontainer feature はイメージビルド時にしか実行されないため、イメージ層がキャッシュ
+# されているとビルド当時のバージョンのまま固定される。postCreate で毎回更新して回避する。
+sudo npm install -g @anthropic-ai/claude-code@latest || echo "Claude Code CLI の更新に失敗しました（既存バージョンのまま継続します）"
+
 echo ""
 echo "=== セットアップ完了 ==="
 echo "開発サーバー: npm run dev  (http://localhost:3000)"
