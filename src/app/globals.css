@@ -90,6 +90,9 @@
   --color-session-cedil: var(--session-cedil);
   --color-session-divider: var(--session-divider);
 
+  /* 10px の極小テキスト（セッションセルのメタ情報等）。text-[10px] のインライン指定は使わない */
+  --text-2xs: 10px;
+
   /* お気に入り★カラー（Tailwind デフォルトパレットの yellow-* を参照） */
   --color-star: var(--color-yellow-500); /* 星アイコン */
   --color-fav-bg: var(--color-yellow-100); /* お気に入りボタン背景 */

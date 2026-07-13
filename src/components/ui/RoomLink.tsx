@@ -1,14 +1,20 @@
+import { ExternalTextLink } from "@/components/ui/ExternalTextLink";
+
 interface Props {
   name: string;
-  url?: string;
+  url?: string | null;
 }
 
 /** 会場URLがある場合はリンク、ない場合はテキストとしてルーム名を描画する */
 export function RoomLink({ name, url }: Props) {
-  if (!url) return <>{name}</>;
   return (
-    <a href={url} target="_blank" rel="noopener" className="text-session-link-sub hover:underline">
+    <ExternalTextLink
+      href={url}
+      icon={false}
+      fallback={name}
+      className="inline text-session-link-sub"
+    >
       {name}
-    </a>
+    </ExternalTextLink>
   );
 }

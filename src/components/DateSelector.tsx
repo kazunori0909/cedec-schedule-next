@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const WEEKDAY_JP = ["日", "月", "火", "水", "木", "金", "土"];
 
@@ -15,21 +15,17 @@ export function DateSelector({ dateList, selected, onSelect }: Props) {
     <div className="flex gap-2 flex-wrap">
       {dateList.map((date, i) => {
         const label = `${date.getMonth() + 1}/${date.getDate()}(${WEEKDAY_JP[date.getDay()]})`;
-        const isActive = i === selected;
         return (
-          <button
+          <Button
             key={i}
-            type="button"
+            variant="outline"
+            size="lg"
             onClick={() => onSelect(i)}
-            className={cn(
-              "px-5 py-2 rounded-md border text-base font-medium transition-colors cursor-pointer",
-              isActive
-                ? "bg-primary text-primary-foreground border-primary"
-                : "bg-card text-card-foreground border-border hover:bg-accent"
-            )}
+            aria-pressed={i === selected}
+            className="text-base aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground"
           >
             {label}
-          </button>
+          </Button>
         );
       })}
     </div>

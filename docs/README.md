@@ -21,3 +21,4 @@
 | 2   | 招待セッション表示 ✅                          | 2025年以降のJSON方式で招待系セッションを判定し、Room表示の横にバッジ表示                                             | [phase2/](phase2-invited-session-badge/)    |
 | 3   | README.md 最新化 ✅                            | 「年度別対応」セクションをJSON方式（2025〜）の実装に合わせて修正                                                     | [phase3/](phase3-readme-json-flow-update/)  |
 | 4   | devcontainer で Fable 5 を選択可能に（進行中） | `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` が feature flag 取得を止め、`/model` 一覧からモデルが消えていた問題を修正 | [phase4/](phase4-devcontainer-fable-model/) |
+| 5   | shadcn/ui プリミティブ統合（進行中）           | 手書きボタン・二重実装オーバーレイ・散在マジック値を shadcn/ui（Radix）プリミティブとトークンに統合                  | [phase5/](phase5-shadcn-ui-primitives/)     |

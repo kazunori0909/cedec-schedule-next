@@ -1,7 +1,7 @@
 "use client";
 
 import { Star } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   active: boolean;
@@ -10,20 +10,16 @@ interface Props {
 
 export function FavoriteToggle({ active, onToggle }: Props) {
   return (
-    <button
-      type="button"
+    <Button
+      variant="outline"
+      size="sm"
       onClick={onToggle}
-      className={cn(
-        "inline-flex items-center gap-2 px-3 py-1.5 rounded-md border transition-colors cursor-pointer",
-        active
-          ? "bg-fav-bg border-fav-border text-fav-text"
-          : "bg-card border-border text-foreground hover:bg-accent"
-      )}
       aria-pressed={active}
       aria-label="お気に入りモード切替"
+      className="group aria-pressed:border-fav-border aria-pressed:bg-fav-bg aria-pressed:text-fav-text"
     >
-      <Star className={cn("w-4 h-4", active && "fill-star text-star")} />
-      <span className="text-sm font-medium">お気に入り</span>
-    </button>
+      <Star className="group-aria-pressed:fill-star group-aria-pressed:text-star" />
+      お気に入り
+    </Button>
   );
 }
