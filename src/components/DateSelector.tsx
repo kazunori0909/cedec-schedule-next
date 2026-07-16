@@ -12,7 +12,7 @@ interface Props {
 
 export function DateSelector({ dateList, selected, onSelect }: Props) {
   return (
-    <div className="flex gap-2 flex-wrap">
+    <div className="grid grid-cols-3 gap-2">
       {dateList.map((date, i) => {
         const label = `${date.getMonth() + 1}/${date.getDate()}(${WEEKDAY_JP[date.getDay()]})`;
         return (
