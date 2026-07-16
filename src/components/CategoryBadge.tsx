@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { categoryBadgeClass, resolveCategoryBg } from "@/components/ui/categoryBadgeVariants";
+import { categoryBadgeClass, resolveCategoryBg } from "@/components/categoryBadgeColors";
 
 interface Props {
   category: string;
