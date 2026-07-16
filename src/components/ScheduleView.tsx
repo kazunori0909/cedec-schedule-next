@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { CASH_SETTING, DEFAULT_YEAR, findYearSetting, getDateList, isValidYear } from "@/lib/cedec";
+import { useEffect, useMemo } from "react";
+import { CASH_SETTING, findYearSetting, getDateList } from "@/lib/cedec";
 import { useCurrentYearState, useScheduleStore } from "@/store/scheduleStore";
 import { useCurrentTimeRow } from "@/hooks/useCurrentTimeRow";
 import { useScheduleData } from "@/hooks/useScheduleData";
 import { useRoomColumns } from "@/hooks/useRoomColumns";
+import { setYearParam, useYearParam } from "@/hooks/useYearParam";
 import { formatCedilDate } from "@/lib/cedil";
 import { getNow } from "@/lib/utils";
 
@@ -19,34 +20,19 @@ import { SideMenu } from "@/components/SideMenu";
 import { ScheduleTable } from "@/components/schedule/ScheduleTable";
 
 export function ScheduleView() {
-  // next build（静的出力）ではビルド時にURLパラメータが存在しないため useSearchParams は
-  // 使わず、useEffect でクライアント側から window.location.search を読み出す。
-  // year が確定するまで null を返すことで DEFAULT_YEAR のフラッシュを防ぐ。
-  const [year, setYear] = useState<string | null>(null);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const yearParam = params.get("year");
-    // URL（ブラウザ専用の外部状態）はマウント後にしか読めないため、ここでの
-    // setState は不可避。SSR 相当のフラッシュ防止のための一度きりの同期。
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setYear(yearParam && isValidYear(yearParam) ? yearParam : DEFAULT_YEAR);
-  }, []);
+  // year は URL の ?year= が唯一の真実（useYearParam が購読）。
+  // 静的出力ではクライアントで確定するまで null のため、ローディング表示で
+  // DEFAULT_YEAR のフラッシュを防ぐ。
+  const year = useYearParam();
 
   if (year === null) {
     return <div className="p-8 text-center">読み込み中...</div>;
   }
 
-  return <ScheduleViewInner year={year} onYearChange={setYear} />;
+  return <ScheduleViewInner year={year} />;
 }
 
-function ScheduleViewInner({
-  year,
-  onYearChange,
-}: {
-  year: string;
-  onYearChange: (year: string) => void;
-}) {
+function ScheduleViewInner({ year }: { year: string }) {
   const { hydrated, setHydrated, setDayIndex, toggleFavoriteMode, toggleHideSpec, toggleFavorite } =
     useScheduleStore();
   const { dayIndex, favoriteMode, hideSpecs, favorites } = useCurrentYearState(year);
@@ -101,28 +87,11 @@ function ScheduleViewInner({
   const highlightEnabled = todayDayIndex === dayIndex;
   const currentTimeStr = useCurrentTimeRow(timeRows, highlightEnabled);
 
-  // 年度変更: URL と year state を同時更新
-  const handleYearChange = (newYear: string) => {
-    const params = new URLSearchParams(window.location.search);
-    if (newYear === DEFAULT_YEAR) {
-      params.delete("year");
-    } else {
-      params.set("year", newYear);
-    }
-    const search = params.toString();
-    window.history.replaceState(
-      null,
-      "",
-      `${window.location.pathname}${search ? `?${search}` : ""}`
-    );
-    onYearChange(newYear);
-  };
-
   return (
     <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-30 bg-card/95 backdrop-blur border-b border-border">
         <div className="flex items-center gap-3 px-4 py-3">
-          <SideMenu currentYear={year} onYearChange={handleYearChange} />
+          <SideMenu currentYear={year} onYearChange={setYearParam} />
           <h1 className="text-xl font-bold">CEDEC {year} スケジュール</h1>
           <span className="text-xs text-muted-foreground hidden sm:inline">非公式</span>
           {(scheduleData?.fetched || CASH_SETTING[year] || cedilUpdate) && (
