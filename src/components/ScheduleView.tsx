@@ -53,12 +53,12 @@ function ScheduleViewInner({
 
   // マウント後に localStorage から rehydrate（skipHydration: true のため手動で呼ぶ）
   // localStorage は同期的なため、コールバック登録を rehydrate より先に行う
+  // setHydrated は Zustand のアクション（ストア生成時に確定する安定参照）のため再発火しない
   useEffect(() => {
     const unsub = useScheduleStore.persist.onFinishHydration(() => setHydrated());
     useScheduleStore.persist.rehydrate();
     return unsub;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setHydrated]);
 
   const setting = useMemo(() => findYearSetting(year), [year]);
   const dateList = useMemo(() => getDateList(setting), [setting]);
