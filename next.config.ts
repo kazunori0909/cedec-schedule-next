@@ -4,6 +4,7 @@ const BASE_PATH = process.env.BASE_PATH ?? "";
 
 const nextConfig: NextConfig = {
   output: "export",
+  reactCompiler: true,
   basePath: BASE_PATH,
   env: {
     NEXT_PUBLIC_BASE_PATH: BASE_PATH,
