@@ -14,7 +14,7 @@ export const tableHeaderVariants = cva("border border-border", {
 export const tableCellVariants = cva("border border-border align-top", {
   variants: {
     kind: {
-      time: "w-10 sticky left-0 bg-card z-10 text-center text-[11px] text-muted-foreground",
+      time: "w-10 sticky left-0 bg-card z-10 text-center text-2xs text-muted-foreground",
       empty: "",
     },
     highlight: {
