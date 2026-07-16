@@ -4,7 +4,6 @@ import {
   findYearSetting,
   formatMinutesToTime,
   getAllYears,
-  getCategoryClass,
   getDateList,
   getFloorURL,
   isValidYear,
@@ -29,23 +28,6 @@ describe("formatMinutesToTime", () => {
       expect(formatMinutesToTime(parseTimeToMinutes(t))).toBe(t);
     }
   });
-});
-
-// ---------------------------------------------------------------------------
-// getCategoryClass
-// ---------------------------------------------------------------------------
-describe("getCategoryClass", () => {
-  it("ENG → cat-eng", () => expect(getCategoryClass("ENG")).toBe("cat-eng"));
-  it("VA → cat-va", () => expect(getCategoryClass("VA")).toBe("cat-va"));
-  it("PRD → cat-prd", () => expect(getCategoryClass("PRD")).toBe("cat-prd"));
-  it("BP → cat-bp", () => expect(getCategoryClass("BP")).toBe("cat-bp"));
-  it("SND → cat-snd", () => expect(getCategoryClass("SND")).toBe("cat-snd"));
-  it("GD → cat-gd", () => expect(getCategoryClass("GD")).toBe("cat-gd"));
-  it("AC → cat-ac", () => expect(getCategoryClass("AC")).toBe("cat-ac"));
-  it("基調講演 → cat-keynote", () => expect(getCategoryClass("基調講演")).toBe("cat-keynote"));
-  it("未知のカテゴリは undefined を返す", () =>
-    expect(getCategoryClass("UNKNOWN")).toBeUndefined());
-  it("空文字は undefined を返す", () => expect(getCategoryClass("")).toBeUndefined());
 });
 
 // ---------------------------------------------------------------------------

@@ -27,6 +27,9 @@ export function ScheduleView() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const yearParam = params.get("year");
+    // URL（ブラウザ専用の外部状態）はマウント後にしか読めないため、ここでの
+    // setState は不可避。SSR 相当のフラッシュ防止のための一度きりの同期。
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setYear(yearParam && isValidYear(yearParam) ? yearParam : DEFAULT_YEAR);
   }, []);
 

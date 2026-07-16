@@ -10,9 +10,11 @@ export default defineConfig({
   resolve: { alias },
   test: {
     // カバレッジ対象は実行時ロジック（src）に限定する。
+    // テストは対象ファイルと同じディレクトリに同居させているため計測対象から除外する。
     coverage: {
       provider: "v8",
       include: ["src/lib/**", "src/hooks/**"],
+      exclude: ["**/*.test.{ts,tsx}"],
       reporter: ["text", "html"],
     },
     projects: [
@@ -25,7 +27,7 @@ export default defineConfig({
           name: "scripts",
           globals: true,
           environment: "node",
-          include: ["scripts/__tests__/**/*.test.ts"],
+          include: ["scripts/**/*.test.ts"],
         },
       },
       {
@@ -37,8 +39,8 @@ export default defineConfig({
           name: "app",
           globals: true,
           environment: "node",
-          setupFiles: ["./src/__tests__/setup.ts"],
-          include: ["src/__tests__/**/*.test.{ts,tsx}"],
+          setupFiles: ["./src/test/setup.ts"],
+          include: ["src/**/*.test.{ts,tsx}"],
         },
       },
     ],

@@ -1,11 +1,4 @@
-import type {
-  ScheduleData,
-  Session,
-  ExtraEvent,
-  RoomColumn,
-  UnifiedSession,
-  YearSetting,
-} from "@/types/schedule";
+import type { ScheduleData, ExtraEvent, RoomColumn, UnifiedSession } from "@/types/schedule";
 import {
   findYearSetting,
   parseTimeToMinutes,
@@ -281,5 +274,3 @@ export function buildMatrix(timeRows: string[], columns: RoomColumn[]): CellInfo
 
   return matrix;
 }
-
-export type { RoomColumn, UnifiedSession, YearSetting, Session, ExtraEvent };
