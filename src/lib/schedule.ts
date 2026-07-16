@@ -222,6 +222,34 @@ export function buildFavoriteColumns(
   }));
 }
 
+export interface ScheduleViewModel {
+  /** お気に入りモード時はフィルター済み、通常時は全カラム */
+  displayColumns: RoomColumn[];
+  /** フィルター前の全セッションから抽出したカテゴリ一覧 */
+  allCategories: string[];
+  timeRange: { min: number; max: number };
+  timeRows: string[];
+}
+
+// 部屋カラム・表示用カラム・時刻軸をまとめて導出する純関数。
+// レンダー間のメモ化は React Compiler が呼び出しコンポーネント側で行う。
+export function buildScheduleViewModel(
+  scheduleData: ScheduleData | null,
+  year: string,
+  dayIndex: number,
+  favoriteMode: boolean,
+  favorites: Record<string, boolean>
+): ScheduleViewModel {
+  const columns = scheduleData ? buildRoomColumns(scheduleData, dayIndex, year) : [];
+  const allCategories = getAllCategories(columns);
+  const displayColumns = favoriteMode
+    ? buildFavoriteColumns(columns, favorites, dayIndex)
+    : columns;
+  const timeRange = getTimeRange(displayColumns);
+  const timeRows = generateTimeRows(timeRange.min, timeRange.max);
+  return { displayColumns, allCategories, timeRange, timeRows };
+}
+
 export interface CellInfo {
   kind: "session" | "event" | "empty" | "occupied";
   session?: UnifiedSession;

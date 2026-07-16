@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { CASH_SETTING, findYearSetting, getDateList } from "@/lib/cedec";
 import { useCurrentYearState, useScheduleStore } from "@/store/scheduleStore";
 import { useCurrentTimeRow } from "@/hooks/useCurrentTimeRow";
 import { useScheduleData } from "@/hooks/useScheduleData";
-import { useRoomColumns } from "@/hooks/useRoomColumns";
 import { setYearParam, useYearParam } from "@/hooks/useYearParam";
+import { buildScheduleViewModel } from "@/lib/schedule";
 import { formatCedilDate } from "@/lib/cedil";
 import { getNow } from "@/lib/utils";
 
@@ -46,19 +46,12 @@ function ScheduleViewInner({ year }: { year: string }) {
     return unsub;
   }, [setHydrated]);
 
-  const setting = useMemo(() => findYearSetting(year), [year]);
-  const dateList = useMemo(() => getDateList(setting), [setting]);
+  // 導出値のメモ化は React Compiler が行う（手動 useMemo は不要）
+  const setting = findYearSetting(year);
+  const dateList = getDateList(setting);
 
   // 開催期間中なら今日の dayIndex を自動選択
-  const todayDayIndex = useMemo(() => {
-    const now = getNow();
-    if (now.getFullYear() !== parseInt(year, 10)) return undefined;
-    for (let i = 0; i < dateList.length; i++) {
-      if (dateList[i].getMonth() === now.getMonth() && dateList[i].getDate() === now.getDate())
-        return i;
-    }
-    return undefined;
-  }, [dateList, year]);
+  const todayDayIndex = findTodayDayIndex(dateList, year);
 
   // ViewModel: データ取得
   const { scheduleData, loading, error, cedilLookup, cedilUpdate, cedilCount } = useScheduleData(
@@ -67,7 +60,7 @@ function ScheduleViewInner({ year }: { year: string }) {
   );
 
   // ViewModel: 部屋カラム・時刻軸
-  const { displayColumns, allCategories, timeRange, timeRows } = useRoomColumns(
+  const { displayColumns, allCategories, timeRange, timeRows } = buildScheduleViewModel(
     scheduleData,
     year,
     dayIndex,
@@ -175,4 +168,16 @@ function ScheduleViewInner({ year }: { year: string }) {
       </footer>
     </div>
   );
+}
+
+// 今日が開催期間中ならその日付インデックスを返す
+function findTodayDayIndex(dateList: Date[], year: string): number | undefined {
+  const now = getNow();
+  if (now.getFullYear() !== parseInt(year, 10)) return undefined;
+  for (let i = 0; i < dateList.length; i++) {
+    if (dateList[i].getMonth() === now.getMonth() && dateList[i].getDate() === now.getDate()) {
+      return i;
+    }
+  }
+  return undefined;
 }
