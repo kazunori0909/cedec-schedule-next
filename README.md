@@ -17,13 +17,13 @@ CEDiLに登録済みの資料リンクも自動付与します。
 
 ## 技術構成
 
-| 区分           | 採用技術                               |
-| -------------- | -------------------------------------- |
-| フロントエンド | Next.js 16 + React 19 + TypeScript     |
-| スタイリング   | Tailwind CSS v4                        |
-| 状態管理       | Zustand（localStorage で永続化）       |
-| データ生成     | TypeScript スクリプト（tsx + cheerio） |
-| 開発環境       | devcontainer（Node.js 22）             |
+| 区分           | 採用技術                                                  |
+| -------------- | --------------------------------------------------------- |
+| フロントエンド | Next.js 16 + React 19 + TypeScript（React Compiler 有効） |
+| スタイリング   | Tailwind CSS v4                                           |
+| 状態管理       | Zustand（localStorage で永続化）                          |
+| データ生成     | TypeScript スクリプト（tsx + cheerio）                    |
+| 開発環境       | devcontainer（Node.js 22）                                |
 
 ## ファイル構成
 
@@ -41,32 +41,32 @@ cedec_schedule/
 │   │   ├── FilterPanel.tsx     フィルター（デスクトップ用）
 │   │   ├── InfoTooltip.tsx     データ取得日時ツールチップ
 │   │   ├── SideMenu.tsx        年度切り替えサイドメニュー
+│   │   ├── categoryBadgeColors.ts  カテゴリバッジ基本クラス・背景色マッピング
 │   │   ├── ui/                 UIプリミティブ（shadcn/ui・cva バリアント・共有UI）
 │   │   │   ├── button.tsx                ボタン（shadcn/ui・Radix）
 │   │   │   ├── sheet.tsx                 ドロワー/モーダル（shadcn/ui・Radix Dialog）
 │   │   │   ├── popover.tsx               ポップオーバー（shadcn/ui・Radix Popover）
 │   │   │   ├── ExternalTextLink.tsx      外部リンク共有（safeExternalUrl + rel=noopener 内包）
 │   │   │   ├── RoomLink.tsx              部屋名リンク共有コンポーネント
-│   │   │   ├── categoryBadgeVariants.ts  カテゴリバッジ基本クラス・背景色マッピング
 │   │   │   ├── sessionVariants.ts        セッションセル cva
 │   │   │   └── tableVariants.ts          テーブル th/td cva
 │   │   └── schedule/
 │   │       ├── ScheduleTable.tsx  部屋別タイムテーブル
 │   │       └── SessionCell.tsx    個別セッションセル
 │   ├── hooks/
-│   │   ├── useCurrentTimeRow.ts 現在時刻ハイライト（開催期間中1分更新）
-│   │   ├── useRoomColumns.ts   部屋カラム・フィルタリング・時刻軸
-│   │   └── useScheduleData.ts  スケジュール・CEDiLデータ取得
+│   │   ├── useCurrentTimeRow.ts 現在時刻ハイライト（useSyncExternalStore・1分更新）
+│   │   ├── useScheduleData.ts  スケジュール・CEDiLデータ取得
+│   │   └── useYearParam.ts     URL の ?year= を購読・更新（useSyncExternalStore）
 │   ├── lib/
 │   │   ├── cedec.ts            年度設定（SCHEDULE_SETTING）
 │   │   ├── cedil.ts            CEDiL資料リンク付与
 │   │   ├── custom.ts           非公式イベント設定
 │   │   ├── exportExcel.ts      Excelエクスポートロジック（exceljs）
-│   │   ├── schedule.ts         JSON取得・パース・buildMatrix
+│   │   ├── schedule.ts         JSON取得・パース・buildScheduleViewModel・buildMatrix
 │   │   └── utils.ts            共通ユーティリティ（safeExternalUrl 等）
 │   ├── store/scheduleStore.ts  Zustandストア
-│   ├── types/schedule.ts       型定義
-│   └── __tests__/              Vitestユニットテスト
+│   └── types/schedule.ts       型定義
+# テストは各対象ファイルの隣に *.test.ts(x) として同居配置
 ├── public/
 │   └── web_data/               生成済みJSON（git管理外）
 │       └── {year}/
