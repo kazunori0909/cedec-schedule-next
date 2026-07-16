@@ -23,8 +23,6 @@ const eslintConfig = [
   {
     rules: {
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
-      // マウントフラグ・ローディングリセット等の標準パターンを誤検知するため warn に下げる
-      "react-hooks/set-state-in-effect": "warn",
     },
   },
 ];
