@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import type { RoomColumn } from "@/types/schedule";
 import { generateTimeRows, getSessionId, buildMatrix } from "@/lib/schedule";
 import { getFloorURL } from "@/lib/cedec";
@@ -32,13 +31,11 @@ export function ScheduleTable({
   currentTimeStr,
   onToggleFavorite,
 }: Props) {
-  const timeRows = useMemo(
-    () => generateTimeRows(timeRange.min, timeRange.max),
-    [timeRange.min, timeRange.max]
-  );
+  // 導出値のメモ化は React Compiler が行う（手動 useMemo は不要）
+  const timeRows = generateTimeRows(timeRange.min, timeRange.max);
 
   // 2D マトリクス [rowIdx][colIdx] = CellInfo
-  const matrix = useMemo(() => buildMatrix(timeRows, columns), [timeRows, columns]);
+  const matrix = buildMatrix(timeRows, columns);
 
   return (
     <div className="overflow-x-auto">

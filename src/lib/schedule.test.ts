@@ -4,6 +4,7 @@ import type { RoomColumn, ScheduleData, Session } from "@/types/schedule";
 import {
   buildFavoriteColumns,
   buildRoomColumns,
+  buildScheduleViewModel,
   generateTimeRows,
   getAllCategories,
   getRowSpan,
@@ -434,5 +435,27 @@ describe("buildFavoriteColumns", () => {
     const result = buildFavoriteColumns(columns, { s1: true, s3: true }, 0);
     expect(result[0].name).toBe("お気に入り 1");
     expect(result[1].name).toBe("お気に入り 2");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildScheduleViewModel
+// ---------------------------------------------------------------------------
+// 変換ロジック（buildRoomColumns・getTimeRange 等）は上記の各 describe で網羅済み。
+// ここでは null ガードと favoriteMode 分岐のみを検証する。
+describe("buildScheduleViewModel", () => {
+  it("scheduleData が null のとき全フィールドが空/デフォルト値", () => {
+    const vm = buildScheduleViewModel(null, "2020", 0, false, {});
+    expect(vm.displayColumns).toHaveLength(0);
+    expect(vm.allCategories).toHaveLength(0);
+    // データなし → デフォルト範囲
+    expect(vm.timeRange).toEqual({ min: 9 * 60, max: 18 * 60 });
+  });
+
+  it("favoriteMode=true かつお気に入りなしのとき displayColumns はプレースホルダー", () => {
+    const data = makeScheduleData([makeSession({ id: "s1" })]);
+    const vm = buildScheduleViewModel(data, "2020", 0, true, {});
+    expect(vm.displayColumns).toHaveLength(1);
+    expect(vm.displayColumns[0].key).toBe("fav_empty");
   });
 });

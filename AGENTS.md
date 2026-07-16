@@ -6,6 +6,7 @@ Next.js + React + TypeScript で構築された静的サイト（`next build` �
 ## 技術スタック
 
 - **フロントエンド**: Next.js 16 + React 19 + TypeScript + Tailwind CSS v4
+  - React Compiler 有効（`reactCompiler: true`）。導出値のメモ化は Compiler に委ね、手動 `useMemo`/`useCallback` は書かない。react-hooks 系ルールの eslint-disable は Compiler の最適化拒否（Suppression skip）を招くため禁止
 - **状態管理**: Zustand + localStorage（フィルター・お気に入り・選択日付の永続化）
 - **データ生成**: TypeScript スクリプト（`scripts/`、tsx で実行）
 - **HTMLパース**: cheerio（jQueryライクAPI）
@@ -70,14 +71,14 @@ cedec_schedule/
 │   │       └── SessionCell.tsx   # 個別セッションセル
 │   ├── hooks/                  # カスタムフック
 │   │   ├── useCurrentTimeRow.ts # 現在時刻ハイライト（開催期間中1分更新）
-│   │   ├── useRoomColumns.ts   # 部屋カラム・フィルタリング・時刻軸計算
-│   │   └── useScheduleData.ts  # スケジュール・CEDiLデータ取得
+│   │   ├── useScheduleData.ts  # スケジュール・CEDiLデータ取得
+│   │   └── useYearParam.ts     # URL の ?year= を購読・更新（useSyncExternalStore）
 │   ├── lib/
 │   │   ├── cedec.ts            # 年度別設定（SCHEDULE_SETTING）・getDomain・resolveDevNight・resolveDetailUrl
 │   │   ├── cedil.ts            # CEDiL資料リンク付与
 │   │   ├── custom.ts           # 非公式イベント定義
 │   │   ├── exportExcel.ts      # Excelエクスポートロジック（exceljs・buildMatrix利用）
-│   │   ├── schedule.ts         # JSONフェッチ・パース・buildMatrix（CellInfo型・タイムテーブル2Dマトリクス生成）
+│   │   ├── schedule.ts         # JSONフェッチ・パース・buildScheduleViewModel（部屋カラム・時刻軸導出）・buildMatrix（CellInfo型・タイムテーブル2Dマトリクス生成）
 │   │   └── utils.ts            # 共通ユーティリティ（safeExternalUrl 等）
 │   ├── store/scheduleStore.ts  # Zustandストア（永続化込み）
 │   ├── types/schedule.ts       # 型定義
