@@ -75,23 +75,6 @@ export function getDomain(year: string): string {
   return `https://cedec.cesa.or.jp/${year}/`;
 }
 
-// カテゴリーコード → CSS変数名のマッピング
-export const SPEC_CLASS: Record<string, string> = {
-  ENG: "cat-eng",
-  VA: "cat-va",
-  PRD: "cat-prd",
-  BP: "cat-bp",
-  SND: "cat-snd",
-  GD: "cat-gd",
-  AC: "cat-ac",
-  NW: "cat-nw",
-  // 2011/2012 固有コード（ENGまたはBPと同色）
-  PG: "cat-eng",
-  PD: "cat-bp",
-  BM: "cat-bp",
-  基調講演: "cat-keynote",
-};
-
 // dev_night 設定を ExtraEvent に展開する
 export function resolveDevNight(setting: YearSetting): ExtraEvent | null {
   const dn: DevNightConfig | undefined = setting.dev_night;
@@ -185,10 +168,6 @@ export function resolveDetailUrl(detailUrl: string, year: string): string {
 
 export function getYoutubeURL(session: { youtube?: string; live?: string }): string | undefined {
   return session.live || session.youtube || undefined;
-}
-
-export function getCategoryClass(category: string): string | undefined {
-  return SPEC_CLASS[category];
 }
 
 export type { CategoryCode };
