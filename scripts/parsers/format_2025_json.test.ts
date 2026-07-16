@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseFormat2025Json, type TimetableJson } from "../parsers/format_2025_json";
+import { parseFormat2025Json, type TimetableJson } from "./format_2025_json";
 
 // 招待セッション判定（type_id → is_invited）を検証する（Phase 2: 招待セッション表示）
 

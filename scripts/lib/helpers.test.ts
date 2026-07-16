@@ -8,7 +8,7 @@ import {
   normalizeWhitespace,
   parseTimeRange,
   roomNoFromText,
-} from "../lib/helpers";
+} from "./helpers";
 
 // generate_json.ts が schedule.json を生成する際の文字列・時刻加工（種類A: 生成段階の正しさ）を検証する。
 // 実行時の変換ロジック（種類B）は src/__tests__/lib/ 側で別途カバーしている。
