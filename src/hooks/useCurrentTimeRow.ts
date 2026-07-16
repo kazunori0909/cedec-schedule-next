@@ -11,6 +11,9 @@ export function useCurrentTimeRow(timeRows: string[], enabled: boolean): string 
     enabled ? findCurrentTimeRow(timeRows) : undefined
   );
 
+  // 時計（外部システム）への購読であり、enabled/timeRows 変化時の即時再計算と
+  // 1 分間隔更新のため effect 内 setState は不可避。React 公式が許容する同期ケース。
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!enabled) {
       setTime(undefined);
@@ -22,6 +25,7 @@ export function useCurrentTimeRow(timeRows: string[], enabled: boolean): string 
     }, 60 * 1000);
     return () => clearInterval(interval);
   }, [timeRows, enabled]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   return time;
 }
