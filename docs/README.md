@@ -24,3 +24,4 @@
 | 5   | shadcn/ui プリミティブ統合 ✅                  | 手書きボタン・二重実装オーバーレイ・散在マジック値を shadcn/ui（Radix）プリミティブとトークンに統合                  | [phase5/](phase5-shadcn-ui-primitives/)     |
 | 6   | テストのコ・ロケーション化とコード配置整理 ✅  | テストを対象ソース隣へ移動し、命名の実態不一致・デッドコード・lint 警告を解消                                        | [phase6/](phase6-test-colocation-cleanup/)  |
 | 7   | React Compiler 導入 ✅                         | 手動 `useMemo` を撤廃し React Compiler に最適化を委譲、抑制していた react-hooks 系警告を根本解消                     | [phase7/](phase7-react-compiler-adoption/)  |
+| 8   | 依存パッケージの安全なアップデート（進行中）   | パッチ／マイナー更新（next 16.2.10 ほか）を適用。TypeScript 7 / ESLint 10 は上流未対応で見送り                       | [phase8/](phase8-dependency-updates/)       |

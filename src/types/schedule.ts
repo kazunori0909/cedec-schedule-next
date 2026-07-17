@@ -1,18 +1,6 @@
 // schedule.json の型定義
 export type CategoryCode =
-  | "ENG"
-  | "VA"
-  | "PRD"
-  | "BP"
-  | "SND"
-  | "GD"
-  | "AC"
-  | "NW"
-  | "PG"
-  | "PD"
-  | "BM"
-  | "基調講演"
-  | "";
+  "ENG" | "VA" | "PRD" | "BP" | "SND" | "GD" | "AC" | "NW" | "PG" | "PD" | "BM" | "基調講演" | "";
 
 export interface Speaker {
   name: string;
@@ -110,8 +98,7 @@ export interface CustomYearSetting {
 
 // セッション統合型（公式 + 追加 + 非公式）
 export type UnifiedSession =
-  | { kind: "session"; data: Session }
-  | { kind: "event"; data: ExtraEvent; isCustom?: boolean };
+  { kind: "session"; data: Session } | { kind: "event"; data: ExtraEvent; isCustom?: boolean };
 
 // 表示用
 export interface RoomColumn {
