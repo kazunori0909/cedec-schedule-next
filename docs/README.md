@@ -25,3 +25,4 @@
 | 6   | テストのコ・ロケーション化とコード配置整理 ✅  | テストを対象ソース隣へ移動し、命名の実態不一致・デッドコード・lint 警告を解消                                        | [phase6/](phase6-test-colocation-cleanup/)  |
 | 7   | React Compiler 導入 ✅                         | 手動 `useMemo` を撤廃し React Compiler に最適化を委譲、抑制していた react-hooks 系警告を根本解消                     | [phase7/](phase7-react-compiler-adoption/)  |
 | 8   | 依存パッケージの安全なアップデート（進行中）   | パッチ／マイナー更新（next 16.2.10 ほか）を適用。TypeScript 7 / ESLint 10 は上流未対応で見送り                       | [phase8/](phase8-dependency-updates/)       |
+| 9   | CEDiL フェッチ抑止 ✅                          | `cedil_tag_no` 未指定年度（2026 等）で `cedil.json` への 404 リクエストが出る不具合を、フェッチ前の設定分岐で解消    | [phase9/](phase9-cedil-fetch-guard/)        |

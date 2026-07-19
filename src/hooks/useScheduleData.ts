@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { ScheduleData } from "@/types/schedule";
 import { fetchSchedule } from "@/lib/schedule";
 import { fetchCedil, buildCedilLookup } from "@/lib/cedil";
+import { findYearSetting } from "@/lib/cedec";
 
 export interface UseScheduleDataResult {
   scheduleData: ScheduleData | null;
@@ -56,6 +57,8 @@ export function useScheduleData(year: string, dateList: Date[]): UseScheduleData
 
   useEffect(() => {
     if (!scheduleData) return;
+    if (findYearSetting(year).cedil_tag_no === undefined) return;
+
     let cancelled = false;
     fetchCedil(year).then((cedil) => {
       if (cancelled || !cedil) return;
