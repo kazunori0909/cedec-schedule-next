@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 import type { ScheduleData } from "@/types/schedule";
 import { exportScheduleToExcel } from "@/lib/exportExcel";
 import { Button } from "@/components/ui/button";
@@ -27,14 +27,14 @@ export function ExcelDownloadButton({ scheduleData, year, favorites }: Props) {
   return (
     <Button
       variant="outline"
-      size="sm"
+      size="icon-sm"
       onClick={handleClick}
       disabled={loading}
       title="Excelとしてダウンロード"
+      aria-label={loading ? "Excelを生成中" : "Excelとしてダウンロード"}
       className="border-emerald-600 text-emerald-700 hover:bg-emerald-600 hover:text-white"
     >
-      <Download />
-      {loading ? "生成中..." : "Excel DL"}
+      {loading ? <Loader2 className="animate-spin" /> : <Download />}
     </Button>
   );
 }
