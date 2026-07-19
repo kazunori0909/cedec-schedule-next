@@ -85,7 +85,9 @@ function ScheduleViewInner({ year }: { year: string }) {
       <header className="sticky top-0 z-30 bg-card/95 backdrop-blur border-b border-border">
         <div className="flex items-center gap-3 px-4 py-3">
           <SideMenu currentYear={year} onYearChange={setYearParam} />
-          <h1 className="text-xl font-bold">CEDEC {year} スケジュール</h1>
+          <h1 className="text-base font-bold whitespace-nowrap sm:text-xl">
+            CEDEC {year} スケジュール
+          </h1>
           <span className="text-xs text-muted-foreground hidden sm:inline">非公式</span>
           {(scheduleData?.fetched || CASH_SETTING[year] || cedilUpdate) && (
             <InfoTooltip
