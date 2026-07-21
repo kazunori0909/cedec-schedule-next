@@ -13,7 +13,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import * as cheerio from "cheerio";
 import { abbreviateCompany, isEventOver, normalizeWhitespace } from "./lib/helpers";
-import { fetchLiveSessions } from "./lib/live";
+import { fetchLiveSessions, type LiveSessions } from "./lib/live";
 import { allHtmlPath, dayHtmlPath, liveHtmlPath, outputDir } from "./lib/paths";
 import type { RawSession } from "./lib/session";
 import { buildYoutubeMap, findYoutubeUrl } from "./lib/youtube";
@@ -25,7 +25,7 @@ import { parseFormat2024 } from "./parsers/format_2024";
 import { parseFormat2025Json } from "./parsers/format_2025_json";
 import { parseFormatBefore2017 } from "./parsers/format_before2017";
 import { loadTimetableSource } from "./lib/timetable_source";
-import { getDomain, findYearSetting } from "../src/lib/cedec";
+import { getDomain, findYearSetting, LIVE_URL_PENDING } from "../src/lib/cedec";
 
 type FormatName =
   | "format_before2017"
@@ -95,7 +95,7 @@ function parseByFormat($: cheerio.CheerioAPI, format: FormatName, ctx: ParseCont
 /** データ取得後・保存前に全セッションへ適用する加工処理 */
 function postprocessSessions(
   sessions: RawSession[],
-  liveMap: Map<string, string>,
+  liveSessions: LiveSessions,
   youtubeMap: Map<string, string>,
   eventOver: boolean
 ): RawSession[] {
@@ -108,7 +108,7 @@ function postprocessSessions(
       sp.company = abbreviateCompany(sp.company);
     }
 
-    let live: string | null = liveMap.get(s.session_id) ?? null;
+    let live: string | null = liveSessions.urls.get(s.session_id) ?? null;
     let youtube: string | null = findYoutubeUrl(s.title, youtubeMap);
 
     if (eventOver && live !== null) {
@@ -123,6 +123,12 @@ function postprocessSessions(
       }
       // 会期後はliveパラメータを削除
       live = null;
+    }
+
+    // 配信予定リストに載っているが URL 未確定のセッションは live にセンチネルを入れる。
+    // 会期前限定（会期後は配信予定の表示に意味がない）。URL が付けば YouTube リンクを出すので不要。
+    if (!eventOver && live === null && youtube === null && liveSessions.planned.has(s.session_id)) {
+      live = LIVE_URL_PENDING;
     }
 
     s.live = live;
@@ -211,21 +217,23 @@ async function processYear(year: string, config: YearConfig, fetchRemote: boolea
     sessions = parseByFormat($, config.format, { year });
   }
 
-  let liveMap = new Map<string, string>();
+  let liveSessions: LiveSessions = { urls: new Map(), planned: new Set() };
   if (config.live) {
-    liveMap = await fetchLiveSessions(
+    liveSessions = await fetchLiveSessions(
       getDomain(year) + config.live,
       first_date,
       liveHtmlPath(year)
     );
-    console.log(`[INFO] LIVE配信URL: ${liveMap.size} 件取得`);
+    console.log(
+      `[INFO] LIVE配信URL: ${liveSessions.urls.size} 件取得 / 配信予定: ${liveSessions.planned.size} 件`
+    );
   }
 
   const youtubeMap = buildYoutubeMap(year);
   const eventOver = isEventOver(parseInt(year, 10), first_date);
   if (eventOver) console.log("[INFO] 会期終了後モード: liveパラメータを処理します");
 
-  const processed = postprocessSessions(sessions, liveMap, youtubeMap, eventOver);
+  const processed = postprocessSessions(sessions, liveSessions, youtubeMap, eventOver);
   const jsonContent = generateJson(year, processed, fetched);
 
   const dir = outputDir(year);

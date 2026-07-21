@@ -19,6 +19,7 @@ export interface Session {
   detail_url: string;
   sub_category?: CategoryCode[];
   youtube?: string;
+  // 配信リンク（URL）または URL 未確定センチネル LIVE_URL_PENDING。
   live?: string;
   // 招待・特別招待・団体招待・海外招待のいずれか（JSON方式の年度のみ判定可能）
   is_invited?: boolean;
