@@ -6,7 +6,10 @@ import {
   getAllYears,
   getDateList,
   getFloorURL,
+  getYoutubeURL,
+  isLiveUrlPending,
   isValidYear,
+  LIVE_URL_PENDING,
   parseTimeToMinutes,
   resolveDetailUrl,
   SCHEDULE_SETTING,
@@ -165,5 +168,48 @@ describe("getFloorURL", () => {
     const url = getFloorURL("1", "2022");
     expect(url).toBeDefined();
     expect(url).toContain("cedec.cesa.or.jp/2022");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getYoutubeURL / isLiveUrlPending（URL 未確定センチネル）
+// ---------------------------------------------------------------------------
+describe("getYoutubeURL", () => {
+  it("live URL を優先して返す", () => {
+    expect(getYoutubeURL({ live: "https://youtu.be/live", youtube: "https://youtu.be/yt" })).toBe(
+      "https://youtu.be/live"
+    );
+  });
+
+  it("live が無ければ youtube を返す", () => {
+    expect(getYoutubeURL({ youtube: "https://youtu.be/yt" })).toBe("https://youtu.be/yt");
+  });
+
+  it("URL 未確定センチネルは URL として返さない", () => {
+    expect(getYoutubeURL({ live: LIVE_URL_PENDING })).toBeUndefined();
+  });
+
+  it("URL 未確定センチネルでも youtube があればそちらを返す", () => {
+    expect(getYoutubeURL({ live: LIVE_URL_PENDING, youtube: "https://youtu.be/yt" })).toBe(
+      "https://youtu.be/yt"
+    );
+  });
+
+  it("どちらも無ければ undefined", () => {
+    expect(getYoutubeURL({})).toBeUndefined();
+  });
+});
+
+describe("isLiveUrlPending", () => {
+  it("センチネルのとき true", () => {
+    expect(isLiveUrlPending({ live: LIVE_URL_PENDING })).toBe(true);
+  });
+
+  it("実 URL のとき false", () => {
+    expect(isLiveUrlPending({ live: "https://youtu.be/live" })).toBe(false);
+  });
+
+  it("live 未設定のとき false", () => {
+    expect(isLiveUrlPending({})).toBe(false);
   });
 });

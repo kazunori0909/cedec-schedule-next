@@ -2,14 +2,22 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import * as cheerio from "cheerio";
 import { dayIndexFromDate, roomNoFromText } from "./helpers";
 
+/** LIVEページの解析結果 */
+export interface LiveSessions {
+  /** session_id => YouTube URL（配信リンクが掲載済みのセッションのみ） */
+  urls: Map<string, string>;
+  /** LIVEページに配信予定として載っている全 session_id（リンク未掲載を含む） */
+  planned: Set<string>;
+}
+
 /**
- * LIVEページを取得し、session_id => YouTube URL のマッピングを返す。
+ * LIVEページを取得し、配信 URL のマッピングと配信予定セッションの集合を返す。
  *
  * ページ構造:
  *   .p-session__time-item  日付ブロック（YouTube URL一覧）
  *     .p-session__time-title  "7月22日（火）"
  *     .p-session__time-body   会場名 + <a href="youtube URL">
- *   .c-guide-card__link  セッションカード
+ *   .c-guide-card__link  セッションカード（＝配信予定。会期前は URL 未掲載のことがある）
  *     .c-session__date    "7/22"
  *     .c-session__venue   "第1会場"
  */
@@ -17,7 +25,7 @@ export async function fetchLiveSessions(
   liveUrl: string,
   firstDate: string,
   cachePath: string
-): Promise<Map<string, string>> {
+): Promise<LiveSessions> {
   let html: string;
   if (existsSync(cachePath)) {
     console.log(`[INFO] LIVEページをキャッシュから読み込みます: ${cachePath}`);
@@ -27,7 +35,7 @@ export async function fetchLiveSessions(
     const res = await fetch(liveUrl);
     if (!res.ok) {
       console.warn(`[WARN] LIVEページの取得に失敗しました: ${liveUrl}`);
-      return new Map();
+      return { urls: new Map(), planned: new Set() };
     }
     html = await res.text();
     writeFileSync(cachePath, html);
@@ -64,13 +72,17 @@ export async function fetchLiveSessions(
       });
   });
 
-  // 2. セッションカードから session_id => YouTube URL を解決
-  const result = new Map<string, string>();
+  // 2. セッションカードから配信予定セッションを列挙し、可能なら YouTube URL を解決する。
+  //    カードに載っているセッションは配信予定（planned）。会期前は roomYoutube が空で
+  //    URL を解決できないことがあるため、URL の有無と配信予定を分けて記録する。
+  const urls = new Map<string, string>();
+  const planned = new Set<string>();
   $("a.c-guide-card__link").each((_, card) => {
     const href = $(card).attr("href") ?? "";
     const m = href.match(/\/detail\/([^/]+)/);
     if (!m) return;
     const sessionId = m[1];
+    planned.add(sessionId);
 
     const dateText = $(card).find(".c-session__date").first().text().trim();
     const venueText = $(card).find(".c-session__venue").first().text().trim();
@@ -87,9 +99,9 @@ export async function fetchLiveSessions(
     const key = `${dayIndex}_${roomNo}`;
     const youtube = roomYoutube.get(key);
     if (youtube) {
-      result.set(sessionId, youtube);
+      urls.set(sessionId, youtube);
     }
   });
 
-  return result;
+  return { urls, planned };
 }

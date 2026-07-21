@@ -166,8 +166,19 @@ export function resolveDetailUrl(detailUrl: string, year: string): string {
   return base + (detailUrl.startsWith("/") ? detailUrl : "/" + detailUrl);
 }
 
+// Live 配信は行われるが、配信 URL がまだ公式に掲載されていない状態を表す live のセンチネル値。
+// URL ではないため safeExternalUrl では弾かれる。フロントは isLiveUrlPending() で判定する。
+export const LIVE_URL_PENDING = "pending";
+
+// Live 配信予定だが配信 URL が未確定（保留中）かどうか
+export function isLiveUrlPending(session: { live?: string }): boolean {
+  return session.live === LIVE_URL_PENDING;
+}
+
 export function getYoutubeURL(session: { youtube?: string; live?: string }): string | undefined {
-  return session.live || session.youtube || undefined;
+  // センチネルは URL ではないので href としては使わない
+  const live = session.live === LIVE_URL_PENDING ? undefined : session.live;
+  return live || session.youtube || undefined;
 }
 
 export type { CategoryCode };

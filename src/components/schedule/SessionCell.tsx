@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Hash, Star } from "lucide-react";
+import { Hash, Radio, Star } from "lucide-react";
 import type { UnifiedSession, ExtraEvent } from "@/types/schedule";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { RoomLink } from "@/components/ui/RoomLink";
 import { ExternalTextLink } from "@/components/ui/ExternalTextLink";
-import { resolveDetailUrl, getYoutubeURL, getFloorURL } from "@/lib/cedec";
+import { resolveDetailUrl, getYoutubeURL, getFloorURL, isLiveUrlPending } from "@/lib/cedec";
 import { isCanceledSession } from "@/lib/schedule";
 import { cn, hashTagUrl } from "@/lib/utils";
 
@@ -99,7 +99,11 @@ export function SessionCell({
 
       <div className="flex flex-wrap items-center gap-2 mt-auto">
         <CedilStatus url={cedilUrl} />
-        <ExternalTextLink href={getYoutubeURL(s)} className="text-session-media">
+        <ExternalTextLink
+          href={getYoutubeURL(s)}
+          className="text-session-media"
+          fallback={isLiveUrlPending(s) ? <LiveUrlPendingBadge /> : null}
+        >
           YouTube
         </ExternalTextLink>
       </div>
@@ -146,6 +150,17 @@ function SpeakerItem({ speaker }: { speaker: { name: string; company: string } }
       <span className="text-session-text">{speaker.name}</span>
       <span className="text-session-meta text-2xs">{speaker.company}</span>
     </div>
+  );
+}
+
+// Live 配信は行われるが、配信 URL がまだ公式に掲載されていないセッションの表示。
+// リンクではないため <span> で「Live配信予定」を明記する（URL 掲載後は YouTube リンクに切り替わる）。
+function LiveUrlPendingBadge() {
+  return (
+    <span className="inline-flex items-center gap-0.5 text-session-media text-2xs">
+      <Radio className="size-3" />
+      Live配信予定
+    </span>
   );
 }
 
