@@ -27,4 +27,4 @@
 | 8   | 依存パッケージの安全なアップデート（進行中）   | パッチ／マイナー更新（next 16.2.10 ほか）を適用。TypeScript 7 / ESLint 10 は上流未対応で見送り                         | [phase8/](phase8-dependency-updates/)         |
 | 9   | CEDiL フェッチ抑止 ✅                          | `cedil_tag_no` 未指定年度（2026 等）で `cedil.json` への 404 リクエストが出る不具合を、フェッチ前の設定分岐で解消      | [phase9/](phase9-cedil-fetch-guard/)          |
 | 10  | レスポンシブ時のヘッダー最適化（進行中）       | 狭幅端末でヘッダー高が増える問題に対し、Excel DL ラベルの表現変更（PC も統一）とタイトルの一行化（フォント縮小）で対応 | [phase10/](phase10-responsive-header-layout/) |
-| 11  | Live配信予定バッジ（進行中）                   | 公式 LIVE ページに載るが配信 URL 未掲載のセッションの `live` にセンチネルを入れ、「Live配信予定」を明記                | [phase11/](phase11-live-planned-badge/)       |
+| 11  | Live配信予定バッジ ✅                          | 公式 LIVE ページに載るが配信 URL 未掲載のセッションの `live` にセンチネルを入れ、「Live配信予定」を明記                | [phase11/](phase11-live-planned-badge/)       |
