@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { CASH_SETTING, findYearSetting, getDateList } from "@/lib/cedec";
+import { CASH_SETTING, findYearSetting, getDateList, LT_DAY_INDEX } from "@/lib/cedec";
 import { useCurrentYearState, useScheduleStore } from "@/store/scheduleStore";
 import { useCurrentTimeRow } from "@/hooks/useCurrentTimeRow";
 import { useScheduleData } from "@/hooks/useScheduleData";
 import { setYearParam, useYearParam } from "@/hooks/useYearParam";
-import { buildScheduleViewModel } from "@/lib/schedule";
+import { buildLightningTalkViewModel, buildScheduleViewModel } from "@/lib/schedule";
 import { formatCedilDate } from "@/lib/cedil";
 import { getNow } from "@/lib/utils";
 
@@ -59,14 +59,16 @@ function ScheduleViewInner({ year }: { year: string }) {
     dateList
   );
 
+  // LT データを持たない年度で LT タブの選択状態が復元された場合は Day1 にフォールバックする
+  const lightningTalks = scheduleData?.lightning_talks ?? [];
+  const isLightningTalkTab = dayIndex === LT_DAY_INDEX && lightningTalks.length > 0;
+  const activeDayIndex = dayIndex === LT_DAY_INDEX && !isLightningTalkTab ? 0 : dayIndex;
+
   // ViewModel: 部屋カラム・時刻軸
-  const { displayColumns, allCategories, timeRange, timeRows } = buildScheduleViewModel(
-    scheduleData,
-    year,
-    dayIndex,
-    favoriteMode,
-    favorites
-  );
+  // LT タブは全日程を横断するため、日付・お気に入りによる絞り込みは行わない
+  const { displayColumns, allCategories, timeRows } = isLightningTalkTab
+    ? buildLightningTalkViewModel(lightningTalks)
+    : buildScheduleViewModel(scheduleData, year, activeDayIndex, favoriteMode, favorites);
 
   // 開催期間中の自動日付選択（データ読み込み完了後に当日へ）
   useEffect(() => {
@@ -76,8 +78,8 @@ function ScheduleViewInner({ year }: { year: string }) {
     }
   }, [scheduleData, todayDayIndex, year, setDayIndex]);
 
-  // 現在時刻ハイライト（開催期間中のみ）
-  const highlightEnabled = todayDayIndex === dayIndex;
+  // 現在時刻ハイライト（開催期間中のみ。全日程横断の LT タブでは当日判定が成立しないため無効）
+  const highlightEnabled = todayDayIndex === activeDayIndex;
   const currentTimeStr = useCurrentTimeRow(timeRows, highlightEnabled);
 
   return (
@@ -115,10 +117,13 @@ function ScheduleViewInner({ year }: { year: string }) {
           <div className="flex items-center gap-3 flex-wrap">
             <DateSelector
               dateList={dateList}
-              selected={dayIndex}
+              selected={activeDayIndex}
+              showLightningTalk={lightningTalks.length > 0}
               onSelect={(i) => setDayIndex(year, i)}
             />
-            <FavoriteToggle active={favoriteMode} onToggle={() => toggleFavoriteMode(year)} />
+            {!isLightningTalkTab && (
+              <FavoriteToggle active={favoriteMode} onToggle={() => toggleFavoriteMode(year)} />
+            )}
             {/* モバイル: ドロワーボタン */}
             <div className="sm:hidden">
               <FilterDrawer
@@ -144,11 +149,13 @@ function ScheduleViewInner({ year }: { year: string }) {
         {error && <div className="text-center p-8 text-destructive">エラー: {error}</div>}
         {!loading && !error && scheduleData && (
           <>
-            <h2 className="text-lg font-bold mb-3">Day {dayIndex + 1}</h2>
+            <h2 className="text-lg font-bold mb-3">
+              {isLightningTalkTab ? "ライトニングトーク" : `Day ${activeDayIndex + 1}`}
+            </h2>
             <ScheduleTable
               columns={displayColumns}
-              timeRange={timeRange}
-              dayIndex={dayIndex}
+              timeRows={timeRows}
+              dayIndex={activeDayIndex}
               year={year}
               favorites={favorites}
               hideSpecs={hideSpecs}

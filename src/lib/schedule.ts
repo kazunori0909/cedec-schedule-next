@@ -1,4 +1,10 @@
-import type { ScheduleData, ExtraEvent, RoomColumn, UnifiedSession } from "@/types/schedule";
+import type {
+  ScheduleData,
+  ExtraEvent,
+  RoomColumn,
+  Session,
+  UnifiedSession,
+} from "@/types/schedule";
 import {
   findYearSetting,
   parseTimeToMinutes,
@@ -180,13 +186,6 @@ export function generateTimeRows(min: number, max: number): string[] {
   );
 }
 
-// セッションが何行を占めるか（rowSpan）
-export function getRowSpan(startStr: string, endStr: string): number {
-  const s = parseTimeToMinutes(startStr);
-  const e = parseTimeToMinutes(endStr);
-  return Math.max(1, (e - s) / MIN_MINUTES);
-}
-
 // 全カテゴリーをユニーク取得
 export function getAllCategories(columns: RoomColumn[]): string[] {
   const set = new Set<string>();
@@ -227,7 +226,7 @@ export interface ScheduleViewModel {
   displayColumns: RoomColumn[];
   /** フィルター前の全セッションから抽出したカテゴリ一覧 */
   allCategories: string[];
-  timeRange: { min: number; max: number };
+  /** テーブルの行となる時刻列 */
   timeRows: string[];
 }
 
@@ -246,8 +245,68 @@ export function buildScheduleViewModel(
     ? buildFavoriteColumns(columns, favorites, dayIndex)
     : columns;
   const timeRange = getTimeRange(displayColumns);
-  const timeRows = generateTimeRows(timeRange.min, timeRange.max);
-  return { displayColumns, allCategories, timeRange, timeRows };
+  return {
+    displayColumns,
+    allCategories,
+    timeRows: generateTimeRows(timeRange.min, timeRange.max),
+  };
+}
+
+// ライトニングトークの会場カラムキー（"1-2" = 1日目・第2会場）
+function ltColumnKey(talk: Session): string {
+  return `${talk.day}-${talk.room}`;
+}
+
+// ライトニングトークを「日 × 会場」のカラムへ振り分ける。
+// 講演が存在する組み合わせのみを、日→会場の順に並べて返す。
+export function buildLightningTalkColumns(talks: Session[]): RoomColumn[] {
+  const byColumn = new Map<string, UnifiedSession[]>();
+  for (const talk of talks) {
+    const key = ltColumnKey(talk);
+    if (!byColumn.has(key)) byColumn.set(key, []);
+    byColumn.get(key)!.push({ kind: "session", data: talk });
+  }
+
+  return [...byColumn.keys()]
+    .sort((a, b) => {
+      const [dayA, roomA] = a.split("-");
+      const [dayB, roomB] = b.split("-");
+      return dayA === dayB
+        ? roomA.localeCompare(roomB, undefined, { numeric: true })
+        : dayA.localeCompare(dayB);
+    })
+    .map((key) => {
+      const [day, room] = key.split("-");
+      return {
+        name: `Day${day}-${room}`,
+        key: `lt_${key}`,
+        roomName: `第${room}会場`,
+        sessions: byColumn.get(key) ?? [],
+      };
+    });
+}
+
+// ライトニングトークは 6 分刻みで 5 分固定グリッドに乗らず、日によって開催時間も異なる。
+// そのため実際に出現する開始・終了時刻の和集合を時刻軸にする。
+export function buildLightningTalkTimeRows(columns: RoomColumn[]): string[] {
+  const times = new Set<string>();
+  for (const col of columns) {
+    for (const u of col.sessions) {
+      times.add(getSessionStartString(u));
+      times.add(getSessionEndString(u));
+    }
+  }
+  return [...times].sort((a, b) => parseTimeToMinutes(a) - parseTimeToMinutes(b));
+}
+
+// LT タブ用の ViewModel。全日程を横断するため日付による絞り込みは行わない。
+export function buildLightningTalkViewModel(talks: Session[]): ScheduleViewModel {
+  const displayColumns = buildLightningTalkColumns(talks);
+  return {
+    displayColumns,
+    allCategories: getAllCategories(displayColumns),
+    timeRows: buildLightningTalkTimeRows(displayColumns),
+  };
 }
 
 export interface CellInfo {
@@ -275,7 +334,10 @@ export function buildMatrix(timeRows: string[], columns: RoomColumn[]): CellInfo
       const endStr = getSessionEndString(session);
       const startIdx = timeIndex.get(startStr);
       if (startIdx === undefined) continue;
-      const rowSpan = getRowSpan(startStr, endStr);
+      // 高さは行インデックスの差で求める。5分固定でない時刻軸（LT タブ）でも成立させるため。
+      // 終了時刻が時刻軸に無い場合（データ不整合）は 1 行として描画する。
+      const endIdx = timeIndex.get(endStr);
+      const rowSpan = endIdx === undefined ? 1 : Math.max(1, endIdx - startIdx);
 
       const isFullSpan = session.kind === "event" && session.data.colspan === "all";
       const colSpan = isFullSpan ? colCount : 1;
