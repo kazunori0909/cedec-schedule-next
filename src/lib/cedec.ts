@@ -11,7 +11,7 @@ import type {
 // 　 以降はセッション一覧に表記されるようになったため、未使用
 // prettier-ignore
 export const SCHEDULE_SETTING: YearSetting[] = [
-  { year: "2026", first_date: "0722",                     dev_night: { rel_path: "event/developer/", room_no: "1階「G7＋G8」" }, },
+  { year: "2026", first_date: "0722", cedil_tag_no: 760,  dev_night: { rel_path: "event/developer/", room_no: "1階「G7＋G8」" }, },
   { year: "2025", first_date: "0722", cedil_tag_no: 756,  dev_night: { rel_path: "event/developer/", room_no: "多目的ホール" }, room_overrides: [{ day: 1, room: "第13会場", display: "Epic部屋" }], },
   { year: "2024", first_date: "0821", cedil_tag_no: 752,  dev_night: { rel_path: "event/developer/", room_no: "多目的ホール" }, },
   { year: "2023", first_date: "0823", cedil_tag_no: 748 },
