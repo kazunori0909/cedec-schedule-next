@@ -29,4 +29,4 @@
 | 10  | レスポンシブ時のヘッダー最適化 ✅              | 狭幅端末でヘッダー高が増える問題に対し、Excel DL ラベルの表現変更（PC も統一）とタイトルの一行化（フォント縮小）で対応 | [phase10/](phase10-responsive-header-layout/)    |
 | 11  | Live配信予定バッジ ✅                          | 公式 LIVE ページに載るが配信 URL 未掲載のセッションの `live` にセンチネルを入れ、「Live配信予定」を明記                | [phase11/](phase11-live-planned-badge/)          |
 | 12  | Biome 移行と TS7 対応 ❌不採用                 | Biome 化で ESLint の TS7 非対応は解消するが、`next build` の型チェック無効化が別途必要と判明し不採用。知見のみ記録     | [phase12/](phase12-biome-migration/)             |
-| 13  | CEDiL ライトニングトーク除外（進行中）         | 公式タイムテーブルに載らずセッションに紐付かないライトニングトーク資料を、一覧の「形式」で判定し `cedil.json` から除外 | [phase13/](phase13-cedil-lightning-talk-filter/) |
+| 13  | CEDiL ライトニングトーク除外 ✅                | 公式タイムテーブルに載らずセッションに紐付かないライトニングトーク資料を、一覧の「形式」で判定し `cedil.json` から除外 | [phase13/](phase13-cedil-lightning-talk-filter/) |
