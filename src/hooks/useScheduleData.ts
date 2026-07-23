@@ -64,7 +64,9 @@ export function useScheduleData(year: string, dateList: Date[]): UseScheduleData
       if (cancelled || !cedil) return;
       setCedilUpdate(cedil.update_date);
       setCedilCount(cedil.list.length);
-      setCedilLookup(buildCedilLookup(cedil.list, scheduleData.sessions, dateList));
+      // ライトニングトークの資料も CEDiL に登録されるため、突き合わせ対象に含める
+      const targets = [...scheduleData.sessions, ...(scheduleData.lightning_talks ?? [])];
+      setCedilLookup(buildCedilLookup(cedil.list, targets, dateList));
     });
     return () => {
       cancelled = true;

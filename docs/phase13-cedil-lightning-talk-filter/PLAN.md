@@ -1,5 +1,10 @@
 # Phase 13: CEDiL ライトニングトークの除外
 
+> **この除外は [Phase 14](../phase14-lightning-talk-tab/PLAN.md) で解除済み。**
+> 当時ライトニングトークは本サイトに存在せず紐付け先が無かったが、Phase 14 で公式
+> `timetable.json` の LT 枠 `children` を展開してセッション化したため、CEDiL 資料が
+> 通常どおりタイトル一致で紐付くようになった。
+
 ## 課題
 
 2026 年度の CEDiL タグ番号（760）が判明したため `SCHEDULE_SETTING` に設定し `cedil.json` を
