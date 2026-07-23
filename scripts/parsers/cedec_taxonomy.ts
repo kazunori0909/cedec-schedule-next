@@ -44,6 +44,12 @@ export const FORMAT_MAP: Record<number, string> = {
   22: "ライトニングトーク",
 };
 
+/**
+ * 「ライトニングトーク」形式の ID。
+ * この形式の親ポストは 30 分程度の「LT 枠」を表し、個々の LT 講演を children に持つ。
+ */
+export const FORMAT_ID_LIGHTNING_TALK = 22;
+
 /** 種別 ID → 名称（例: 3 → "スポンサー"） */
 export const TYPE_MAP: Record<number, string> = {
   1: "公募",
