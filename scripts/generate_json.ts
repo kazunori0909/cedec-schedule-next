@@ -22,7 +22,7 @@ import { parseFormat2019 } from "./parsers/format_2019";
 import { parseFormat2020 } from "./parsers/format_2020";
 import { parseFormat2023 } from "./parsers/format_2023";
 import { parseFormat2024 } from "./parsers/format_2024";
-import { parseFormat2025Json } from "./parsers/format_2025_json";
+import { parseFormat2025Json, parseLightningTalks } from "./parsers/format_2025_json";
 import { parseFormatBefore2017 } from "./parsers/format_before2017";
 import { loadTimetableSource } from "./lib/timetable_source";
 import { getDomain, findYearSetting, LIVE_URL_PENDING } from "../src/lib/cedec";
@@ -137,8 +137,38 @@ function postprocessSessions(
   return sessions;
 }
 
-function generateJson(year: string, sessions: RawSession[], fetched?: string): string {
+function toEntry(s: RawSession): Record<string, unknown> {
+  const subCategory = s.sub_category
+    .split(",")
+    .map((x) => x.trim())
+    .filter((x) => x !== "");
+
+  const entry: Record<string, unknown> = {
+    id: s.session_id,
+    day: String(s.day),
+    room: s.room_no,
+    start: s.start,
+    end: s.end,
+    category: s.category,
+    title: s.title,
+    speakers: s.speakers,
+    detail_url: s.detail_url,
+  };
+  if (subCategory.length > 0) entry.sub_category = subCategory;
+  if (s.live !== null && s.live !== undefined) entry.live = s.live;
+  if (s.youtube !== null && s.youtube !== undefined) entry.youtube = s.youtube;
+  if (s.is_invited) entry.is_invited = true;
+  return entry;
+}
+
+function generateJson(
+  year: string,
+  sessions: RawSession[],
+  fetched?: string,
+  lightningTalks: RawSession[] = []
+): string {
   const { first_date } = findYearSetting(year);
+  const talks = lightningTalks.filter((s) => s.title !== "");
   // PHP の `'year' => $year` は数値変換されてJSONに出るため、ここでも数値化する
   const data: Record<string, unknown> = {
     year: parseInt(year, 10),
@@ -146,31 +176,10 @@ function generateJson(year: string, sessions: RawSession[], fetched?: string): s
     generated: new Date().toISOString(),
     // JSON 方式の年度はデータ取得日時を記録する（フロントの「取得日時」表示に使用）
     ...(fetched ? { fetched } : {}),
-    sessions: sessions
-      .filter((s) => s.title !== "")
-      .map((s) => {
-        const subCategory = s.sub_category
-          .split(",")
-          .map((x) => x.trim())
-          .filter((x) => x !== "");
-
-        const entry: Record<string, unknown> = {
-          id: s.session_id,
-          day: String(s.day),
-          room: s.room_no,
-          start: s.start,
-          end: s.end,
-          category: s.category,
-          title: s.title,
-          speakers: s.speakers,
-          detail_url: s.detail_url,
-        };
-        if (subCategory.length > 0) entry.sub_category = subCategory;
-        if (s.live !== null && s.live !== undefined) entry.live = s.live;
-        if (s.youtube !== null && s.youtube !== undefined) entry.youtube = s.youtube;
-        if (s.is_invited) entry.is_invited = true;
-        return entry;
-      }),
+    sessions: sessions.filter((s) => s.title !== "").map(toEntry),
+    // ライトニングトークは sessions とは別配列で出力する。Day タブ・Excel 出力・カテゴリ
+    // フィルターの対象を変えずに、LT タブ側だけが参照できるようにするため。
+    ...(talks.length > 0 ? { lightning_talks: talks.map(toEntry) } : {}),
   };
 
   return JSON.stringify(data);
@@ -180,6 +189,7 @@ async function processYear(year: string, config: YearConfig, fetchRemote: boolea
   const { first_date } = findYearSetting(year);
 
   let sessions: RawSession[] = [];
+  let lightningTalks: RawSession[] = [];
   let fetched: string | undefined;
 
   if (config.format === undefined) {
@@ -194,6 +204,10 @@ async function processYear(year: string, config: YearConfig, fetchRemote: boolea
       first_date,
       room_overrides
     );
+    lightningTalks = parseLightningTalks(source.timetable, source.cancel, first_date);
+    if (lightningTalks.length > 0) {
+      console.log(`[INFO] ライトニングトーク: ${lightningTalks.length} 件を展開`);
+    }
     fetched = source.fetchedAt;
   } else if (config.split_files) {
     console.log(`[INFO] ${year} 処理開始 (format=${config.format})`);
@@ -234,7 +248,8 @@ async function processYear(year: string, config: YearConfig, fetchRemote: boolea
   if (eventOver) console.log("[INFO] 会期終了後モード: liveパラメータを処理します");
 
   const processed = postprocessSessions(sessions, liveSessions, youtubeMap, eventOver);
-  const jsonContent = generateJson(year, processed, fetched);
+  const processedTalks = postprocessSessions(lightningTalks, liveSessions, youtubeMap, eventOver);
+  const jsonContent = generateJson(year, processed, fetched, processedTalks);
 
   const dir = outputDir(year);
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });

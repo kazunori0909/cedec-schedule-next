@@ -33,6 +33,9 @@ export interface ScheduleData {
   // フロントの「取得日時」表示に使う。未付与の年度は CASH_SETTING にフォールバックする。
   fetched?: string;
   sessions: Session[];
+  // ライトニングトーク講演。公式タイムテーブルには「LT 枠」しか現れないため、枠の子データを
+  // 展開して別配列で持つ（2026〜・JSON方式の年度のみ）。LT タブ以外はこの配列を参照しない。
+  lightning_talks?: Session[];
 }
 
 // 年度別設定（events含む追加イベント）
@@ -105,5 +108,7 @@ export type UnifiedSession =
 export interface RoomColumn {
   name: string; // 部屋名（表示用）
   key: string; // 内部キー（重複回避のためサフィックスあり）
+  // 表示ラベルと実際の会場名が異なる場合の会場名（LT タブの "Day1-1" 等）。省略時は name を使う
+  roomName?: string;
   sessions: UnifiedSession[];
 }

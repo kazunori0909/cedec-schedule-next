@@ -27,20 +27,11 @@ interface CedilResult {
 
 const FETCH_DELAY_MS = 1000;
 
-// ライトニングトークは公式タイムテーブルに載らずセッションへ紐付かないため除外する。
-// 一覧ページの `<div class="name"><strong>形式 ： </strong>ライトニングトーク</div>` で判定する。
-const LIGHTNING_TALK_RE = /形式\s*[:：]\s*ライトニングトーク/;
-
 function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-async function readPage(
-  tag: number,
-  page: number,
-  result: CedilResult,
-  excluded: string[]
-): Promise<number | null> {
+async function readPage(tag: number, page: number, result: CedilResult): Promise<number | null> {
   const url = `https://cedil.cesa.or.jp/cedil_sessions/search_tag/${tag}?page=${page}`;
   const res = await fetch(url);
   if (!res.ok) {
@@ -64,15 +55,6 @@ async function readPage(
     let title = h2.text().trim();
     title = title.replace(/[\n 　]/g, "");
 
-    const isLightningTalk = $(session)
-      .find("div.name")
-      .toArray()
-      .some((el) => LIGHTNING_TALK_RE.test($(el).text()));
-    if (isLightningTalk) {
-      excluded.push(title);
-      return;
-    }
-
     const a = h2.find("a").first();
     const href = a.length > 0 ? (a.attr("href") ?? "") : "";
 
@@ -93,18 +75,12 @@ async function processYear(year: string, tag: number): Promise<void> {
     update_date: new Date().toISOString(),
   };
 
-  const excluded: string[] = [];
   let page: number | null = 1;
   while (page !== null) {
-    const next = await readPage(tag, page, result, excluded);
+    const next = await readPage(tag, page, result);
     if (next === null) break;
     await sleep(FETCH_DELAY_MS);
     page = next;
-  }
-
-  if (excluded.length > 0) {
-    console.log(`[INFO] ライトニングトーク ${excluded.length} 件を除外しました`);
-    excluded.forEach((title) => console.log(`         - ${title}`));
   }
 
   const dir = outputDir(year);

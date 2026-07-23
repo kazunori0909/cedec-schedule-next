@@ -3,11 +3,12 @@ import { describe, expect, it } from "vitest";
 import type { RoomColumn, ScheduleData, Session } from "@/types/schedule";
 import {
   buildFavoriteColumns,
+  buildLightningTalkViewModel,
+  buildMatrix,
   buildRoomColumns,
   buildScheduleViewModel,
   generateTimeRows,
   getAllCategories,
-  getRowSpan,
   getSessionId,
   getSessionRange,
   getTimeRange,
@@ -42,27 +43,45 @@ function makeScheduleData(sessions: Session[]): ScheduleData {
 }
 
 // ---------------------------------------------------------------------------
-// getRowSpan
+// buildMatrix（rowSpan は時刻行のインデックス差で決まる）
 // ---------------------------------------------------------------------------
-describe("getRowSpan", () => {
-  it("60分セッションは rowSpan 12（5分刻み）", () => {
-    expect(getRowSpan("10:00", "11:00")).toBe(12);
+describe("buildMatrix", () => {
+  function columnOf(sessions: Session[]): RoomColumn[] {
+    return [{ name: "1", key: "1", sessions: sessions.map((s) => ({ kind: "session", data: s })) }];
+  }
+
+  it("5分刻みの時刻軸では 60分セッションが rowSpan 12 になる", () => {
+    const rows = generateTimeRows(600, 660);
+    const matrix = buildMatrix(rows, columnOf([makeSession({ start: "10:00", end: "11:00" })]));
+    expect(matrix[0][0].rowSpan).toBe(12);
   });
 
-  it("30分セッションは rowSpan 6", () => {
-    expect(getRowSpan("10:00", "10:30")).toBe(6);
+  it("開始行から終了行までを occupied で埋める", () => {
+    const rows = generateTimeRows(600, 660);
+    const matrix = buildMatrix(rows, columnOf([makeSession({ start: "10:00", end: "10:15" })]));
+    expect(matrix[0][0].kind).toBe("session");
+    expect(matrix[1][0].kind).toBe("occupied");
+    expect(matrix[2][0].kind).toBe("occupied");
+    // 終了時刻の行は次のセッション用に空けておく
+    expect(matrix[3][0].kind).toBe("empty");
   });
 
-  it("5分セッションは rowSpan 1", () => {
-    expect(getRowSpan("10:00", "10:05")).toBe(1);
+  it("5分刻みでない時刻軸（LT タブ）でも高さが行数と一致する", () => {
+    const rows = ["12:30", "12:36", "12:42"];
+    const matrix = buildMatrix(rows, columnOf([makeSession({ start: "12:30", end: "12:42" })]));
+    expect(matrix[0][0].rowSpan).toBe(2);
   });
 
-  it("同じ時刻（0分）は最小値 1 を返す", () => {
-    expect(getRowSpan("10:00", "10:00")).toBe(1);
+  it("開始時刻が時刻軸に無いセッションは描画しない", () => {
+    const rows = generateTimeRows(600, 660);
+    const matrix = buildMatrix(rows, columnOf([makeSession({ start: "10:03", end: "10:30" })]));
+    expect(matrix.every((row) => row[0].kind === "empty")).toBe(true);
   });
 
-  it("90分セッションは rowSpan 18", () => {
-    expect(getRowSpan("13:00", "14:30")).toBe(18);
+  it("終了時刻が時刻軸に無いセッションは 1 行として描画する", () => {
+    const rows = generateTimeRows(600, 660);
+    const matrix = buildMatrix(rows, columnOf([makeSession({ start: "10:00", end: "10:33" })]));
+    expect(matrix[0][0].rowSpan).toBe(1);
   });
 });
 
@@ -448,8 +467,9 @@ describe("buildScheduleViewModel", () => {
     const vm = buildScheduleViewModel(null, "2020", 0, false, {});
     expect(vm.displayColumns).toHaveLength(0);
     expect(vm.allCategories).toHaveLength(0);
-    // データなし → デフォルト範囲
-    expect(vm.timeRange).toEqual({ min: 9 * 60, max: 18 * 60 });
+    // データなし → デフォルト範囲（09:00〜18:00）
+    expect(vm.timeRows[0]).toBe("09:00");
+    expect(vm.timeRows[vm.timeRows.length - 1]).toBe("18:00");
   });
 
   it("favoriteMode=true かつお気に入りなしのとき displayColumns はプレースホルダー", () => {
@@ -457,5 +477,49 @@ describe("buildScheduleViewModel", () => {
     const vm = buildScheduleViewModel(data, "2020", 0, true, {});
     expect(vm.displayColumns).toHaveLength(1);
     expect(vm.displayColumns[0].key).toBe("fav_empty");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildLightningTalkViewModel
+// ---------------------------------------------------------------------------
+describe("buildLightningTalkViewModel", () => {
+  // Day1 は 12:30 始まり・Day2 は 12:10 始まりで、6分刻み（5分グリッドに乗らない）
+  const talks: Session[] = [
+    makeSession({ id: "t1", day: "1", room: "1", start: "12:30", end: "12:36" }),
+    makeSession({ id: "t2", day: "1", room: "1", start: "12:36", end: "12:42" }),
+    makeSession({ id: "t3", day: "1", room: "2", start: "12:30", end: "12:36", category: "GD" }),
+    makeSession({ id: "t4", day: "2", room: "1", start: "12:10", end: "12:16" }),
+  ];
+
+  it("日 × 会場ごとにカラムを作り、日→会場の順に並べる", () => {
+    const vm = buildLightningTalkViewModel(talks);
+    expect(vm.displayColumns.map((c) => c.name)).toEqual(["Day1-1", "Day1-2", "Day2-1"]);
+  });
+
+  it("講演のない日 × 会場の組み合わせはカラムを作らない", () => {
+    const vm = buildLightningTalkViewModel(talks);
+    expect(vm.displayColumns.map((c) => c.key)).not.toContain("lt_2-2");
+  });
+
+  it("カラムには会場名を別途保持する（表示ラベルは Day 付きのため）", () => {
+    const vm = buildLightningTalkViewModel(talks);
+    expect(vm.displayColumns[1].roomName).toBe("第2会場");
+  });
+
+  it("時刻軸は全日程の開始・終了時刻の和集合を昇順で並べたもの", () => {
+    const vm = buildLightningTalkViewModel(talks);
+    expect(vm.timeRows).toEqual(["12:10", "12:16", "12:30", "12:36", "12:42"]);
+  });
+
+  it("カテゴリは LT 講演から抽出する", () => {
+    const vm = buildLightningTalkViewModel(talks);
+    expect(vm.allCategories).toEqual(["ENG", "GD"]);
+  });
+
+  it("LT が無い場合は空のカラム・時刻軸を返す", () => {
+    const vm = buildLightningTalkViewModel([]);
+    expect(vm.displayColumns).toHaveLength(0);
+    expect(vm.timeRows).toHaveLength(0);
   });
 });

@@ -70,6 +70,10 @@ export const TIME_SPAN = 3;
 export const MIN_MINUTES = 5;
 export const DEFAULT_YEAR = "2026";
 
+// ライトニングトークタブを表す dayIndex の番兵値。
+// 全日程を横断するタブのため日付インデックス（0〜2）とは重ならない値にする。
+export const LT_DAY_INDEX = -1;
+
 // 年度から公式サイトのドメインを導出する（全年度 https://cedec.cesa.or.jp/{year}/ に統一）
 export function getDomain(year: string): string {
   return `https://cedec.cesa.or.jp/${year}/`;

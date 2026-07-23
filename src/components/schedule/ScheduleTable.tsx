@@ -1,7 +1,7 @@
 "use client";
 
 import type { RoomColumn } from "@/types/schedule";
-import { generateTimeRows, getSessionId, buildMatrix } from "@/lib/schedule";
+import { getSessionId, buildMatrix } from "@/lib/schedule";
 import { getFloorURL } from "@/lib/cedec";
 import { SessionCell } from "@/components/schedule/SessionCell";
 import { RoomLink } from "@/components/ui/RoomLink";
@@ -10,7 +10,7 @@ import { tableHeaderVariants, tableCellVariants } from "@/components/ui/tableVar
 
 interface Props {
   columns: RoomColumn[];
-  timeRange: { min: number; max: number };
+  timeRows: string[];
   dayIndex: number;
   year: string;
   favorites: Record<string, boolean>;
@@ -22,7 +22,7 @@ interface Props {
 
 export function ScheduleTable({
   columns,
-  timeRange,
+  timeRows,
   dayIndex,
   year,
   favorites,
@@ -32,8 +32,6 @@ export function ScheduleTable({
   onToggleFavorite,
 }: Props) {
   // 導出値のメモ化は React Compiler が行う（手動 useMemo は不要）
-  const timeRows = generateTimeRows(timeRange.min, timeRange.max);
-
   // 2D マトリクス [rowIdx][colIdx] = CellInfo
   const matrix = buildMatrix(timeRows, columns);
 
@@ -45,7 +43,7 @@ export function ScheduleTable({
             <th className={tableHeaderVariants({ kind: "time" })}></th>
             {columns.map((col) => (
               <th key={col.key} className={tableHeaderVariants({ kind: "room" })}>
-                <RoomLink name={col.name} url={getFloorURL(col.name, year)} />
+                <RoomLink name={col.name} url={getFloorURL(col.roomName ?? col.name, year)} />
               </th>
             ))}
           </tr>
@@ -89,7 +87,7 @@ export function ScheduleTable({
                         onToggleFavorite={() => onToggleFavorite(sessionId)}
                         cedilUrl={cedilLookup[sessionId]}
                         hideSpecs={hideSpecs}
-                        roomName={col.name}
+                        roomName={col.roomName ?? col.name}
                       />
                     </td>
                   );

@@ -1,6 +1,12 @@
 import { buildSession, type RawSession } from "../lib/session";
 import { dayIndexFromDate, roomNoFromText } from "../lib/helpers";
-import { getCategoryName, getFormatName, getTypeName } from "./cedec_taxonomy";
+import {
+  FORMAT_ID_LIGHTNING_TALK,
+  getCategoryName,
+  getFormatName,
+  getTypeName,
+} from "./cedec_taxonomy";
+import { formatMinutesToTime, parseTimeToMinutes } from "../../src/lib/cedec";
 import type { RoomOverride } from "../../src/types/schedule";
 
 /**
@@ -14,6 +20,9 @@ import type { RoomOverride } from "../../src/types/schedule";
  * - speakers: 登壇者辞書（id → { name, company, ... }）
  * - cancel:   { show:{sessions:[id]}, hide:{sessions:[id]} }
  *             show=【講演キャンセル】表示 / hide=非表示（出力しない）
+ *
+ * ライトニングトーク（format_id=22）だけは親ポストが「LT 枠」を表し、個々の講演は
+ * children に入る。これは parseLightningTalks で別途展開する。
  */
 
 interface RawPost {
@@ -29,6 +38,9 @@ interface RawPost {
   subcategory: number[];
   speakers: number[];
   coming_soon: number;
+  // LT 枠の子ポスト（個々の LT 講演）。子は held_at ではなく held_at_as_child を持つ
+  children?: RawPost[];
+  held_at_as_child?: string | null;
 }
 
 interface RawSpeaker {
@@ -84,6 +96,43 @@ function parseFirstDate(firstDate: string): [number, number] {
   return [parseInt(firstDate.slice(0, 2), 10), parseInt(firstDate.slice(2, 4), 10)];
 }
 
+/** "2026/07/22 09:30:00" の日付部分から開催初日基準の day（1〜3）を求める */
+function toDay(datetime: string | null | undefined, firstMonth: number, firstDay: number): number {
+  const dateStr = datetime?.split(" ")[0] ?? "";
+  const [, mm, dd] = dateStr.split("/").map((s) => parseInt(s, 10));
+  return dayIndexFromDate(mm, dd, firstMonth, firstDay);
+}
+
+/** 分野コードを解決する。分野なし（基調講演・主催者挨拶等）は形式名→種別名にフォールバック */
+function resolveCategory(post: RawPost): { category: string; subCategory: string } {
+  // 分野: category_id → subcategory[] の順でコード化（12 は除外）
+  const cats: string[] = [];
+  const mainCat = getCategoryName(post.category_id);
+  if (mainCat !== "") cats.push(mainCat);
+  for (const sc of post.subcategory ?? []) {
+    const name = getCategoryName(sc);
+    if (name !== "") cats.push(name);
+  }
+
+  let category = cats[0] ?? "";
+  if (category === "") {
+    const formatName = getFormatName(post.format_id);
+    const typeName = TYPE_AS_CATEGORY.has(post.type_id ?? -1) ? getTypeName(post.type_id) : "";
+    if (!GENERIC_FORMATS.includes(formatName)) {
+      category = formatName !== "" ? formatName : typeName;
+    }
+  }
+  return { category, subCategory: cats.slice(1).join(",") };
+}
+
+/** 登壇者 ID を辞書で引いて展開する（前後空白（全角含む）は除去し HTML 方式の .text().trim() と揃える） */
+function resolveSpeakers(post: RawPost, dict: Record<string, RawSpeaker>): RawSpeaker[] {
+  return (post.speakers ?? []).flatMap((sid) => {
+    const sp = dict[String(sid)];
+    return sp?.name ? [{ name: sp.name.trim(), company: (sp.company ?? "").trim() }] : [];
+  });
+}
+
 export function parseFormat2025Json(
   data: TimetableJson,
   cancel: CancelJson,
@@ -108,37 +157,10 @@ export function parseFormat2025Json(
     if (start === "") continue;
 
     // 開催初日基準の day（1〜3）。held_at = "YYYY/MM/DD HH:MM:SS"
-    const dateStr = post.held_at.split(" ")[0] ?? "";
-    const [, mm, dd] = dateStr.split("/").map((s) => parseInt(s, 10));
-    const day = dayIndexFromDate(mm, dd, firstMonth, firstDay);
+    const day = toDay(post.held_at, firstMonth, firstDay);
 
-    // 分野: category_id → subcategory[] の順でコード化（12 は除外）
-    const cats: string[] = [];
-    const mainCat = getCategoryName(post.category_id);
-    if (mainCat !== "") cats.push(mainCat);
-    for (const sc of post.subcategory ?? []) {
-      const name = getCategoryName(sc);
-      if (name !== "") cats.push(name);
-    }
-
-    let category = cats[0] ?? "";
-    let subCategory = cats.slice(1).join(",");
-
-    // 分野なし（基調講演・主催者挨拶等）は形式名→種別名にフォールバック
-    if (category === "") {
-      const formatName = getFormatName(post.format_id);
-      const typeName = TYPE_AS_CATEGORY.has(post.type_id ?? -1) ? getTypeName(post.type_id) : "";
-      if (!GENERIC_FORMATS.includes(formatName)) {
-        category = formatName !== "" ? formatName : typeName;
-      }
-    }
-
-    // 前後空白（全角含む）は除去。HTML 方式の .text().trim() と挙動を揃える
-    let speakers: RawSpeaker[] = (post.speakers ?? []).flatMap((sid) => {
-      const sp = data.speakers[String(sid)];
-      return sp?.name ? [{ name: sp.name.trim(), company: (sp.company ?? "").trim() }] : [];
-    });
-
+    let { category, subCategory } = resolveCategory(post);
+    let speakers = resolveSpeakers(post, data.speakers);
     let isInvited = INVITED_TYPE_IDS.has(post.type_id ?? -1);
 
     // 中止セッションは公式描画と同様に分野・登壇者を伏せ、タイトルへ印を付ける
@@ -177,4 +199,110 @@ export function parseFormat2025Json(
   }
 
   return sessions;
+}
+
+/** 開始時刻の並びが 1 件しかない等で枠長を決められない場合の既定値（分） */
+const DEFAULT_LT_SLOT_MINUTES = 6;
+
+/** 開始時刻（分）の並びから 1 講演あたりの標準枠長を求める（連続する開始間隔の最頻値） */
+function resolveSlotMinutes(startMinutes: number[]): number {
+  const counts = new Map<number, number>();
+  for (let i = 1; i < startMinutes.length; i++) {
+    const gap = startMinutes[i] - startMinutes[i - 1];
+    if (gap > 0) counts.set(gap, (counts.get(gap) ?? 0) + 1);
+  }
+
+  let mode = 0;
+  let modeCount = 0;
+  for (const [gap, count] of counts) {
+    if (count > modeCount) {
+      mode = gap;
+      modeCount = count;
+    }
+  }
+  return mode > 0 ? mode : DEFAULT_LT_SLOT_MINUTES;
+}
+
+/**
+ * ライトニングトーク（format_id=22）の親ポストが持つ children を、個々の LT 講演として展開する。
+ *
+ * 親ポストは「CEDEC Lightning 2026　第1会場　1日目」のような 30 分の枠を表し、
+ * 公式タイムテーブルにはこの枠しか現れない。子ポストが実際の講演で、
+ *   - 開始時刻は held_at（null）ではなく held_at_as_child に入る
+ *   - end_time は常に null
+ * のため、終了時刻は「次の講演の開始時刻」から導出する。最後の 1 件は
+ * 「開始 + 標準枠長」と親枠の終了時刻の早い方を採用する（講演数が枠の定員に満たない回で
+ * 最後の 1 件が枠の終わりまで不当に伸びるのを防ぐ）。
+ *
+ * 親ポスト自体は parseFormat2025Json 側で通常セッションとして出力され続ける
+ * （Day タブで「この時間に LT 枠がある」ことが分かる状態を保つため）。
+ */
+export function parseLightningTalks(
+  data: TimetableJson,
+  cancel: CancelJson,
+  firstDate: string
+): RawSession[] {
+  const [firstMonth, firstDay] = parseFirstDate(firstDate);
+  const showIds = toIdSet(cancel.show?.sessions);
+  const hideIds = toIdSet(cancel.hide?.sessions);
+
+  const talks: RawSession[] = [];
+
+  for (const parent of data.posts) {
+    if (parent.format_id !== FORMAT_ID_LIGHTNING_TALK) continue;
+
+    // 開始時刻を持つ子だけを対象に、開始時刻順へ並べ替える（公式 JSON の並びは不定）
+    const ordered = (parent.children ?? [])
+      .flatMap((child) => {
+        const start = toHHMM(child.held_at_as_child ?? null);
+        return start !== "" && child.title ? [{ child, start }] : [];
+      })
+      .sort((a, b) => a.start.localeCompare(b.start));
+    if (ordered.length === 0) continue;
+
+    const startMinutes = ordered.map((o) => parseTimeToMinutes(o.start));
+    const slotMinutes = resolveSlotMinutes(startMinutes);
+    const parentEndStr = toHHMM(parent.end_time);
+    const parentEnd = parentEndStr === "" ? Infinity : parseTimeToMinutes(parentEndStr);
+
+    for (let i = 0; i < ordered.length; i++) {
+      const { child, start } = ordered[i];
+      // 終了時刻は先に全件分求めてから除外判定を行う（非表示の講演が間にあっても枠の並びは崩さない）
+      const endMinutes =
+        i + 1 < ordered.length
+          ? startMinutes[i + 1]
+          : Math.min(startMinutes[i] + slotMinutes, parentEnd);
+
+      if (child.coming_soon === 1) continue;
+      if (hideIds.has(String(child.id))) continue;
+
+      let { category, subCategory } = resolveCategory(child);
+      let speakers = resolveSpeakers(child, data.speakers);
+      let title = child.title;
+      if (showIds.has(String(child.id))) {
+        title = `【講演キャンセル】${child.title}`;
+        category = "";
+        subCategory = "";
+        speakers = [];
+      }
+
+      talks.push(
+        buildSession({
+          session_id: child.uuid,
+          day: toDay(child.held_at_as_child ?? parent.held_at, firstMonth, firstDay),
+          room_no: roomNoFromText(child.room ?? parent.room ?? ""),
+          start,
+          end: formatMinutesToTime(endMinutes),
+          category,
+          sub_category: subCategory,
+          title,
+          speakers,
+          // 個々の LT 講演に固有の詳細ページは存在しない（枠単位のページのみ）
+          detail_url: "",
+        })
+      );
+    }
+  }
+
+  return talks;
 }
