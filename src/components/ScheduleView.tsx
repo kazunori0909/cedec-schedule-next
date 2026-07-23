@@ -85,12 +85,13 @@ function ScheduleViewInner({ year }: { year: string }) {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-30 bg-card/95 backdrop-blur border-b border-border">
-        <div className="flex items-center gap-3 px-4 py-3">
+        <div className="flex items-center gap-2 px-3 py-3 sm:gap-3 sm:px-4">
           <SideMenu currentYear={year} onYearChange={setYearParam} />
-          <h1 className="text-base font-bold whitespace-nowrap sm:text-xl">
-            CEDEC {year} スケジュール
+          {/* 狭幅では縮小して一行に収める。min-w-0 + truncate は安全網で、
+              想定より狭い端末でもタイトルが右側のボタンを押し出さないようにする */}
+          <h1 className="min-w-0 truncate text-sm font-bold sm:text-xl">
+            CEDEC {year} 非公式タイムテーブル
           </h1>
-          <span className="text-xs text-muted-foreground hidden sm:inline">非公式</span>
           {(scheduleData?.fetched || CASH_SETTING[year] || cedilUpdate) && (
             <InfoTooltip
               lines={[
@@ -113,7 +114,7 @@ function ScheduleViewInner({ year }: { year: string }) {
             )}
           </div>
         </div>
-        <div className="px-4 pb-3 flex flex-col gap-2">
+        <div className="px-3 pb-3 flex flex-col gap-2 sm:px-4">
           <div className="flex items-center gap-3 flex-wrap">
             <DateSelector
               dateList={dateList}
