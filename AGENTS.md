@@ -29,8 +29,8 @@ Next.js + React + TypeScript で構築された静的サイト（`next build` �
   → public/web_data/{year}/schedule.json 生成
 
 CEDiL公式サイト
-  → scripts/generate_cedil.ts で解析
-  → public/web_data/{year}/cedil.json 生成
+  → public/cgi/generate_cedil.php で解析（XServer 上で URL/cron 実行。ローカルは php CLI）
+  → public/web_data/{year}/cedil.json 生成（アプリは実行時 fetch のため再ビルド不要）
   → セッションにリンクを付与
 ```
 
@@ -83,10 +83,11 @@ cedec_schedule/
 │   ├── store/scheduleStore.ts  # Zustandストア（永続化込み）
 │   ├── types/schedule.ts       # 型定義
 │   └── __tests__/              # Vitestユニットテスト
-├── public/web_data/            # 事前生成済みJSON（git管理外）
+├── public/
+│   ├── cgi/generate_cedil.php  # CEDiLサイトを解析しcedil.jsonを生成（PHP・URL/cron/CLI）
+│   └── web_data/               # 事前生成済みJSON（git管理外）
 ├── scripts/                    # データ生成スクリプト（tsx で実行）
 │   ├── generate_json.ts        # 公式HTMLを解析しschedule.jsonを生成
-│   ├── generate_cedil.ts       # CEDiLサイトを解析しcedil.jsonを生成
 │   ├── generate_youtube.ts     # CEDECチャンネル動画リストをキャッシュ
 │   ├── lib/                    # 共通ユーティリティ
 │   └── parsers/                # 年度別パーサー（HTML: before2017・2018〜2020・2023・2024 / JSON: format_2025_json・cedec_taxonomy）
@@ -102,5 +103,5 @@ cedec_schedule/
 - `npm run format` — Prettier 自動整形
 - `npm run format:check` — フォーマット差分チェック（CI 用）
 - `npm run generate:json [year]` — schedule.json 生成（年度省略時は全年度）
-- `npm run generate:cedil [year]` — cedil.json 生成
+- `php public/cgi/generate_cedil.php [year]` — cedil.json 生成（引数なし=最新年度。URL 経由は `?key=` 必須・`all` 非対応。CLI/cron はトークン不要）
 - `npm run generate:youtube [-- --force]` — YouTube動画リスト取得（要 `.env` の `YOUTUBE_API_KEY`）
