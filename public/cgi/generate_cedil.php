@@ -57,14 +57,23 @@ ini_set('display_errors', '0');
 $isCli = (PHP_SAPI === 'cli');
 
 // URL 経由で要求する秘密トークン。コミットしない設定ファイル（`return ['key' => '...'];`）から読む。
-// 読み込み順は次の通りで、最初に見つかったものを使う。
-//   1. <webroot の親>/cedil_config.php … 推奨。Web 公開されず、next build の out/ にも入らない
-//   2. <webroot>/cgi/generate_cedil.config.php … 従来パス（後方互換）
-// どちらも無い／key が空なら URL 経由の呼び出しはすべて 403（fail-safe）。
-$CONFIG_CANDIDATES = [
-    dirname(__DIR__, 2) . '/cedil_config.php',
-    __DIR__ . '/generate_cedil.config.php',
-];
+// 探索順は「このスクリプトの親ディレクトリを上へ順に辿って cedil_config.php を探す」→「従来パス」。
+// サイトを公開ディレクトリ直下に置く場合もサブディレクトリ配下に置く場合も、
+// 階層の深さを気にせず「公開ディレクトリの外」に設定を置けるようにするため上へ辿る。
+//   例: <webroot>/cedec_schedule/cgi/generate_cedil.php なら
+//       <webroot>/cedec_schedule/ → <webroot>/ → <webroot の親>/ の順に探す
+// どこにも無い／key が空なら URL 経由の呼び出しはすべて 403（fail-safe）。
+$CONFIG_CANDIDATES = [];
+$dir = __DIR__;
+for ($i = 0; $i < 5; $i++) {
+    $parent = dirname($dir);
+    if ($parent === $dir) {
+        break; // ルートに到達
+    }
+    $dir = $parent;
+    $CONFIG_CANDIDATES[] = $dir . '/cedil_config.php';
+}
+$CONFIG_CANDIDATES[] = __DIR__ . '/generate_cedil.config.php'; // 従来パス（後方互換）
 $EXPECTED_KEY = '';
 foreach ($CONFIG_CANDIDATES as $configPath) {
     if (!is_readable($configPath)) {

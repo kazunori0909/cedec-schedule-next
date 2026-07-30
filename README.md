@@ -262,11 +262,18 @@ URL 経由で叩く場合は秘密トークンを設定する。リポジトリ�
 **公開ディレクトリの外**（例: 公開ディレクトリが `/home/<account>/<domain>/public_html` なら
 `/home/<account>/<domain>/cedil_config.php`）へコピーし、`'key'` を長いランダム文字列に置き換える。
 ローカルで動かす場合は `cp cedil_config.sample.php cedil_config.php`（`.gitignore` 済み）。
-`generate_cedil.php` は次の順に設定を探し、最初に見つかったものを使う。
+`generate_cedil.php` は**自分の親ディレクトリを上へ順に辿って `cedil_config.php` を探し**、
+最初に見つかったものを使う（無ければ従来パス `<スクリプトと同じ階層>/generate_cedil.config.php`）。
+サイトを公開ディレクトリ直下に置いてもサブディレクトリ配下に置いても、設定は公開ディレクトリの
+外に置ける。
 
-1. `<公開ディレクトリの親>/cedil_config.php` — 推奨。Web 公開されず、`next build` が
-   `public/` を `out/` へコピーする対象にも入らないため、デプロイ成果物にトークンが混ざらない
-2. `<公開ディレクトリ>/cgi/generate_cedil.config.php` — 従来パス（後方互換）
+```
+/home/<account>/<domain>/
+├── cedil_config.php                       ← ここに置く（Web 公開されない）
+└── public_html/
+    └── cedec_schedule/                    ← サブディレクトリ配置でも可
+        └── cgi/generate_cedil.php
+```
 
 未設定のうちは URL 経由の呼び出しはすべて 403 になる（fail-safe）。
 `year` は年度テーブルに実在する年度のみ許可され、`all` 等の一括指定は提供しない

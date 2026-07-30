@@ -6,16 +6,21 @@
  * このサンプル自体もリポジトリルート（= 実物を置く場所と同じ階層）に置く。
  * public/ に置くと `next build` で out/ へコピーされ Web 公開されてしまうため。
  *
- * 設置場所（generate_cedil.php はこの順に探し、最初に見つかったものを使う）:
- *   1. <webroot の親>/cedil_config.php    ← 推奨
- *      Web 公開されず、`next build` が public/ を out/ へコピーする対象にも入らないため、
- *      デプロイ成果物にトークンが混ざらない。
- *      例: 公開ディレクトリが /home/<account>/<domain>/public_html なら
- *          /home/<account>/<domain>/cedil_config.php
- *      ローカルではリポジトリルートの cedil_config.php が同じ位置づけになる（.gitignore 済み）。
- *   2. <webroot>/cgi/generate_cedil.config.php    ← 従来パス（後方互換）
- *      リポジトリの public/cgi/ 配下にあたるため、ローカルに置くと out/ にコピーされる。
- *      新規設置では 1 を使うこと。
+ * 設置場所:
+ *   generate_cedil.php は自分の親ディレクトリを上へ順に辿って cedil_config.php を探し、
+ *   最初に見つかったものを使う（見つからなければ従来パスの
+ *   <スクリプトと同じ階層>/generate_cedil.config.php にフォールバック）。
+ *
+ *   推奨は「公開ディレクトリの外」。Web 公開されず、`next build` が public/ を out/ へ
+ *   コピーする対象にも入らないため、デプロイ成果物にトークンが混ざらない。
+ *     例1) サイトを公開ディレクトリ直下に置く場合
+ *          スクリプト: /home/<account>/<domain>/public_html/cgi/generate_cedil.php
+ *          設定ファイル: /home/<account>/<domain>/cedil_config.php
+ *     例2) サイトをサブディレクトリに置く場合
+ *          スクリプト: /home/<account>/<domain>/public_html/<sub>/cgi/generate_cedil.php
+ *          設定ファイル: /home/<account>/<domain>/cedil_config.php（上へ辿って見つかる）
+ *
+ *   ローカルではリポジトリルートの cedil_config.php が同じ位置づけになる（.gitignore 済み）。
  *
  * 使い方:
  *   1. このファイルを上記 1 の場所に cedil_config.php としてコピーする
