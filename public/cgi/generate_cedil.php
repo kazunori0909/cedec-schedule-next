@@ -57,7 +57,7 @@ ini_set('display_errors', '0');
 $isCli = (PHP_SAPI === 'cli');
 
 // URL 経由で要求する秘密トークン。コミットしない設定ファイル（`return ['key' => '...'];`）から読む。
-// 探索順は「このスクリプトの親ディレクトリを上へ順に辿って cedil_config.php を探す」→「従来パス」。
+// このスクリプトの親ディレクトリを上へ順に辿り、最初に見つかった cedil_config.php を使う。
 // サイトを公開ディレクトリ直下に置く場合もサブディレクトリ配下に置く場合も、
 // 階層の深さを気にせず「公開ディレクトリの外」に設定を置けるようにするため上へ辿る。
 //   例: <webroot>/cedec_schedule/cgi/generate_cedil.php なら
@@ -73,7 +73,6 @@ for ($i = 0; $i < 5; $i++) {
     $dir = $parent;
     $CONFIG_CANDIDATES[] = $dir . '/cedil_config.php';
 }
-$CONFIG_CANDIDATES[] = __DIR__ . '/generate_cedil.config.php'; // 従来パス（後方互換）
 $EXPECTED_KEY = '';
 foreach ($CONFIG_CANDIDATES as $configPath) {
     if (!is_readable($configPath)) {

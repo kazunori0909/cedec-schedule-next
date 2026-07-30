@@ -263,7 +263,7 @@ URL 経由で叩く場合は秘密トークンを設定する。リポジトリ�
 `/home/<account>/<domain>/cedil_config.php`）へコピーし、`'key'` を長いランダム文字列に置き換える。
 ローカルで動かす場合は `cp cedil_config.sample.php cedil_config.php`（`.gitignore` 済み）。
 `generate_cedil.php` は**自分の親ディレクトリを上へ順に辿って `cedil_config.php` を探し**、
-最初に見つかったものを使う（無ければ従来パス `<スクリプトと同じ階層>/generate_cedil.config.php`）。
+最初に見つかったものを使う。
 サイトを公開ディレクトリ直下に置いてもサブディレクトリ配下に置いても、設定は公開ディレクトリの
 外に置ける。
 

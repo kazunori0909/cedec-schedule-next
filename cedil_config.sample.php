@@ -8,10 +8,9 @@
  *
  * 設置場所:
  *   generate_cedil.php は自分の親ディレクトリを上へ順に辿って cedil_config.php を探し、
- *   最初に見つかったものを使う（見つからなければ従来パスの
- *   <スクリプトと同じ階層>/generate_cedil.config.php にフォールバック）。
+ *   最初に見つかったものを使う（ファイル名はこの1つだけ）。
  *
- *   推奨は「公開ディレクトリの外」。Web 公開されず、`next build` が public/ を out/ へ
+ *   置き場所は「公開ディレクトリの外」。Web 公開されず、`next build` が public/ を out/ へ
  *   コピーする対象にも入らないため、デプロイ成果物にトークンが混ざらない。
  *     例1) サイトを公開ディレクトリ直下に置く場合
  *          スクリプト: /home/<account>/<domain>/public_html/cgi/generate_cedil.php
@@ -23,7 +22,7 @@
  *   ローカルではリポジトリルートの cedil_config.php が同じ位置づけになる（.gitignore 済み）。
  *
  * 使い方:
- *   1. このファイルを上記 1 の場所に cedil_config.php としてコピーする
+ *   1. このファイルを上記の場所に cedil_config.php としてコピーする
  *      （ローカルなら `cp cedil_config.sample.php cedil_config.php`）
  *   2. 'key' を十分に長いランダム文字列に置き換える
  *      例: php -r "echo bin2hex(random_bytes(24)), PHP_EOL;"
