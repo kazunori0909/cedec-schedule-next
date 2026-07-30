@@ -44,6 +44,9 @@ next-env.d.ts
 # web_data はスクリプト生成物のため追跡しない
 /public/web_data
 
+# CEDiL 更新エンドポイントの秘密トークン設定（実値。サンプルのみコミット）
+/public/cgi/generate_cedil.config.php
+
 # キャッシュ・一時ファイル
 web_data_original/
 

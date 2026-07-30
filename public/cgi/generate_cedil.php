@@ -8,16 +8,22 @@
  * Next アプリは cedil.json を実行時に fetch するため、この JSON を差し替えれば
  * 再ビルド・再デプロイなしで反映される。
  *
- * 使い方（引数は URL クエリ ?year=... または CLI 第1引数）:
- *   （引数なし）  … 年度テーブルの最新年度のみ取得
- *   ?year=2025    … テーブルにタグ番号があればその年度を取得
- *   ?year=all     … テーブルの全年度を取得
+ * 使い方:
+ *   URL（公開）: /cgi/generate_cedil.php?key=<トークン>[&year=2025]
+ *     - year 未指定 … 年度テーブルの最新年度のみ取得
+ *     - year=2025   … テーブルにタグ番号があればその年度を取得
+ *     - ?key= は必須。generate_cedil.config.php の 'key' と一致しなければ 403
+ *   CLI（cron/ローカル）: php generate_cedil.php [2025]
+ *     - トークン不要（サーバーアクセス自体が前提）。year 未指定なら最新年度
  *
  * 配置:  <webroot>/cgi/generate_cedil.php
  * 出力:  <webroot>/web_data/{year}/cedil.json（アプリの fetch パス /web_data/{year}/cedil.json と一致）
  *
- * セキュリティ: 書き込み先は年度テーブルの許可年度から導出する固定パスのみ。任意の tag /
- *   パスは受け付けない。公開 URL のため、必要に応じて cgi/ を .htaccess で保護すること。
+ * セキュリティ:
+ *   - 年度は年度テーブルのキー完全一致のみ許可（allowlist）。書き込み先は既知年度から
+ *     導出する固定パスのみで、任意 tag / パストラバーサルは受け付けない。
+ *   - URL 経由は秘密トークン（?key=）必須。全年度一括（all）は提供しない（濫用による
+ *     CEDiL / サーバー負荷を避けるため。複数年度が必要なら年度ごとに実行する）。
  */
 
 // 年度 → CEDiL タグ番号。src/lib/cedec.ts の SCHEDULE_SETTING と対応（新しい年度を先頭に）。
@@ -45,7 +51,15 @@ const FETCH_DELAY  = 1;   // ページ間の待機（秒）。並列・連続取
 const HTTP_TIMEOUT = 30;  // 1 リクエストのタイムアウト（秒）
 const USER_AGENT   = 'cedec-schedule-cedil-updater/1.0';
 
+// エラー内容（パス等）が応答に混ざらないよう画面出力を無効化する
+ini_set('display_errors', '0');
+
 $isCli = (PHP_SAPI === 'cli');
+
+// URL 経由で要求する秘密トークン。コミットしない generate_cedil.config.php から読む。
+// 例: <?php return ['key' => '<十分に長いランダム文字列>'];
+$config = @include __DIR__ . '/generate_cedil.config.php';
+$EXPECTED_KEY = (is_array($config) && isset($config['key'])) ? (string) $config['key'] : '';
 
 /** 指定タグの検索結果を全ページ巡回し、[{title, url}] を返す */
 function fetchCedilList(int $tag): array
@@ -143,35 +157,52 @@ function processYear(string $year, int $tag): array
     return ['year' => $year, 'count' => count($list), 'ok' => $ok];
 }
 
-// ---- 引数解決 ----------------------------------------------------------------
-$arg = '';
-if ($isCli) {
-    $arg = $argv[1] ?? '';
-} else {
-    $arg = isset($_GET['year']) ? (string) $_GET['year'] : '';
+// ---- 認証（URL 経由のみ）------------------------------------------------------
+if (!$isCli) {
+    header('Content-Type: application/json; charset=utf-8');
+
+    $providedKey = (isset($_GET['key']) && is_string($_GET['key'])) ? $_GET['key'] : '';
+    // 設定漏れ（トークン未設定）は fail-safe で拒否する。timing 安全に比較する。
+    if ($EXPECTED_KEY === '' || !hash_equals($EXPECTED_KEY, $providedKey)) {
+        http_response_code(403);
+        echo json_encode(['ok' => false, 'error' => 'forbidden'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
 }
-$arg = trim($arg);
+
+// ---- 引数解決 ----------------------------------------------------------------
+// year は「未指定＝最新年度」または「テーブルに実在する年度キー」のみ許可。
+// 配列など文字列以外は不正値として弾く（all 等の一括指定は提供しない）。
+$arg = '';
+$argInvalid = false;
+if ($isCli) {
+    $arg = isset($argv[1]) ? trim((string) $argv[1]) : '';
+} elseif (!isset($_GET['year'])) {
+    $arg = '';
+} elseif (is_string($_GET['year'])) {
+    $arg = trim($_GET['year']);
+} else {
+    // year が配列等（?year[]=... など）
+    $argInvalid = true;
+}
 
 $targets = [];
 $error   = null;
 
-if ($arg === '') {
+if ($argInvalid) {
+    $error = 'invalid year';
+} elseif ($arg === '') {
     // 引数なし: 最新年度（テーブル先頭）のみ
     $latest = array_key_first($YEAR_TAG);
     $targets[$latest] = $YEAR_TAG[$latest];
-} elseif ($arg === 'all') {
-    $targets = $YEAR_TAG;
 } elseif (isset($YEAR_TAG[$arg])) {
     $targets[$arg] = $YEAR_TAG[$arg];
 } else {
-    $error = "unknown year: {$arg}";
+    // 不正な入力値は応答に反映しない（情報漏えい・ノイズ回避）
+    $error = 'invalid year';
 }
 
 // ---- 実行 --------------------------------------------------------------------
-if (!$isCli) {
-    header('Content-Type: application/json; charset=utf-8');
-}
-
 if ($error !== null) {
     if (!$isCli) {
         http_response_code(400);

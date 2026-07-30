@@ -8,8 +8,16 @@
 - [x] 引数モード検証（未指定＝最新年度 / 年度指定 / 不正年度は 400・exit 1）
 - [x] `next build` で `out/cgi/generate_cedil.php` に同梱されることを確認
 - [x] XServer 実機で URL 呼び出し → `cedil.json` 更新を確認（デプロイ後・ユーザー確認済み）
-- [ ] （任意）`cgi/` の保護（.htaccess Basic 認証 / IP 制限）や cron 設定を検討
 - [x] docs/README.md のフェーズ完了時に「（進行中）」を「✅」へ更新
+
+## 公開 URL のセキュリティ強化
+
+- [x] 秘密トークン `?key=` 認証を追加（`generate_cedil.config.php` と `hash_equals`・未設定は 403）
+- [x] トークン設定サンプル `generate_cedil.config.sample.php` を追加し実値を `.gitignore`
+- [x] 全年度一括（`all`）を撤廃
+- [x] 入力ハードニング（配列 year 拒否・テーブルキー完全一致・入力値を応答に出さない・`display_errors` off）
+- [x] 認証/不正入力/正常系を php CLI・組み込みサーバーで検証（403 / 400 / exit1 / 200）
+- [ ] （任意・多層化）`cgi/` の `.htaccess` Basic 認証 / IP 制限の併用を検討
 
 ## 旧 TS スクリプトの廃止（実機確認 OK 後）
 
@@ -26,7 +34,9 @@
 
 ## 運用メモ（デプロイ後）
 
-- 手動更新: `https://<サイト>/cgi/generate_cedil.php`（最新年度）/ `?year=2025` / `?year=all`
-- 自動更新: XServer のサーバーパネル cron で
+- 事前準備（URL 利用時）: `generate_cedil.config.sample.php` を `generate_cedil.config.php` へ
+  コピーし `'key'` を長いランダム文字列に設定（サーバー上・コミット不可）
+- 手動更新（URL）: `https://<サイト>/cgi/generate_cedil.php?key=<TOKEN>`（最新年度）/ `&year=2025`
+- 自動更新（cron・トークン不要）: XServer のサーバーパネル cron で
   `php <パス>/cgi/generate_cedil.php 2026` を会期中だけ定期実行
-- 公開 URL のため、濫用が気になる場合は cgi/ を .htaccess で保護する
+- `all` は非対応。複数年度が必要なときは年度ごとに実行する

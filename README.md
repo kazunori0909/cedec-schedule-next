@@ -106,7 +106,7 @@ npm install
 npm run dev          # 開発サーバー（http://localhost:3000）
 npm run build        # 本番ビルド（out/ に静的ファイル生成）
 npm run generate:json {year}      # schedule.json 生成
-php public/cgi/generate_cedil.php {year}   # cedil.json 生成（PHP・引数なし=最新年度 / all=全年度）
+php public/cgi/generate_cedil.php {year}   # cedil.json 生成（PHP CLI・引数なしは最新年度）
 npm run generate:youtube          # YouTube動画リスト取得（要 .env の YOUTUBE_API_KEY）
 ```
 
@@ -245,13 +245,18 @@ CEDiL 資料（`cedil.json`）は別系統。`cedil_tag_no` 判明後に PHP エ
 その後、CEDiL 資料は PHP エンドポイントで生成・更新する（会期中は追加のたびに再実行）。
 
 ```bash
-# ローカル生成（CLI）
-php public/cgi/generate_cedil.php {year}
+# ローカル / cron（CLI・トークン不要）
+php public/cgi/generate_cedil.php {year}   # 引数なしは最新年度
 
-# デプロイ後は URL / cron でも実行可
-#   https://<サイト>/cgi/generate_cedil.php?year={year}
-#   引数（?year=）なし=最新年度 / ?year=all=全年度
+# 公開 URL（トークン必須・複数年一括は非対応）
+#   https://<サイト>/cgi/generate_cedil.php?key=<TOKEN>&year={year}
 ```
+
+URL 経由で叩く場合は秘密トークンを設定する。`public/cgi/generate_cedil.config.sample.php` を
+`generate_cedil.config.php`（`.gitignore` 済み・サーバー上に作成）へコピーし、`'key'` を長い
+ランダム文字列に置き換える。未設定のうちは URL 経由の呼び出しはすべて 403 になる（fail-safe）。
+`year` は年度テーブルに実在する年度のみ許可され、`all` 等の一括指定は提供しない
+（濫用による CEDiL / サーバー負荷を避けるため。複数年度は年度ごとに実行する）。
 
 ## 更新履歴
 

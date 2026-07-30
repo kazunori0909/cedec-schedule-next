@@ -103,5 +103,5 @@ cedec_schedule/
 - `npm run format` — Prettier 自動整形
 - `npm run format:check` — フォーマット差分チェック（CI 用）
 - `npm run generate:json [year]` — schedule.json 生成（年度省略時は全年度）
-- `php public/cgi/generate_cedil.php [year]` — cedil.json 生成（引数なし=最新年度 / `all`=全年度。URL/cron でも実行可）
+- `php public/cgi/generate_cedil.php [year]` — cedil.json 生成（引数なし=最新年度。URL 経由は `?key=` 必須・`all` 非対応。CLI/cron はトークン不要）
 - `npm run generate:youtube [-- --force]` — YouTube動画リスト取得（要 `.env` の `YOUTUBE_API_KEY`）
