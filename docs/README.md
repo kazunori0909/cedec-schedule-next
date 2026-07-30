@@ -31,3 +31,4 @@
 | 12  | Biome 移行と TS7 対応 ❌不採用                 | Biome 化で ESLint の TS7 非対応は解消するが、`next build` の型チェック無効化が別途必要と判明し不採用。知見のみ記録                        | [phase12/](phase12-biome-migration/)             |
 | 13  | CEDiL ライトニングトーク除外 ✅                | 公式タイムテーブルに載らずセッションに紐付かないライトニングトーク資料を、一覧の「形式」で判定し `cedil.json` から除外（Phase 14 で解除） | [phase13/](phase13-cedil-lightning-talk-filter/) |
 | 14  | ライトニングトークタブ ✅                      | 公式 `timetable.json` の LT 枠 `children` を展開し、日 × 会場を横断する LT 専用タブを追加                                                 | [phase14/](phase14-lightning-talk-tab/)          |
+| 15  | CEDiL 更新用 PHP エンドポイント（進行中）      | `public/cgi/generate_cedil.php` を URL/cron で叩き、再ビルドなしで `cedil.json` を最新化（アプリ無改修・XServer 想定）                    | [phase15/](phase15-cedil-php-endpoint/)          |
