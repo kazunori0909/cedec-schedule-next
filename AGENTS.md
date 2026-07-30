@@ -91,9 +91,7 @@ cedec_schedule/
 │   ├── types/schedule.ts       # 型定義
 │   └── test/setup.ts           # Vitest 共通セットアップ（テスト本体は対象ソースの隣に *.test.ts(x) で同居）
 ├── public/
-│   ├── cgi/
-│   │   ├── generate_cedil.php  # CEDiLサイトを解析しcedil.jsonを生成（PHP・URL/cron/CLI）
-│   │   └── generate_cedil.config.sample.php # URL実行用トークンのサンプル（実値は公開ディレクトリ外に置く）
+│   ├── cgi/generate_cedil.php  # CEDiLサイトを解析しcedil.jsonを生成（PHP・URL/cron/CLI）
 │   └── web_data/               # 事前生成済みJSON（git管理外）
 ├── scripts/                    # データ生成スクリプト（tsx で実行）
 │   ├── generate_json.ts        # 公式HTMLを解析しschedule.jsonを生成
@@ -101,6 +99,7 @@ cedec_schedule/
 │   ├── lib/                    # 共通ユーティリティ
 │   └── parsers/                # 年度別パーサー（HTML: before2017・2018〜2020・2023・2024 / JSON: format_2025_json・cedec_taxonomy）
 ├── web_data_original/          # 公式サイトHTMLのローカルキャッシュ（コミット対象外）
+├── cedil_config.sample.php     # CEDiL更新エンドポイントのトークン設定サンプル（実値は公開ディレクトリ外＝ここと同階層）
 └── .claude/                    # Claude Code 設定
 ```
 

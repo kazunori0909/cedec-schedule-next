@@ -9,7 +9,8 @@
 - CEDiL 更新エンドポイントの秘密トークンは **公開ディレクトリの外**（`<公開ディレクトリの親>/cedil_config.php`）に置く。
   `public/` 配下（従来パスの `public/cgi/generate_cedil.config.php`）も後方互換で読めるが、
   `next build` が `public/` を `out/` へコピーするため、デプロイ成果物にトークンが混入する。新規設置では使わない。
-  コミットするのは `generate_cedil.config.sample.php`（プレースホルダーのみ）だけ。
+  コミットするのはリポジトリルートの `cedil_config.sample.php`（プレースホルダーのみ）だけ。
+  サンプルも `public/` に置かない（`out/` へコピーされ Web 公開されるため）。
   未設定のうちは URL 経由の呼び出しがすべて 403 になる fail-safe のため、**「動かないから」で
   トークンをコード側へ直書きしない**。
 

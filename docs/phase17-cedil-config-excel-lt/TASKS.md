@@ -4,6 +4,8 @@
 
 - [x] `generate_cedil.php` の設定読み込みを「webroot 外を優先・従来パスへフォールバック」に変更
 - [x] `generate_cedil.config.sample.php` のコメントを新しい配置手順に合わせる
+- [x] サンプルをリポジトリルートへ移動（`cedil_config.sample.php`）。`out/cgi/` に残るのが
+      `generate_cedil.php` だけになることを確認
 - [x] README.md / SECURITY.md の設置手順を更新
 - [x] `php public/cgi/generate_cedil.php` が CLI で従来どおり動くことを確認
 - [ ] サーバー上の設定ファイルを webroot 外へ移動（ユーザー作業。移行後に URL 実行で 200 が返ることを確認）

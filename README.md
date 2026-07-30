@@ -69,9 +69,7 @@ cedec_schedule/
 │   └── types/schedule.ts       型定義
 # テストは各対象ファイルの隣に *.test.ts(x) として同居配置
 ├── public/
-│   ├── cgi/
-│   │   ├── generate_cedil.php  CEDiL資料JSON生成（URL/cronで実行・XServer）
-│   │   └── generate_cedil.config.sample.php  URL実行用トークンのサンプル（実値は git 管理外）
+│   ├── cgi/generate_cedil.php  CEDiL資料JSON生成（URL/cronで実行・XServer）
 │   └── web_data/               生成済みJSON（git管理外）
 │       └── {year}/
 │           ├── schedule.json   セッション（LTがある年度は lightning_talks も含む）
@@ -98,6 +96,8 @@ cedec_schedule/
 │       └── phase-compress/     完了フェーズ記録の圧縮スキル（`/phase-compress` で起動）
 ├── .devcontainer/              開発環境定義
 ├── package.json
+├── cedil_config.sample.php     CEDiL更新エンドポイントのトークン設定サンプル
+│                               （実値の cedil_config.php は同じ階層に置く・git 管理外）
 └── .env.example                環境変数テンプレート
 ```
 
@@ -258,9 +258,10 @@ php public/cgi/generate_cedil.php {year}   # 引数なしは最新年度
 #   https://<サイト>/cgi/generate_cedil.php?key=<TOKEN>&year={year}
 ```
 
-URL 経由で叩く場合は秘密トークンを設定する。`public/cgi/generate_cedil.config.sample.php` を
+URL 経由で叩く場合は秘密トークンを設定する。リポジトリルートの `cedil_config.sample.php` を
 **公開ディレクトリの外**（例: 公開ディレクトリが `/home/<account>/<domain>/public_html` なら
 `/home/<account>/<domain>/cedil_config.php`）へコピーし、`'key'` を長いランダム文字列に置き換える。
+ローカルで動かす場合は `cp cedil_config.sample.php cedil_config.php`（`.gitignore` 済み）。
 `generate_cedil.php` は次の順に設定を探し、最初に見つかったものを使う。
 
 1. `<公開ディレクトリの親>/cedil_config.php` — 推奨。Web 公開されず、`next build` が
