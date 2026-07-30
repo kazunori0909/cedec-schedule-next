@@ -33,4 +33,4 @@
 | 14  | ライトニングトークタブ ✅                     | 公式 `timetable.json` の LT 枠 `children` を展開し、日 × 会場を横断する LT 専用タブを追加                                                        | [phase14/](phase14-lightning-talk-tab/)          |
 | 15  | CEDiL 更新用 PHP エンドポイント ✅            | `public/cgi/generate_cedil.php` を URL/cron で叩き、再ビルドなしで `cedil.json` を最新化。旧 `generate_cedil.ts` は廃止（アプリ無改修・XServer） | [phase15/](phase15-cedil-php-endpoint/)          |
 | 16  | テスト・ドキュメント・重複の整理 ✅           | Phase 9〜15 で溜まったテストの不足・ドキュメントの実態ズレ・導出ロジックの重複をまとめて解消                                                     | [phase16/](phase16-test-docs-refactor/)          |
-| 17  | トークン設定の配置と Excel の LT（進行中）    | CEDiL 更新トークンを webroot 外から読むようにし、Excel 出力に LT シートを追加                                                                    | [phase17/](phase17-cedil-config-excel-lt/)       |
+| 17  | トークン設定の配置と Excel の LT ✅           | CEDiL 更新トークンを公開ディレクトリ外から読むようにし、Excel 出力に LT シートを追加                                                             | [phase17/](phase17-cedil-config-excel-lt/)       |
