@@ -6,7 +6,9 @@
 - `.env` を `git add` しない（`.gitignore` で除外済み）。
 - `NEXT_PUBLIC_` プレフィックスの環境変数に秘密情報を入れない（ブラウザバンドルに含まれて公開される）。
 - 新しい API キー・認証情報は `.env` に追加し、`.env.example` にはプレースホルダーのみ記載する。
-- CEDiL 更新エンドポイントの秘密トークンは `public/cgi/generate_cedil.config.php` に置く（`.gitignore` 済み）。
+- CEDiL 更新エンドポイントの秘密トークンは **公開ディレクトリの外**（`<公開ディレクトリの親>/cedil_config.php`）に置く。
+  `public/` 配下（従来パスの `public/cgi/generate_cedil.config.php`）も後方互換で読めるが、
+  `next build` が `public/` を `out/` へコピーするため、デプロイ成果物にトークンが混入する。新規設置では使わない。
   コミットするのは `generate_cedil.config.sample.php`（プレースホルダーのみ）だけ。
   未設定のうちは URL 経由の呼び出しがすべて 403 になる fail-safe のため、**「動かないから」で
   トークンをコード側へ直書きしない**。

@@ -93,7 +93,7 @@ cedec_schedule/
 ├── public/
 │   ├── cgi/
 │   │   ├── generate_cedil.php  # CEDiLサイトを解析しcedil.jsonを生成（PHP・URL/cron/CLI）
-│   │   └── generate_cedil.config.sample.php # URL実行用トークンのサンプル（実値ファイルは .gitignore 済み）
+│   │   └── generate_cedil.config.sample.php # URL実行用トークンのサンプル（実値は公開ディレクトリ外に置く）
 │   └── web_data/               # 事前生成済みJSON（git管理外）
 ├── scripts/                    # データ生成スクリプト（tsx で実行）
 │   ├── generate_json.ts        # 公式HTMLを解析しschedule.jsonを生成

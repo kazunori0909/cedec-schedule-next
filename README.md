@@ -259,8 +259,15 @@ php public/cgi/generate_cedil.php {year}   # 引数なしは最新年度
 ```
 
 URL 経由で叩く場合は秘密トークンを設定する。`public/cgi/generate_cedil.config.sample.php` を
-`generate_cedil.config.php`（`.gitignore` 済み・サーバー上に作成）へコピーし、`'key'` を長い
-ランダム文字列に置き換える。未設定のうちは URL 経由の呼び出しはすべて 403 になる（fail-safe）。
+**公開ディレクトリの外**（例: 公開ディレクトリが `/home/<account>/<domain>/public_html` なら
+`/home/<account>/<domain>/cedil_config.php`）へコピーし、`'key'` を長いランダム文字列に置き換える。
+`generate_cedil.php` は次の順に設定を探し、最初に見つかったものを使う。
+
+1. `<公開ディレクトリの親>/cedil_config.php` — 推奨。Web 公開されず、`next build` が
+   `public/` を `out/` へコピーする対象にも入らないため、デプロイ成果物にトークンが混ざらない
+2. `<公開ディレクトリ>/cgi/generate_cedil.config.php` — 従来パス（後方互換）
+
+未設定のうちは URL 経由の呼び出しはすべて 403 になる（fail-safe）。
 `year` は年度テーブルに実在する年度のみ許可され、`all` 等の一括指定は提供しない
 （濫用による CEDiL / サーバー負荷を避けるため。複数年度は年度ごとに実行する）。
 

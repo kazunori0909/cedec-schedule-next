@@ -41,9 +41,10 @@ Phase 9〜15（CEDiL フェッチ抑止・Live配信予定バッジ・LTタブ�
 
 ## 対象外
 
+いずれも本フェーズでは扱わず、[Phase 17](../phase17-cedil-config-excel-lt/) で対応した。
+
 - ビルド出力（`out/cgi/generate_cedil.config.php`）に CEDiL 更新トークンの設定ファイルが混入する件。
-  ユーザー判断により本フェーズでは扱わない。
-- Excel 出力への LT シート追加。仕様判断が必要なため別途検討する。
+- Excel 出力への LT シート追加（仕様判断が必要だったため）。
 
 ## 決定事項ログ
 

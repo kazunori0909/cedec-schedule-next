@@ -12,7 +12,7 @@
  *   URL（公開）: /cgi/generate_cedil.php?key=<トークン>[&year=2025]
  *     - year 未指定 … 年度テーブルの最新年度のみ取得
  *     - year=2025   … テーブルにタグ番号があればその年度を取得
- *     - ?key= は必須。generate_cedil.config.php の 'key' と一致しなければ 403
+ *     - ?key= は必須。設定ファイルの 'key' と一致しなければ 403（下の $CONFIG_CANDIDATES 参照）
  *   CLI（cron/ローカル）: php generate_cedil.php [2025]
  *     - トークン不要（サーバーアクセス自体が前提）。year 未指定なら最新年度
  *
@@ -56,10 +56,26 @@ ini_set('display_errors', '0');
 
 $isCli = (PHP_SAPI === 'cli');
 
-// URL 経由で要求する秘密トークン。コミットしない generate_cedil.config.php から読む。
-// 例: <?php return ['key' => '<十分に長いランダム文字列>'];
-$config = @include __DIR__ . '/generate_cedil.config.php';
-$EXPECTED_KEY = (is_array($config) && isset($config['key'])) ? (string) $config['key'] : '';
+// URL 経由で要求する秘密トークン。コミットしない設定ファイル（`return ['key' => '...'];`）から読む。
+// 読み込み順は次の通りで、最初に見つかったものを使う。
+//   1. <webroot の親>/cedil_config.php … 推奨。Web 公開されず、next build の out/ にも入らない
+//   2. <webroot>/cgi/generate_cedil.config.php … 従来パス（後方互換）
+// どちらも無い／key が空なら URL 経由の呼び出しはすべて 403（fail-safe）。
+$CONFIG_CANDIDATES = [
+    dirname(__DIR__, 2) . '/cedil_config.php',
+    __DIR__ . '/generate_cedil.config.php',
+];
+$EXPECTED_KEY = '';
+foreach ($CONFIG_CANDIDATES as $configPath) {
+    if (!is_readable($configPath)) {
+        continue;
+    }
+    $config = @include $configPath;
+    if (is_array($config) && isset($config['key']) && is_string($config['key'])) {
+        $EXPECTED_KEY = $config['key'];
+        break;
+    }
+}
 
 /** 指定タグの検索結果を全ページ巡回し、[{title, url}] を返す */
 function fetchCedilList(int $tag): array
