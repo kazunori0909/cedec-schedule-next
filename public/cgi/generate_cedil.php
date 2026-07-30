@@ -154,12 +154,17 @@ function processYear(string $year, int $tag): array
     $json = json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     $ok = ($json !== false) && (@file_put_contents($path, $json) !== false);
 
-    return ['year' => $year, 'count' => count($list), 'ok' => $ok];
+    // update_date を返して、キャッシュではなく実行された応答であることを確認できるようにする
+    return ['year' => $year, 'count' => count($list), 'ok' => $ok, 'update_date' => $result['update_date']];
 }
 
 // ---- 認証（URL 経由のみ）------------------------------------------------------
 if (!$isCli) {
     header('Content-Type: application/json; charset=utf-8');
+    // 更新エンドポイントのため、ブラウザ／プロキシ／サーバー高速化に応答をキャッシュさせない
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+    header('Expires: 0');
 
     $providedKey = (isset($_GET['key']) && is_string($_GET['key'])) ? $_GET['key'] : '';
     // 設定漏れ（トークン未設定）は fail-safe で拒否する。timing 安全に比較する。
