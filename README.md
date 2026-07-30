@@ -22,7 +22,7 @@ CEDiLに登録済みの資料リンクも自動付与します。
 | フロントエンド | Next.js 16 + React 19 + TypeScript（React Compiler 有効） |
 | スタイリング   | Tailwind CSS v4                                           |
 | 状態管理       | Zustand（localStorage で永続化）                          |
-| データ生成     | TypeScript スクリプト（tsx + cheerio）                    |
+| データ生成     | TypeScript スクリプト（tsx + cheerio）／CEDiL資料は PHP   |
 | 開発環境       | devcontainer（Node.js 22）                                |
 
 ## ファイル構成
@@ -68,13 +68,14 @@ cedec_schedule/
 │   └── types/schedule.ts       型定義
 # テストは各対象ファイルの隣に *.test.ts(x) として同居配置
 ├── public/
+│   ├── cgi/
+│   │   └── generate_cedil.php  CEDiL資料JSON生成（URL/cronで実行・XServer）
 │   └── web_data/               生成済みJSON（git管理外）
 │       └── {year}/
 │           ├── schedule.json
 │           └── cedil.json
 ├── scripts/                    データ生成スクリプト（tsx で実行）
 │   ├── generate_json.ts        スケジュールJSON生成スクリプト
-│   ├── generate_cedil.ts       CEDiL JSONデータ生成スクリプト
 │   ├── generate_youtube.ts     YouTube動画リスト生成スクリプト
 │   ├── lib/                    共通ユーティリティ
 │   └── parsers/                年度別フォーマットパーサー（before2017・2018〜2024・2025年以降JSON）
@@ -105,7 +106,7 @@ npm install
 npm run dev          # 開発サーバー（http://localhost:3000）
 npm run build        # 本番ビルド（out/ に静的ファイル生成）
 npm run generate:json {year}      # schedule.json 生成
-npm run generate:cedil {year}     # cedil.json 生成
+php public/cgi/generate_cedil.php {year}   # cedil.json 生成（PHP・引数なし=最新年度 / all=全年度）
 npm run generate:youtube          # YouTube動画リスト取得（要 .env の YOUTUBE_API_KEY）
 ```
 
@@ -148,7 +149,7 @@ npm run generate:youtube          # YouTube動画リスト取得（要 .env の 
 
 > **`cedil_tag_no` は新規作成時には指定しない。**
 > CEDiL検索タグIDは、セッション資料がCEDiLに登録される会期中〜翌週ごろになって、CEDiLのURLから判明する。
-> 新年度の追加時点ではまだ分からないため**省略する**。省略した年度は `generate:cedil` の対象外となり `cedil.json` も生成されない。判明後の手順は「8. CEDiLタグの更新」を参照。
+> 新年度の追加時点ではまだ分からないため**省略する**。省略した年度は CEDiL 資料生成（`public/cgi/generate_cedil.php`）の対象外となり `cedil.json` も生成されない。判明後の手順は「8. CEDiLタグの更新」を参照。
 
 Developers' Night がある場合は `dev_night` を追加する（`day_index`=1・`start_time`=`"19:30"`・`end_time`=`"21:30"` は自動補完）。
 
@@ -204,10 +205,9 @@ npm run generate:youtube -- --force  # 強制再取得
 
 ```bash
 npm run generate:json {year}    # public/web_data/{year}/schedule.json を生成
-npm run generate:cedil {year}   # public/web_data/{year}/cedil.json を生成（cedil_tag_no 設定時のみ）
 ```
 
-`cedil_tag_no` が未設定の年度は `generate:cedil` でスキップされ、`cedil.json` は生成されない。新規作成直後はこの状態が正常で、`generate:json` のみ実行すればよい。
+CEDiL 資料（`cedil.json`）は別系統。`cedil_tag_no` 判明後に PHP エンドポイント（`public/cgi/generate_cedil.php`、「8. CEDiLタグの更新」）で生成する。新規作成直後は `generate:json` のみ実行すればよい。
 
 ### 6. 非公式イベントの追加（custom.ts、任意）
 
@@ -237,10 +237,25 @@ npm run generate:cedil {year}   # public/web_data/{year}/cedil.json を生成（
 
 セッション資料がCEDiLに登録されると検索タグIDが判明する。CEDiLの年度別検索ページのURL（`https://cedil.cesa.or.jp/cedil_sessions/search_tag/{tag}` 形式）から末尾の `{tag}` を読み取る。
 
-判明したら `SCHEDULE_SETTING` の該当年度に `cedil_tag_no` を追記し、`npm run generate:cedil {year}` を実行して `cedil.json` を生成・資料リンクを付与する。
+判明したら **2箇所** にタグ番号を追記する（両方必要）。
+
+1. `src/lib/cedec.ts` の `SCHEDULE_SETTING` の該当年度 `cedil_tag_no` — アプリが CEDiL を fetch し資料リンクを付与するために使う
+2. `public/cgi/generate_cedil.php` の `$YEAR_TAG` テーブル — `cedil.json` 生成に使う
+
+その後、CEDiL 資料は PHP エンドポイントで生成・更新する（会期中は追加のたびに再実行）。
+
+```bash
+# ローカル生成（CLI）
+php public/cgi/generate_cedil.php {year}
+
+# デプロイ後は URL / cron でも実行可
+#   https://<サイト>/cgi/generate_cedil.php?year={year}
+#   引数（?year=）なし=最新年度 / ?year=all=全年度
+```
 
 ## 更新履歴
 
+- 2026年 CEDiL 資料生成を PHP エンドポイント（`public/cgi/generate_cedil.php`）へ移行。URL/cron から `cedil.json` を再ビルドなしで更新できるようにし、`scripts/generate_cedil.ts` を廃止
 - 2026年 UIプリミティブを shadcn/ui（Radix ベース）に統合（手書きボタン→`Button`、ドロワー/サイドメニュー→`Sheet`、ツールチップ→Popover、外部リンク→`ExternalTextLink`。フォーカストラップ等のアクセシビリティを改善）
 - 2026年 Excelダウンロード機能を追加（お気に入り状態を反映・カテゴリ色を背景に表示）
 - 2026年 カテゴリ色を2026年公式サイトの配色に更新

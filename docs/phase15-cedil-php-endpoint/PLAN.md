@@ -65,3 +65,15 @@ JSON_UNESCAPED_SLASHES`・圧縮）で書き出し
 - `public/` 直下を汚さないため `public/cgi/` 配下に配置（ユーザー指定）。
 - 年度→タグは PHP 内テーブルで保持し、引数（未指定＝最新 / 年度指定 / `all`）で対象を切り替える
   （ユーザー指定）。
+
+### 2026-07-30: 旧 TS スクリプト（generate_cedil.ts）を廃止
+
+- XServer 実機で PHP 経由の `cedil.json` 更新を確認できたため、`scripts/generate_cedil.ts` を削除。
+  CEDiL 生成は PHP に一本化する（ユーザー指示）。
+- 影響範囲を調査し、共有物は残すことを確認: `cheerio` 依存（generate_json ほかで使用）、
+  `scripts/lib/paths.ts` の `outputDir`（generate_json で使用）、`SCHEDULE_SETTING.cedil_tag_no`
+  （アプリの CEDiL fetch 抑止・資料リンク付与で使用）。
+- 年度→タグ番号は **cedec.ts（アプリ用）と generate_cedil.php（生成用）の 2 箇所** で保持する
+  構成になる。新年度のタグ判明時は両方へ追記する（README「8. CEDiLタグの更新」に明記）。
+- ローカル生成手段は `php public/cgi/generate_cedil.php {year}`（CLI）に一本化。
+  開発環境に php が必要になるが、利便性優先の割り切りとして許容。

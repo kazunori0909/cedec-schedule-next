@@ -41,4 +41,4 @@ description: CEDEC の既存年度のセッション情報（タイムテーブ�
   `format` を持つ年度）。
 - `live` 配信URL は会期が近づくと公開される。公開後は `YEAR_CONFIGS` の該当年度に
   `live: "timetable/free_lives/"` を追記してから再生成する。
-- CEDiL 資料リンクは別系統（`npm run generate:cedil`、`cedil_tag_no` 判明後）。
+- CEDiL 資料リンクは別系統（PHP エンドポイント `public/cgi/generate_cedil.php`、`cedil_tag_no` 判明後）。ローカルは `php public/cgi/generate_cedil.php {year}`、本番は URL/cron で実行する。

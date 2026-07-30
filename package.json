@@ -7,7 +7,6 @@
     "build": "next build",
     "start": "next start",
     "generate:json": "tsx scripts/generate_json.ts",
-    "generate:cedil": "tsx scripts/generate_cedil.ts",
     "generate:youtube": "tsx scripts/generate_youtube.ts",
     "lint": "eslint src scripts",
     "format": "prettier --write .",
