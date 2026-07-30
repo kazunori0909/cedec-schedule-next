@@ -6,12 +6,19 @@
 - `.env` を `git add` しない（`.gitignore` で除外済み）。
 - `NEXT_PUBLIC_` プレフィックスの環境変数に秘密情報を入れない（ブラウザバンドルに含まれて公開される）。
 - 新しい API キー・認証情報は `.env` に追加し、`.env.example` にはプレースホルダーのみ記載する。
+- CEDiL 更新エンドポイントの秘密トークンは `public/cgi/generate_cedil.config.php` に置く（`.gitignore` 済み）。
+  コミットするのは `generate_cedil.config.sample.php`（プレースホルダーのみ）だけ。
+  未設定のうちは URL 経由の呼び出しがすべて 403 になる fail-safe のため、**「動かないから」で
+  トークンをコード側へ直書きしない**。
 
 ## 外部データの安全な扱い
 
 - `schedule.json` / `cedil.json` は外部サイト由来のため信頼できない入力として扱う。
 - 外部 URL（`detail_url`、`live`、`youtube`、`cedil_url`、`floor_url`）を `<a href>` に渡す場合は **必ず `safeExternalUrl()`（`src/lib/utils.ts`）を経由する**。`javascript:` / `data:` 等のスキームによる XSS を防ぐ。
-- `dangerouslySetInnerHTML` は原則禁止。例外は `src/lib/custom.ts` のハードコード済み非公式イベント HTML のみ（新規追加時は必ずレビュー）。
+- `dangerouslySetInnerHTML` は原則禁止。例外はリポジトリ内にハードコードされたイベント HTML（`ExtraEvent.html`）のみで、
+  出どころは次の2つに限る（いずれも新規追加時は必ずレビュー）。**外部データ由来の HTML は絶対に渡さない。**
+  - `src/lib/custom.ts` の非公式イベント
+  - `src/lib/cedec.ts` の `SCHEDULE_SETTING`（`events` と `dev_night` から `resolveDevNight()` が生成する注記）
 - セッションタイトル・説明文は JSX 経由でレンダリングする（React が自動エスケープ）。
 
 ## `public/` ディレクトリ

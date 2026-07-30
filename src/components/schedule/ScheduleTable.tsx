@@ -1,7 +1,7 @@
 "use client";
 
 import type { RoomColumn } from "@/types/schedule";
-import { getSessionId, buildMatrix } from "@/lib/schedule";
+import { getSessionId, getSessionRoom, buildMatrix } from "@/lib/schedule";
 import { getFloorURL } from "@/lib/cedec";
 import { SessionCell } from "@/components/schedule/SessionCell";
 import { RoomLink } from "@/components/ui/RoomLink";
@@ -43,7 +43,10 @@ export function ScheduleTable({
             <th className={tableHeaderVariants({ kind: "time" })}></th>
             {columns.map((col) => (
               <th key={col.key} className={tableHeaderVariants({ kind: "room" })}>
-                <RoomLink name={col.name} url={getFloorURL(col.roomName ?? col.name, year)} />
+                <RoomLink
+                  name={col.name}
+                  url={col.roomName ? getFloorURL(col.roomName, year) : undefined}
+                />
               </th>
             ))}
           </tr>
@@ -87,7 +90,8 @@ export function ScheduleTable({
                         onToggleFavorite={() => onToggleFavorite(sessionId)}
                         cedilUrl={cedilLookup[sessionId]}
                         hideSpecs={hideSpecs}
-                        roomName={col.roomName ?? col.name}
+                        // 複数会場が混在するカラム（お気に入りモード）ではセッション自身の会場を使う
+                        roomName={col.roomName ?? getSessionRoom(session)}
                       />
                     </td>
                   );

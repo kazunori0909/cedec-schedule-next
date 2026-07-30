@@ -1,13 +1,8 @@
 import type { Border, Borders, Fill } from "exceljs";
 import type { ScheduleData } from "@/types/schedule";
-import {
-  buildRoomColumns,
-  buildMatrix,
-  getSessionId,
-  getTimeRange,
-  generateTimeRows,
-} from "@/lib/schedule";
+import { buildMatrix, buildScheduleViewModel, getSessionId } from "@/lib/schedule";
 import { findYearSetting, getDateList } from "@/lib/cedec";
+import { resolveCategoryHex } from "@/components/categoryBadgeColors";
 
 const thinBorder: Border = { style: "thin", color: { argb: "FF000000" } };
 const allBorders: Partial<Borders> = {
@@ -17,25 +12,9 @@ const allBorders: Partial<Borders> = {
   right: thinBorder,
 };
 
-// セッションセル背景色の淡色化レート（0: 元色のまま / 1: 白）
-// プレビューは /tmp/cedec_color_preview.html で確認できる
-export const FILL_LIGHTEN_RATE = 0.7;
-
-// globals.css の --cat-* 変数に対応した背景色（hex 6桁）
-const CATEGORY_HEX: Record<string, string> = {
-  ENG: "A88E1E",
-  VA: "E55E74",
-  PRD: "5269CE",
-  BP: "45B2E0",
-  SND: "76B946",
-  GD: "3ACBB4",
-  AC: "B677D3",
-  NW: "188B42", // 2011/2012 のみ
-  PG: "A88E1E", // cat-eng と同色
-  PD: "45B2E0", // cat-bp と同色
-  BM: "45B2E0", // cat-bp と同色
-  基調講演: "1F3C5A",
-};
+// セッションセル背景色の淡色化レート（0: 元色のまま / 1: 白）。
+// 画面のバッジ色をそのまま塗ると濃すぎて文字が読みにくいため白に寄せる
+const FILL_LIGHTEN_RATE = 0.7;
 
 // hex 6桁 + レートで白に近づける → ARGB 文字列を返す
 function lightenToArgb(hex6: string, rate: number): string {
@@ -78,11 +57,16 @@ export async function exportScheduleToExcel(
 
   for (let dayIndex = 0; dayIndex < dateList.length; dayIndex++) {
     const date = dateList[dayIndex];
-    const columns = buildRoomColumns(scheduleData, dayIndex, year);
+    // お気に入りは★印で表現するためフィルターせず、画面と同じ導出ロジックを使う
+    const { displayColumns: columns, timeRows } = buildScheduleViewModel(
+      scheduleData,
+      year,
+      dayIndex,
+      false,
+      {}
+    );
     if (columns.length === 0) continue;
 
-    const timeRange = getTimeRange(columns);
-    const timeRows = generateTimeRows(timeRange.min, timeRange.max);
     const matrix = buildMatrix(timeRows, columns);
 
     const m = date.getMonth() + 1;
@@ -143,8 +127,7 @@ export async function exportScheduleToExcel(
 
         // セッションセルにカテゴリ背景色を適用（淡色化レート適用・文字は黒）
         if (cellInfo.kind === "session" && cellInfo.session!.kind === "session") {
-          const category = cellInfo.session!.data.category;
-          const hex6 = CATEGORY_HEX[category];
+          const hex6 = resolveCategoryHex(cellInfo.session!.data.category);
           if (hex6) {
             wsCell.fill = makeSolidFill(lightenToArgb(hex6, FILL_LIGHTEN_RATE));
             wsCell.font = { color: { argb: "FF333333" } };

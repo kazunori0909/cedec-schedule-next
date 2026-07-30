@@ -107,7 +107,6 @@
   --color-cat-snd: var(--cat-snd);
   --color-cat-gd: var(--cat-gd);
   --color-cat-ac: var(--cat-ac);
-  --color-cat-int: var(--cat-int);
   --color-cat-keynote: var(--cat-keynote);
   --color-cat-default: var(--cat-default);
   --color-cat-hidden: var(--cat-hidden);
@@ -133,7 +132,6 @@
   --cat-snd: #76b946; /* サウンド */
   --cat-gd: #3acbb4; /* ゲームデザイン */
   --cat-ac: #b677d3; /* アカデミック・基盤技術 */
-  --cat-int: #dd84bf; /* インタラクティブ */
   --cat-keynote: #1f3c5a; /* 基調講演 */
   --cat-default: #999999;
   --cat-hidden: #c0c0c0; /* フィルター非表示時 */

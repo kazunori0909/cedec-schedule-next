@@ -7,7 +7,7 @@
 - [x] prettier 3.9 のフォーマット差分（`src/types/schedule.ts`）を追従
 - [x] lint / tsc --noEmit / test:run / build / format:check がすべて通過することを確認
 - [x] docs/README.md の開発フェーズ記録テーブルに Phase 8 を追加
-- [ ] コミット
+- [x] コミット（PR #52 `chore/deps-safe-updates` としてマージ済み）
 
 ## 共通
 
