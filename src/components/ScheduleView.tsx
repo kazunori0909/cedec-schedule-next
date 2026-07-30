@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
-import { CASH_SETTING, findYearSetting, getDateList, LT_DAY_INDEX } from "@/lib/cedec";
+import { CASH_SETTING, findYearSetting, getDateList } from "@/lib/cedec";
 import { useCurrentYearState, useScheduleStore } from "@/store/scheduleStore";
 import { useCurrentTimeRow } from "@/hooks/useCurrentTimeRow";
 import { useScheduleData } from "@/hooks/useScheduleData";
 import { setYearParam, useYearParam } from "@/hooks/useYearParam";
-import { buildLightningTalkViewModel, buildScheduleViewModel } from "@/lib/schedule";
+import {
+  buildLightningTalkViewModel,
+  buildScheduleViewModel,
+  resolveActiveDay,
+} from "@/lib/schedule";
 import { formatCedilDate } from "@/lib/cedil";
 import { getNow } from "@/lib/utils";
 
@@ -59,10 +63,11 @@ function ScheduleViewInner({ year }: { year: string }) {
     dateList
   );
 
-  // LT データを持たない年度で LT タブの選択状態が復元された場合は Day1 にフォールバックする
   const lightningTalks = scheduleData?.lightning_talks ?? [];
-  const isLightningTalkTab = dayIndex === LT_DAY_INDEX && lightningTalks.length > 0;
-  const activeDayIndex = dayIndex === LT_DAY_INDEX && !isLightningTalkTab ? 0 : dayIndex;
+  const { isLightningTalkTab, activeDayIndex } = resolveActiveDay(
+    dayIndex,
+    lightningTalks.length > 0
+  );
 
   // ViewModel: 部屋カラム・時刻軸
   // LT タブは全日程を横断するため、日付・お気に入りによる絞り込みは行わない

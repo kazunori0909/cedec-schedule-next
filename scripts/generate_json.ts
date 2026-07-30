@@ -138,10 +138,16 @@ function postprocessSessions(
 }
 
 function toEntry(s: RawSession): Record<string, unknown> {
-  const subCategory = s.sub_category
-    .split(",")
-    .map((x) => x.trim())
-    .filter((x) => x !== "");
+  // 公式HTMLがPC用・スマホ用で同じ分野リストを二重に持つ年度（2011等）があるため重複を除去する。
+  // 重複したままだと表示側でバッジが二重に出て React の key も衝突する。
+  const subCategory = [
+    ...new Set(
+      s.sub_category
+        .split(",")
+        .map((x) => x.trim())
+        .filter((x) => x !== "")
+    ),
+  ];
 
   const entry: Record<string, unknown> = {
     id: s.session_id,

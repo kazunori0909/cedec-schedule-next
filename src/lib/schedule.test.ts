@@ -11,8 +11,11 @@ import {
   getAllCategories,
   getSessionId,
   getSessionRange,
+  getSessionRoom,
   getTimeRange,
+  resolveActiveDay,
 } from "@/lib/schedule";
+import { LT_DAY_INDEX } from "@/lib/cedec";
 
 // ---------------------------------------------------------------------------
 // テスト用ファクトリ
@@ -450,6 +453,20 @@ describe("buildFavoriteColumns", () => {
     expect(result[1].sessions).toHaveLength(1);
   });
 
+  it("複数会場が混在するため roomName は持たない（セル側でセッションの会場を使う）", () => {
+    const columns = buildRoomColumns(
+      makeScheduleData([
+        makeSession({ id: "a", room: "1" }),
+        makeSession({ id: "b", room: "2", start: "10:00", end: "11:00" }),
+      ]),
+      0,
+      "2020"
+    );
+    const fav = buildFavoriteColumns(columns, { a: true, b: true }, 0);
+    expect(fav.every((c) => c.roomName === undefined)).toBe(true);
+    expect(fav.flatMap((c) => c.sessions).map(getSessionRoom)).toEqual(["1", "2"]);
+  });
+
   it("カラム名は お気に入り N 形式になる", () => {
     const result = buildFavoriteColumns(columns, { s1: true, s3: true }, 0);
     expect(result[0].name).toBe("お気に入り 1");
@@ -521,5 +538,28 @@ describe("buildLightningTalkViewModel", () => {
     const vm = buildLightningTalkViewModel([]);
     expect(vm.displayColumns).toHaveLength(0);
     expect(vm.timeRows).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolveActiveDay（永続化された dayIndex → 表示対象の解決）
+// ---------------------------------------------------------------------------
+describe("resolveActiveDay", () => {
+  it("通常の日付インデックスはそのまま返す", () => {
+    expect(resolveActiveDay(2, true)).toEqual({ isLightningTalkTab: false, activeDayIndex: 2 });
+  });
+
+  it("LT を持つ年度で LT_DAY_INDEX なら LT タブになる", () => {
+    expect(resolveActiveDay(LT_DAY_INDEX, true)).toEqual({
+      isLightningTalkTab: true,
+      activeDayIndex: LT_DAY_INDEX,
+    });
+  });
+
+  it("LT を持たない年度で LT_DAY_INDEX が復元されたら Day1 にフォールバックする", () => {
+    expect(resolveActiveDay(LT_DAY_INDEX, false)).toEqual({
+      isLightningTalkTab: false,
+      activeDayIndex: 0,
+    });
   });
 });

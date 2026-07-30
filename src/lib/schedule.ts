@@ -9,6 +9,7 @@ import {
   findYearSetting,
   parseTimeToMinutes,
   formatMinutesToTime,
+  LT_DAY_INDEX,
   MIN_MINUTES,
   resolveDevNight,
 } from "@/lib/cedec";
@@ -87,11 +88,10 @@ export function buildRoomColumns(data: ScheduleData, dayIndex: number, year: str
 
   // ソート済み部屋名でカラムを構築
   const sortedNames = sortRoomNames([...roomMap.keys()]);
-  const columns: RoomColumn[] = sortedNames.map((name) => ({
-    name: name.startsWith("不明_") ? "不明" : name,
-    key: name,
-    sessions: roomMap.get(name) ?? [],
-  }));
+  const columns: RoomColumn[] = sortedNames.map((name) => {
+    const label = name.startsWith("不明_") ? "不明" : name;
+    return { name: label, key: name, roomName: label, sessions: roomMap.get(name) ?? [] };
+  });
 
   // 追加イベント（events）を最初の部屋に追加
   if (setting.events && columns.length > 0) {
@@ -125,11 +125,8 @@ function placeCustomEvent(columns: RoomColumn[], ev: ExtraEvent): void {
   const idx = placeInNonOverlappingGroup(groups, item);
   // 既存カラムに収まらない場合は新カラムを追加
   if (idx >= columns.length) {
-    columns.push({
-      name: ev.room_no || "非公式",
-      key: `custom_${idx}`,
-      sessions: groups[idx],
-    });
+    const label = ev.room_no || "非公式";
+    columns.push({ name: label, key: `custom_${idx}`, roomName: label, sessions: groups[idx] });
   }
 }
 
@@ -139,16 +136,17 @@ export function getSessionRange(u: UnifiedSession): { start: number; end: number
   return { start: parseTimeToMinutes(startStr), end: parseTimeToMinutes(endStr) };
 }
 
-export function getSessionStartString(u: UnifiedSession): string {
+function getSessionStartString(u: UnifiedSession): string {
   return u.kind === "session" ? u.data.start : u.data.start_time;
 }
 
-export function getSessionEndString(u: UnifiedSession): string {
+function getSessionEndString(u: UnifiedSession): string {
   return u.kind === "session" ? u.data.end : u.data.end_time;
 }
 
-export function getSessionTitle(u: UnifiedSession): string {
-  return u.data.title;
+// セッション自身が持つ会場名。カラム内に複数会場が混在する場合（お気に入りモード）に使う
+export function getSessionRoom(u: UnifiedSession): string {
+  return u.kind === "session" ? u.data.room : u.data.room_no;
 }
 
 // タイトルに講演キャンセル表記を含むか（外部データ由来のマーカー判定）
@@ -252,6 +250,24 @@ export function buildScheduleViewModel(
   };
 }
 
+export interface ActiveDay {
+  /** ライトニングトークタブを表示中か */
+  isLightningTalkTab: boolean;
+  /** 描画・日付タブに渡す dayIndex（LT タブ表示中は LT_DAY_INDEX のまま） */
+  activeDayIndex: number;
+}
+
+// 永続化された dayIndex から表示対象を決める。
+// LT データを持たない年度で LT タブの選択状態が復元された場合は Day1 にフォールバックする。
+export function resolveActiveDay(dayIndex: number, hasLightningTalks: boolean): ActiveDay {
+  if (dayIndex !== LT_DAY_INDEX) {
+    return { isLightningTalkTab: false, activeDayIndex: dayIndex };
+  }
+  return hasLightningTalks
+    ? { isLightningTalkTab: true, activeDayIndex: LT_DAY_INDEX }
+    : { isLightningTalkTab: false, activeDayIndex: 0 };
+}
+
 // ライトニングトークの会場カラムキー（"1-2" = 1日目・第2会場）
 function ltColumnKey(talk: Session): string {
   return `${talk.day}-${talk.room}`;
@@ -259,7 +275,7 @@ function ltColumnKey(talk: Session): string {
 
 // ライトニングトークを「日 × 会場」のカラムへ振り分ける。
 // 講演が存在する組み合わせのみを、日→会場の順に並べて返す。
-export function buildLightningTalkColumns(talks: Session[]): RoomColumn[] {
+function buildLightningTalkColumns(talks: Session[]): RoomColumn[] {
   const byColumn = new Map<string, UnifiedSession[]>();
   for (const talk of talks) {
     const key = ltColumnKey(talk);
@@ -288,7 +304,7 @@ export function buildLightningTalkColumns(talks: Session[]): RoomColumn[] {
 
 // ライトニングトークは 6 分刻みで 5 分固定グリッドに乗らず、日によって開催時間も異なる。
 // そのため実際に出現する開始・終了時刻の和集合を時刻軸にする。
-export function buildLightningTalkTimeRows(columns: RoomColumn[]): string[] {
+function buildLightningTalkTimeRows(columns: RoomColumn[]): string[] {
   const times = new Set<string>();
   for (const col of columns) {
     for (const u of col.sessions) {

@@ -14,6 +14,17 @@ vi.mock("@/lib/cedil", async (importOriginal) => {
   const original = await importOriginal<typeof import("@/lib/cedil")>();
   return { ...original, fetchCedil: vi.fn() };
 });
+// 年度 "9999" を「cedil_tag_no 未設定の年度」（新年度追加直後の状態）として扱う。
+// 実際の SCHEDULE_SETTING は全年度にタグ番号を持つため、設定側をモックして再現する。
+const NO_CEDIL_TAG_YEAR = "9999";
+vi.mock("@/lib/cedec", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/lib/cedec")>();
+  return {
+    ...original,
+    findYearSetting: (year: string) =>
+      year === "9999" ? { year: "9999", first_date: "0722" } : original.findYearSetting(year),
+  };
+});
 
 import { fetchSchedule } from "@/lib/schedule";
 import { fetchCedil } from "@/lib/cedil";
@@ -107,6 +118,18 @@ describe("useScheduleData", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.cedilLookup).toEqual({});
     expect(result.current.cedilCount).toBe(0);
+  });
+
+  it("cedil_tag_no 未設定の年度では CEDiL を取得しない（404 リクエスト抑止）", async () => {
+    mockFetchSchedule.mockResolvedValue(MOCK_SCHEDULE);
+    mockFetchCedil.mockResolvedValue(null);
+
+    const { result } = renderHook(() => useScheduleData(NO_CEDIL_TAG_YEAR, DATE_LIST));
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(mockFetchCedil).not.toHaveBeenCalled();
+    expect(result.current.cedilLookup).toEqual({});
+    expect(result.current.cedilUpdate).toBeUndefined();
   });
 
   it("年度が変わると新しいデータを取得する", async () => {

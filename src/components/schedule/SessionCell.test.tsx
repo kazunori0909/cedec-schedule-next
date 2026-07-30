@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { Session, UnifiedSession } from "@/types/schedule";
 import { SessionCell } from "@/components/schedule/SessionCell";
+import { LIVE_URL_PENDING } from "@/lib/cedec";
 
 function makeSession(overrides: Partial<Session> = {}): Session {
   return {
@@ -139,6 +140,51 @@ describe("SessionCell - セッション表示", () => {
     };
     render(<SessionCell {...DEFAULT_PROPS} session={session} />);
     expect(screen.getByText("資料公開: 不明")).toBeInTheDocument();
+  });
+
+  it("live が実 URL のとき YouTube リンクを表示する", () => {
+    const session: UnifiedSession = {
+      kind: "session",
+      data: makeSession({ live: "https://www.youtube.com/watch?v=xxxx" }),
+    };
+    render(<SessionCell {...DEFAULT_PROPS} session={session} />);
+    expect(screen.getByRole("link", { name: /YouTube/ })).toHaveAttribute(
+      "href",
+      "https://www.youtube.com/watch?v=xxxx"
+    );
+    expect(screen.queryByText("Live配信予定")).not.toBeInTheDocument();
+  });
+
+  it("live が URL 未確定センチネルのとき Live配信予定 を表示しリンクにしない", () => {
+    const session: UnifiedSession = {
+      kind: "session",
+      data: makeSession({ live: LIVE_URL_PENDING }),
+    };
+    render(<SessionCell {...DEFAULT_PROPS} session={session} />);
+    expect(screen.getByText("Live配信予定")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /YouTube/ })).not.toBeInTheDocument();
+  });
+
+  it("live が無いときは Live配信予定 も YouTube リンクも表示しない", () => {
+    const session: UnifiedSession = { kind: "session", data: makeSession() };
+    render(<SessionCell {...DEFAULT_PROPS} session={session} />);
+    expect(screen.queryByText("Live配信予定")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /YouTube/ })).not.toBeInTheDocument();
+  });
+
+  it("講演キャンセル表記のセッションは淡色表示になる", () => {
+    const session: UnifiedSession = {
+      kind: "session",
+      data: makeSession({ title: "【講演キャンセル】中止セッション" }),
+    };
+    const { container } = render(<SessionCell {...DEFAULT_PROPS} session={session} />);
+    expect(container.firstElementChild).toHaveClass("opacity-50");
+  });
+
+  it("通常のセッションは淡色表示にならない", () => {
+    const session: UnifiedSession = { kind: "session", data: makeSession() };
+    const { container } = render(<SessionCell {...DEFAULT_PROPS} session={session} />);
+    expect(container.firstElementChild).not.toHaveClass("opacity-50");
   });
 
   it("スピーカーが複数いるとき、最初の1名のみ表示し ほかN名 ボタンを出す", () => {

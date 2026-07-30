@@ -6,6 +6,7 @@ CEDiLに登録済みの資料リンクも自動付与します。
 ## 機能
 
 - 部屋別タイムテーブル表示
+- ライトニングトークタブ（LT 枠を「日 × 会場」で横断表示。LT データがある年度のみ）
 - 分野フィルター（クリックで表示/非表示切り替え）
 - お気に入り登録（localStorageで保存）
 - 現在時刻の自動ハイライト（開催期間中は1分ごとに更新）
@@ -34,7 +35,7 @@ cedec_schedule/
 │   ├── components/             UIコンポーネント
 │   │   ├── ScheduleView.tsx    メインビュー
 │   │   ├── CategoryBadge.tsx   カテゴリバッジ
-│   │   ├── DateSelector.tsx    日付選択タブ
+│   │   ├── DateSelector.tsx    日付選択タブ（LTタブ含む）
 │   │   ├── ExcelDownloadButton.tsx  Excelダウンロードボタン
 │   │   ├── FavoriteToggle.tsx  お気に入りモード切替
 │   │   ├── FilterDrawer.tsx    フィルター（モバイル用）
@@ -62,17 +63,16 @@ cedec_schedule/
 │   │   ├── cedil.ts            CEDiL資料リンク付与
 │   │   ├── custom.ts           非公式イベント設定
 │   │   ├── exportExcel.ts      Excelエクスポートロジック（exceljs）
-│   │   ├── schedule.ts         JSON取得・パース・buildScheduleViewModel・buildMatrix
+│   │   ├── schedule.ts         JSON取得・パース・buildScheduleViewModel・buildLightningTalkViewModel・buildMatrix
 │   │   └── utils.ts            共通ユーティリティ（safeExternalUrl 等）
 │   ├── store/scheduleStore.ts  Zustandストア
 │   └── types/schedule.ts       型定義
 # テストは各対象ファイルの隣に *.test.ts(x) として同居配置
 ├── public/
-│   ├── cgi/
-│   │   └── generate_cedil.php  CEDiL資料JSON生成（URL/cronで実行・XServer）
+│   ├── cgi/generate_cedil.php  CEDiL資料JSON生成（URL/cronで実行・XServer）
 │   └── web_data/               生成済みJSON（git管理外）
 │       └── {year}/
-│           ├── schedule.json
+│           ├── schedule.json   セッション（LTがある年度は lightning_talks も含む）
 │           └── cedil.json
 ├── scripts/                    データ生成スクリプト（tsx で実行）
 │   ├── generate_json.ts        スケジュールJSON生成スクリプト
@@ -91,9 +91,13 @@ cedec_schedule/
 │   ├── settings.json           パーミッション設定
 │   └── skills/
 │       ├── new-year/           新年度対応スキル（`/new-year` で起動）
-│       └── update-timetable/   タイムテーブル更新スキル（`/update-timetable` で起動）
+│       ├── update-timetable/   タイムテーブル更新スキル（`/update-timetable` で起動）
+│       ├── phase-new/          新規開発フェーズ追加スキル（`/phase-new` で起動）
+│       └── phase-compress/     完了フェーズ記録の圧縮スキル（`/phase-compress` で起動）
 ├── .devcontainer/              開発環境定義
 ├── package.json
+├── cedil_config.sample.php     CEDiL更新エンドポイントのトークン設定サンプル
+│                               （実値の cedil_config.php は同じ階層に置く・git 管理外）
 └── .env.example                環境変数テンプレート
 ```
 
@@ -105,6 +109,7 @@ devcontainer での起動を推奨。コンテナ起動後、依存をインス�
 npm install
 npm run dev          # 開発サーバー（http://localhost:3000）
 npm run build        # 本番ビルド（out/ に静的ファイル生成）
+npm run test:run     # テスト（Vitest・1回実行）
 npm run generate:json {year}      # schedule.json 生成
 php public/cgi/generate_cedil.php {year}   # cedil.json 生成（PHP CLI・引数なしは最新年度）
 npm run generate:youtube          # YouTube動画リスト取得（要 .env の YOUTUBE_API_KEY）
@@ -138,12 +143,13 @@ npm run generate:youtube          # YouTube動画リスト取得（要 .env の 
 { year: "2026", first_date: "MMDD" },
 ```
 
-| パラメータ     | 説明                                                     |
-| -------------- | -------------------------------------------------------- |
-| `year`         | 開催年度                                                 |
-| `first_date`   | 初日の日付（MMDD形式）例: `"0820"`                       |
-| `cedil_tag_no` | CEDiL検索タグID（任意）。未設定なら CEDiL 連携をスキップ |
-| `dev_night`    | Developers' Night 設定（任意、下記参照）                 |
+| パラメータ       | 説明                                                                                                              |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `year`           | 開催年度                                                                                                          |
+| `first_date`     | 初日の日付（MMDD形式）例: `"0820"`                                                                                |
+| `cedil_tag_no`   | CEDiL検索タグID（任意）。未設定なら CEDiL 連携をスキップ                                                          |
+| `dev_night`      | Developers' Night 設定（任意、下記参照）                                                                          |
+| `room_overrides` | 会場名の表示差し替え（任意）。`{ day, room, display }` の配列。例: 2025年 Day1 の「第13会場」を「Epic部屋」と表示 |
 
 公式サイトURLは `getDomain(year)` が `https://cedec.cesa.or.jp/{year}/` として自動導出するため設定不要。
 
@@ -252,14 +258,30 @@ php public/cgi/generate_cedil.php {year}   # 引数なしは最新年度
 #   https://<サイト>/cgi/generate_cedil.php?key=<TOKEN>&year={year}
 ```
 
-URL 経由で叩く場合は秘密トークンを設定する。`public/cgi/generate_cedil.config.sample.php` を
-`generate_cedil.config.php`（`.gitignore` 済み・サーバー上に作成）へコピーし、`'key'` を長い
-ランダム文字列に置き換える。未設定のうちは URL 経由の呼び出しはすべて 403 になる（fail-safe）。
+URL 経由で叩く場合は秘密トークンを設定する。リポジトリルートの `cedil_config.sample.php` を
+**公開ディレクトリの外**（例: 公開ディレクトリが `/home/<account>/<domain>/public_html` なら
+`/home/<account>/<domain>/cedil_config.php`）へコピーし、`'key'` を長いランダム文字列に置き換える。
+ローカルで動かす場合は `cp cedil_config.sample.php cedil_config.php`（`.gitignore` 済み）。
+`generate_cedil.php` は**自分の親ディレクトリを上へ順に辿って `cedil_config.php` を探し**、
+最初に見つかったものを使う。
+サイトを公開ディレクトリ直下に置いてもサブディレクトリ配下に置いても、設定は公開ディレクトリの
+外に置ける。
+
+```
+/home/<account>/<domain>/
+├── cedil_config.php                       ← ここに置く（Web 公開されない）
+└── public_html/
+    └── cedec_schedule/                    ← サブディレクトリ配置でも可
+        └── cgi/generate_cedil.php
+```
+
+未設定のうちは URL 経由の呼び出しはすべて 403 になる（fail-safe）。
 `year` は年度テーブルに実在する年度のみ許可され、`all` 等の一括指定は提供しない
 （濫用による CEDiL / サーバー負荷を避けるため。複数年度は年度ごとに実行する）。
 
 ## 更新履歴
 
+- 2026年 ライトニングトークタブを追加（公式 `timetable.json` の LT 枠を1講演ずつ展開し、日 × 会場で横断表示。LT 資料の CEDiL リンクにも対応）
 - 2026年 CEDiL 資料生成を PHP エンドポイント（`public/cgi/generate_cedil.php`）へ移行。URL/cron から `cedil.json` を再ビルドなしで更新できるようにし、`scripts/generate_cedil.ts` を廃止
 - 2026年 UIプリミティブを shadcn/ui（Radix ベース）に統合（手書きボタン→`Button`、ドロワー/サイドメニュー→`Sheet`、ツールチップ→Popover、外部リンク→`ExternalTextLink`。フォーカストラップ等のアクセシビリティを改善）
 - 2026年 Excelダウンロード機能を追加（お気に入り状態を反映・カテゴリ色を背景に表示）

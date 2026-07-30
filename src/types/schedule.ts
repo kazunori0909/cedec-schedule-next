@@ -106,9 +106,11 @@ export type UnifiedSession =
 
 // 表示用
 export interface RoomColumn {
-  name: string; // 部屋名（表示用）
+  name: string; // カラム見出し（表示用）
   key: string; // 内部キー（重複回避のためサフィックスあり）
-  // 表示ラベルと実際の会場名が異なる場合の会場名（LT タブの "Day1-1" 等）。省略時は name を使う
+  // カラム内の会場が一意な場合の実際の会場名（見出しと異なることがある。LT タブは "Day1-1" → "第1会場"）。
+  // お気に入りモードのように複数会場が混在するカラムでは undefined にし、
+  // 会場名はセッション自身のものを使う
   roomName?: string;
   sessions: UnifiedSession[];
 }

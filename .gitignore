@@ -45,7 +45,9 @@ next-env.d.ts
 /public/web_data
 
 # CEDiL 更新エンドポイントの秘密トークン設定（実値。サンプルのみコミット）
-/public/cgi/generate_cedil.config.php
+# generate_cedil.php はスクリプトの親ディレクトリを上へ辿って cedil_config.php を探す。
+# ローカルではリポジトリルートが「公開ディレクトリの外」に相当する。
+/cedil_config.php
 
 # キャッシュ・一時ファイル
 web_data_original/

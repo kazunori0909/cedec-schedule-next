@@ -37,6 +37,15 @@ function updateYear(
   return { ...yearStates, [year]: updater(prev) };
 }
 
+// true のキーだけを持つフラグ集合のトグル。false を残さず削除するのは
+// localStorage に不要なキーを溜めないため。
+function toggleFlag(flags: Record<string, boolean>, key: string): Record<string, boolean> {
+  const next = { ...flags };
+  if (next[key]) delete next[key];
+  else next[key] = true;
+  return next;
+}
+
 export const useScheduleStore = create<ScheduleStore>()(
   persist(
     (set) => ({
@@ -61,22 +70,18 @@ export const useScheduleStore = create<ScheduleStore>()(
 
       toggleHideSpec: (year, spec) =>
         set((s) => ({
-          yearStates: updateYear(s.yearStates, year, (y) => {
-            const hideSpecs = { ...y.hideSpecs };
-            if (hideSpecs[spec]) delete hideSpecs[spec];
-            else hideSpecs[spec] = true;
-            return { ...y, hideSpecs };
-          }),
+          yearStates: updateYear(s.yearStates, year, (y) => ({
+            ...y,
+            hideSpecs: toggleFlag(y.hideSpecs, spec),
+          })),
         })),
 
       toggleFavorite: (year, sessionId) =>
         set((s) => ({
-          yearStates: updateYear(s.yearStates, year, (y) => {
-            const favorites = { ...y.favorites };
-            if (favorites[sessionId]) delete favorites[sessionId];
-            else favorites[sessionId] = true;
-            return { ...y, favorites };
-          }),
+          yearStates: updateYear(s.yearStates, year, (y) => ({
+            ...y,
+            favorites: toggleFlag(y.favorites, sessionId),
+          })),
         })),
     }),
     {

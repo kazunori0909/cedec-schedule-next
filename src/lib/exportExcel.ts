@@ -1,13 +1,14 @@
-import type { Border, Borders, Fill } from "exceljs";
+import type { Border, Borders, Fill, Workbook } from "exceljs";
 import type { ScheduleData } from "@/types/schedule";
+import type { ScheduleViewModel } from "@/lib/schedule";
 import {
-  buildRoomColumns,
+  buildLightningTalkViewModel,
   buildMatrix,
+  buildScheduleViewModel,
   getSessionId,
-  getTimeRange,
-  generateTimeRows,
 } from "@/lib/schedule";
-import { findYearSetting, getDateList } from "@/lib/cedec";
+import { findYearSetting, getDateList, LT_DAY_INDEX } from "@/lib/cedec";
+import { resolveCategoryHex } from "@/components/categoryBadgeColors";
 
 const thinBorder: Border = { style: "thin", color: { argb: "FF000000" } };
 const allBorders: Partial<Borders> = {
@@ -17,25 +18,9 @@ const allBorders: Partial<Borders> = {
   right: thinBorder,
 };
 
-// セッションセル背景色の淡色化レート（0: 元色のまま / 1: 白）
-// プレビューは /tmp/cedec_color_preview.html で確認できる
-export const FILL_LIGHTEN_RATE = 0.7;
-
-// globals.css の --cat-* 変数に対応した背景色（hex 6桁）
-const CATEGORY_HEX: Record<string, string> = {
-  ENG: "A88E1E",
-  VA: "E55E74",
-  PRD: "5269CE",
-  BP: "45B2E0",
-  SND: "76B946",
-  GD: "3ACBB4",
-  AC: "B677D3",
-  NW: "188B42", // 2011/2012 のみ
-  PG: "A88E1E", // cat-eng と同色
-  PD: "45B2E0", // cat-bp と同色
-  BM: "45B2E0", // cat-bp と同色
-  基調講演: "1F3C5A",
-};
+// セッションセル背景色の淡色化レート（0: 元色のまま / 1: 白）。
+// 画面のバッジ色をそのまま塗ると濃すぎて文字が読みにくいため白に寄せる
+const FILL_LIGHTEN_RATE = 0.7;
 
 // hex 6桁 + レートで白に近づける → ARGB 文字列を返す
 function lightenToArgb(hex6: string, rate: number): string {
@@ -65,6 +50,94 @@ function formatCellContent(session: Parameters<typeof getSessionId>[0], isFav: b
   return star + session.data.title;
 }
 
+// ViewModel 1つ分をワークシートとして書き出す（日別シートと LT シートで共通）
+function addSheet(
+  wb: Workbook,
+  sheetName: string,
+  { displayColumns: columns, timeRows }: ScheduleViewModel,
+  dayIndex: number,
+  favorites: Record<string, boolean>
+): void {
+  const matrix = buildMatrix(timeRows, columns);
+  const ws = wb.addWorksheet(sheetName);
+
+  // 列幅: 時刻列 + 部屋列
+  ws.getColumn(1).width = 7;
+  columns.forEach((_, i) => {
+    ws.getColumn(i + 2).width = 30;
+  });
+
+  // ヘッダー行（部屋名）— スチールブルー系の背景
+  const headerRow = ws.addRow(["時刻", ...columns.map((c) => c.name)]);
+  headerRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+    if (colNumber > columns.length + 1) return;
+    cell.border = allBorders;
+    cell.alignment = { vertical: "middle", horizontal: "center" };
+    cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+    cell.fill = makeSolidFill("FF2D5F8A");
+  });
+
+  // データ行
+  timeRows.forEach((time, rowIdx) => {
+    const rowValues: (string | null)[] = [time];
+    columns.forEach((_, colIdx) => {
+      const cellInfo = matrix[rowIdx][colIdx];
+      if (cellInfo.kind === "session" || cellInfo.kind === "event") {
+        const session = cellInfo.session!;
+        const sessionId = getSessionId(session, dayIndex);
+        rowValues.push(formatCellContent(session, !!favorites[sessionId]));
+      } else if (cellInfo.kind === "empty") {
+        rowValues.push("");
+      } else {
+        // occupied: マージ範囲内のため空値
+        rowValues.push(null);
+      }
+    });
+
+    const row = ws.addRow(rowValues);
+
+    // 時刻セル
+    const timeCell = row.getCell(1);
+    timeCell.border = allBorders;
+    timeCell.alignment = { vertical: "middle", horizontal: "center" };
+
+    // 部屋セル（occupied 以外）
+    columns.forEach((_, colIdx) => {
+      const cellInfo = matrix[rowIdx][colIdx];
+      if (cellInfo.kind === "occupied") return;
+
+      const wsCell = row.getCell(colIdx + 2);
+      wsCell.border = allBorders;
+      wsCell.alignment = {
+        vertical: "middle",
+        wrapText: cellInfo.kind === "session" || cellInfo.kind === "event",
+      };
+
+      // セッションセルにカテゴリ背景色を適用（淡色化レート適用・文字は黒）
+      if (cellInfo.kind === "session" && cellInfo.session!.kind === "session") {
+        const hex6 = resolveCategoryHex(cellInfo.session!.data.category);
+        if (hex6) {
+          wsCell.fill = makeSolidFill(lightenToArgb(hex6, FILL_LIGHTEN_RATE));
+          wsCell.font = { color: { argb: "FF333333" } };
+        }
+      }
+    });
+  });
+
+  // セルマージ（全行追加後に適用）
+  timeRows.forEach((_, rowIdx) => {
+    const excelRow = rowIdx + 2; // 1行目はヘッダー
+    columns.forEach((_, colIdx) => {
+      const cellInfo = matrix[rowIdx][colIdx];
+      if (cellInfo.kind !== "session" && cellInfo.kind !== "event") return;
+      const rowSpan = cellInfo.rowSpan ?? 1;
+      const colSpan = cellInfo.isFullSpan ? columns.length : 1;
+      if (rowSpan <= 1 && colSpan <= 1) return;
+      ws.mergeCells(excelRow, colIdx + 2, excelRow + rowSpan - 1, colIdx + colSpan + 1);
+    });
+  });
+}
+
 export async function exportScheduleToExcel(
   scheduleData: ScheduleData,
   year: string,
@@ -78,93 +151,20 @@ export async function exportScheduleToExcel(
 
   for (let dayIndex = 0; dayIndex < dateList.length; dayIndex++) {
     const date = dateList[dayIndex];
-    const columns = buildRoomColumns(scheduleData, dayIndex, year);
-    if (columns.length === 0) continue;
-
-    const timeRange = getTimeRange(columns);
-    const timeRows = generateTimeRows(timeRange.min, timeRange.max);
-    const matrix = buildMatrix(timeRows, columns);
+    // お気に入りは★印で表現するためフィルターせず、画面と同じ導出ロジックを使う
+    const vm = buildScheduleViewModel(scheduleData, year, dayIndex, false, {});
+    if (vm.displayColumns.length === 0) continue;
 
     const m = date.getMonth() + 1;
     const d = date.getDate();
-    const ws = wb.addWorksheet(`Day${dayIndex + 1} (${m}-${d})`);
+    addSheet(wb, `Day${dayIndex + 1} (${m}-${d})`, vm, dayIndex, favorites);
+  }
 
-    // 列幅: 時刻列 + 部屋列
-    ws.getColumn(1).width = 7;
-    columns.forEach((_, i) => {
-      ws.getColumn(i + 2).width = 30;
-    });
-
-    // ヘッダー行（部屋名）— スチールブルー系の背景
-    const headerRow = ws.addRow(["時刻", ...columns.map((c) => c.name)]);
-    headerRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-      if (colNumber > columns.length + 1) return;
-      cell.border = allBorders;
-      cell.alignment = { vertical: "middle", horizontal: "center" };
-      cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
-      cell.fill = makeSolidFill("FF2D5F8A");
-    });
-
-    // データ行
-    timeRows.forEach((time, rowIdx) => {
-      const rowValues: (string | null)[] = [time];
-      columns.forEach((_, colIdx) => {
-        const cellInfo = matrix[rowIdx][colIdx];
-        if (cellInfo.kind === "session" || cellInfo.kind === "event") {
-          const session = cellInfo.session!;
-          const sessionId = getSessionId(session, dayIndex);
-          rowValues.push(formatCellContent(session, !!favorites[sessionId]));
-        } else if (cellInfo.kind === "empty") {
-          rowValues.push("");
-        } else {
-          // occupied: マージ範囲内のため空値
-          rowValues.push(null);
-        }
-      });
-
-      const row = ws.addRow(rowValues);
-
-      // 時刻セル
-      const timeCell = row.getCell(1);
-      timeCell.border = allBorders;
-      timeCell.alignment = { vertical: "middle", horizontal: "center" };
-
-      // 部屋セル（occupied 以外）
-      columns.forEach((_, colIdx) => {
-        const cellInfo = matrix[rowIdx][colIdx];
-        if (cellInfo.kind === "occupied") return;
-
-        const wsCell = row.getCell(colIdx + 2);
-        wsCell.border = allBorders;
-        wsCell.alignment = {
-          vertical: "middle",
-          wrapText: cellInfo.kind === "session" || cellInfo.kind === "event",
-        };
-
-        // セッションセルにカテゴリ背景色を適用（淡色化レート適用・文字は黒）
-        if (cellInfo.kind === "session" && cellInfo.session!.kind === "session") {
-          const category = cellInfo.session!.data.category;
-          const hex6 = CATEGORY_HEX[category];
-          if (hex6) {
-            wsCell.fill = makeSolidFill(lightenToArgb(hex6, FILL_LIGHTEN_RATE));
-            wsCell.font = { color: { argb: "FF333333" } };
-          }
-        }
-      });
-    });
-
-    // セルマージ（全行追加後に適用）
-    timeRows.forEach((_, rowIdx) => {
-      const excelRow = rowIdx + 2; // 1行目はヘッダー
-      columns.forEach((_, colIdx) => {
-        const cellInfo = matrix[rowIdx][colIdx];
-        if (cellInfo.kind !== "session" && cellInfo.kind !== "event") return;
-        const rowSpan = cellInfo.rowSpan ?? 1;
-        const colSpan = cellInfo.isFullSpan ? columns.length : 1;
-        if (rowSpan <= 1 && colSpan <= 1) return;
-        ws.mergeCells(excelRow, colIdx + 2, excelRow + rowSpan - 1, colIdx + colSpan + 1);
-      });
-    });
+  // ライトニングトークは全日程を横断するため、日別シートに分けず1枚にまとめる
+  const lightningTalks = scheduleData.lightning_talks ?? [];
+  if (lightningTalks.length > 0) {
+    const vm = buildLightningTalkViewModel(lightningTalks);
+    addSheet(wb, "LT", vm, LT_DAY_INDEX, favorites);
   }
 
   // ブラウザ用: Buffer → Blob → ダウンロード
