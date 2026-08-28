@@ -147,15 +147,15 @@ npm run generate:youtube          # YouTube動画リスト取得（要 .env の 
 | ---------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `year`           | 開催年度                                                                                                          |
 | `first_date`     | 初日の日付（MMDD形式）例: `"0820"`                                                                                |
-| `cedil_tag_no`   | CEDiL検索タグID（任意）。未設定なら CEDiL 連携をスキップ                                                          |
+| `cedil_tag_no`   | CEDiL イベントID（任意）。未設定なら CEDiL 連携をスキップ ※キー名は旧サイトの「タグ番号」由来                     |
 | `dev_night`      | Developers' Night 設定（任意、下記参照）                                                                          |
 | `room_overrides` | 会場名の表示差し替え（任意）。`{ day, room, display }` の配列。例: 2025年 Day1 の「第13会場」を「Epic部屋」と表示 |
 
 公式サイトURLは `getDomain(year)` が `https://cedec.cesa.or.jp/{year}/` として自動導出するため設定不要。
 
 > **`cedil_tag_no` は新規作成時には指定しない。**
-> CEDiL検索タグIDは、セッション資料がCEDiLに登録される会期中〜翌週ごろになって、CEDiLのURLから判明する。
-> 新年度の追加時点ではまだ分からないため**省略する**。省略した年度は CEDiL 資料生成（`public/cgi/generate_cedil.php`）の対象外となり `cedil.json` も生成されない。判明後の手順は「8. CEDiLタグの更新」を参照。
+> CEDiL イベントIDは、セッション資料がCEDiLに登録される会期中〜翌週ごろになって、CEDiLのURLから判明する。
+> 新年度の追加時点ではまだ分からないため**省略する**。省略した年度は CEDiL 資料生成（`public/cgi/generate_cedil.php`）の対象外となり `cedil.json` も生成されない。判明後の手順は「8. CEDiL イベントIDの更新」を参照。
 
 Developers' Night がある場合は `dev_night` を追加する（`day_index`=1・`start_time`=`"19:30"`・`end_time`=`"21:30"` は自動補完）。
 
@@ -213,7 +213,7 @@ npm run generate:youtube -- --force  # 強制再取得
 npm run generate:json {year}    # public/web_data/{year}/schedule.json を生成
 ```
 
-CEDiL 資料（`cedil.json`）は別系統。`cedil_tag_no` 判明後に PHP エンドポイント（`public/cgi/generate_cedil.php`、「8. CEDiLタグの更新」）で生成する。新規作成直後は `generate:json` のみ実行すればよい。
+CEDiL 資料（`cedil.json`）は別系統。`cedil_tag_no` 判明後に PHP エンドポイント（`public/cgi/generate_cedil.php`、「8. CEDiL イベントIDの更新」）で生成する。新規作成直後は `generate:json` のみ実行すればよい。
 
 ### 6. 非公式イベントの追加（custom.ts、任意）
 
@@ -239,14 +239,14 @@ CEDiL 資料（`cedil.json`）は別系統。`cedil_tag_no` 判明後に PHP エ
 
 `npm run dev` で開発サーバーを起動し、追加した年度がサイドメニューから選択でき、スケジュールが正しく表示されることを確認する。
 
-### 8. CEDiLタグの更新（会期中〜翌週ごろ）
+### 8. CEDiL イベントIDの更新（会期中〜翌週ごろ）
 
-セッション資料がCEDiLに登録されると検索タグIDが判明する。CEDiLの年度別検索ページのURL（`https://cedil.cesa.or.jp/cedil_sessions/search_tag/{tag}` 形式）から末尾の `{tag}` を読み取る。
+セッション資料がCEDiLに登録されるとイベントIDが判明する。CEDiLの年度別検索ページのURL（`https://cedil.cesa.or.jp/cedil_sessions/search?event={id}` 形式）から `{id}` を読み取る。
 
-判明したら **2箇所** にタグ番号を追記する（両方必要）。
+判明したら **2箇所** にイベントIDを追記する（両方必要）。
 
 1. `src/lib/cedec.ts` の `SCHEDULE_SETTING` の該当年度 `cedil_tag_no` — アプリが CEDiL を fetch し資料リンクを付与するために使う
-2. `public/cgi/generate_cedil.php` の `$YEAR_TAG` テーブル — `cedil.json` 生成に使う
+2. `public/cgi/generate_cedil.php` の `$YEAR_EVENT` テーブル — `cedil.json` 生成に使う
 
 その後、CEDiL 資料は PHP エンドポイントで生成・更新する（会期中は追加のたびに再実行）。
 
@@ -281,6 +281,7 @@ URL 経由で叩く場合は秘密トークンを設定する。リポジトリ�
 
 ## 更新履歴
 
+- 2026年 CEDiL サイトのリニューアル（検索URLの `search?event={id}` 化・一覧HTMLの刷新）に `public/cgi/generate_cedil.php` を追従（イベントIDの値は旧タグ番号と同一のため設定は据え置き）
 - 2026年 ライトニングトークタブを追加（公式 `timetable.json` の LT 枠を1講演ずつ展開し、日 × 会場で横断表示。LT 資料の CEDiL リンクにも対応）
 - 2026年 CEDiL 資料生成を PHP エンドポイント（`public/cgi/generate_cedil.php`）へ移行。URL/cron から `cedil.json` を再ビルドなしで更新できるようにし、`scripts/generate_cedil.ts` を廃止
 - 2026年 UIプリミティブを shadcn/ui（Radix ベース）に統合（手書きボタン→`Button`、ドロワー/サイドメニュー→`Sheet`、ツールチップ→Popover、外部リンク→`ExternalTextLink`。フォーカストラップ等のアクセシビリティを改善）

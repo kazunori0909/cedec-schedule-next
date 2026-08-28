@@ -2,7 +2,7 @@
 /**
  * generate_cedil.php
  *
- * CEDiL サイトを年度別タグでクロールし、web_data/{year}/cedil.json を最新化する。
+ * CEDiL サイトを年度別イベントIDでクロールし、web_data/{year}/cedil.json を最新化する。
  * XServer 等の PHP 実行環境に配置し、URL 呼び出し（またはサーバー cron の CLI 実行）で使う。
  *
  * Next アプリは cedil.json を実行時に fetch するため、この JSON を差し替えれば
@@ -11,7 +11,7 @@
  * 使い方:
  *   URL（公開）: /cgi/generate_cedil.php?key=<トークン>[&year=2025]
  *     - year 未指定 … 年度テーブルの最新年度のみ取得
- *     - year=2025   … テーブルにタグ番号があればその年度を取得
+ *     - year=2025   … テーブルにイベントIDがあればその年度を取得
  *     - ?key= は必須。設定ファイルの 'key' と一致しなければ 403（下の $CONFIG_CANDIDATES 参照）
  *   CLI（cron/ローカル）: php generate_cedil.php [2025]
  *     - トークン不要（サーバーアクセス自体が前提）。year 未指定なら最新年度
@@ -21,13 +21,15 @@
  *
  * セキュリティ:
  *   - 年度は年度テーブルのキー完全一致のみ許可（allowlist）。書き込み先は既知年度から
- *     導出する固定パスのみで、任意 tag / パストラバーサルは受け付けない。
+ *     導出する固定パスのみで、任意 event / パストラバーサルは受け付けない。
  *   - URL 経由は秘密トークン（?key=）必須。全年度一括（all）は提供しない（濫用による
  *     CEDiL / サーバー負荷を避けるため。複数年度が必要なら年度ごとに実行する）。
  */
 
-// 年度 → CEDiL タグ番号。src/lib/cedec.ts の SCHEDULE_SETTING と対応（新しい年度を先頭に）。
-$YEAR_TAG = [
+// 年度 → CEDiL イベントID。src/lib/cedec.ts の SCHEDULE_SETTING（`cedil_tag_no`）と対応（新しい年度を先頭に）。
+// 2026 年のサイトリニューアルで URL は search_tag/{id} → search?event={id} に変わったが、
+// ID の値は旧タグ番号と同一（旧 URL も同じ ID の新 URL へ 301 される）。
+$YEAR_EVENT = [
     '2026' => 760,
     '2025' => 756,
     '2024' => 752,
@@ -46,7 +48,7 @@ $YEAR_TAG = [
     '2011' => 6,
 ];
 
-const CEDIL_BASE   = 'https://cedil.cesa.or.jp/cedil_sessions/search_tag/';
+const CEDIL_BASE   = 'https://cedil.cesa.or.jp/cedil_sessions/search';
 const FETCH_DELAY  = 1;   // ページ間の待機（秒）。並列・連続取得はしない
 const HTTP_TIMEOUT = 30;  // 1 リクエストのタイムアウト（秒）
 const USER_AGENT   = 'cedec-schedule-cedil-updater/1.0';
@@ -85,13 +87,13 @@ foreach ($CONFIG_CANDIDATES as $configPath) {
     }
 }
 
-/** 指定タグの検索結果を全ページ巡回し、[{title, url}] を返す */
-function fetchCedilList(int $tag): array
+/** 指定イベントIDの検索結果を全ページ巡回し、[{title, url}] を返す */
+function fetchCedilList(int $event): array
 {
     $list = [];
     $page = 1;
     while ($page !== null) {
-        $html = fetchPage($tag, $page);
+        $html = fetchPage($event, $page);
         if ($html === null) {
             break;
         }
@@ -104,9 +106,9 @@ function fetchCedilList(int $tag): array
 }
 
 /** 1 ページ取得（失敗時は null） */
-function fetchPage(int $tag, int $page): ?string
+function fetchPage(int $event, int $page): ?string
 {
-    $url = CEDIL_BASE . $tag . '?page=' . $page;
+    $url = CEDIL_BASE . '?event=' . $event . '&page=' . $page;
     $ctx = stream_context_create([
         'http' => [
             'method'  => 'GET',
@@ -119,8 +121,11 @@ function fetchPage(int $tag, int $page): ?string
 }
 
 /**
- * .session_list を抽出して $list に追記し、次ページ番号を返す（無ければ null）。
- * 旧 cgi/generate_cedil.php と同じく DOM + XPath で解析する。
+ * a.c-session-card を抽出して $list に追記し、次ページ番号を返す（無ければ null）。
+ * DOM + XPath で解析する。セレクタは 2026 年のサイトリニューアル後の構造に対応。
+ *
+ *   <a href=".../view/3408?event=760" class="c-session-card">
+ *     <h3 class="c-session-card__title">タイトル</h3>
  */
 function parsePage(string $html, array &$list): ?int
 {
@@ -131,40 +136,45 @@ function parsePage(string $html, array &$list): ?int
     libxml_clear_errors();
     $xpath = new DOMXPath($dom);
 
-    $sessions = $xpath->query(cls('session_list'));
-    foreach ($sessions as $session) {
-        $h2 = $xpath->query('.//h2', $session)->item(0);
-        if ($h2 === null) {
+    $cards = $xpath->query('//a' . cls('c-session-card'));
+    foreach ($cards as $card) {
+        $titleEl = $xpath->query('.//*' . cls('c-session-card__title'), $card)->item(0);
+        if ($titleEl === null) {
             continue;
         }
-        // タイトルは trim 後、改行・半角/全角スペースを除去（generate_cedil.ts と同じ正規化）
-        $title = preg_replace('/[\n 　]/u', '', trim($h2->textContent));
+        // タイトルは trim 後、改行・半角/全角スペースを除去（アプリ側 normalizeTitle と揃える）
+        $title = preg_replace('/[\n 　]/u', '', trim($titleEl->textContent));
 
-        $a = $xpath->query('.//a', $h2)->item(0);
-        $url = ($a instanceof DOMElement) ? $a->getAttribute('href') : '';
+        // href は絶対 URL。検索条件の ?event= が付くため取り除き、セッション詳細 URL だけを残す
+        $url = ($card instanceof DOMElement) ? strtok($card->getAttribute('href'), '?') : '';
 
-        // generate_cedil.ts と同じく、h2 があれば無条件に追加する
         $list[] = ['title' => $title, 'url' => $url];
     }
 
-    // 次ページ: .page_change 内の span.active の次の span
-    $activeNext = $xpath
-        ->query(cls('page_change') . "//span[contains(concat(' ', normalize-space(@class), ' '), ' active ')]/following-sibling::span[1]")
-        ->item(0);
-    $nextText = $activeNext ? trim($activeNext->textContent) : '';
-    return $nextText !== '' ? (int) $nextText : null;
+    // 次ページ: .c-pagination__arrow.--next。最終ページでは a ではなく disabled な button になる
+    $next = $xpath->query('//a' . cls('c-pagination__arrow') . cls('--next'))->item(0);
+    if (!($next instanceof DOMElement)) {
+        return null;
+    }
+    $query = parse_url($next->getAttribute('href'), PHP_URL_QUERY);
+    if (!is_string($query)) {
+        return null;
+    }
+    parse_str($query, $params);
+    $page = isset($params['page']) && is_string($params['page']) ? (int) $params['page'] : 0;
+    return $page > 0 ? $page : null;
 }
 
-/** class を空白境界で含む要素を選ぶ XPath 断片 */
+/** class を空白境界で含むことを表す XPath 述語（`c-session-card-list` 等の部分一致を避ける） */
 function cls(string $name): string
 {
-    return "//*[contains(concat(' ', normalize-space(@class), ' '), ' " . $name . " ')]";
+    return "[contains(concat(' ', normalize-space(@class), ' '), ' " . $name . " ')]";
 }
 
 /** 1 年度分を取得して cedil.json を書き出す。結果サマリを返す */
-function processYear(string $year, int $tag): array
+function processYear(string $year, int $event): array
 {
-    $list = fetchCedilList($tag);
+    $list = fetchCedilList($event);
     $result = [
         'list'        => $list,
         'update_date' => gmdate('Y-m-d\TH:i:s.000\Z'),
@@ -222,10 +232,10 @@ if ($argInvalid) {
     $error = 'invalid year';
 } elseif ($arg === '') {
     // 引数なし: 最新年度（テーブル先頭）のみ
-    $latest = array_key_first($YEAR_TAG);
-    $targets[$latest] = $YEAR_TAG[$latest];
-} elseif (isset($YEAR_TAG[$arg])) {
-    $targets[$arg] = $YEAR_TAG[$arg];
+    $latest = array_key_first($YEAR_EVENT);
+    $targets[$latest] = $YEAR_EVENT[$latest];
+} elseif (isset($YEAR_EVENT[$arg])) {
+    $targets[$arg] = $YEAR_EVENT[$arg];
 } else {
     // 不正な入力値は応答に反映しない（情報漏えい・ノイズ回避）
     $error = 'invalid year';
@@ -244,12 +254,12 @@ if ($error !== null) {
 }
 
 $results = [];
-foreach ($targets as $year => $tag) {
-    $r = processYear((string) $year, (int) $tag);
+foreach ($targets as $year => $event) {
+    $r = processYear((string) $year, (int) $event);
     $results[] = $r;
     if ($isCli) {
         $status = $r['ok'] ? 'OK' : 'FAILED';
-        echo "[{$status}] {$year} (tag={$tag}): {$r['count']} 件\n";
+        echo "[{$status}] {$year} (event={$event}): {$r['count']} 件\n";
     }
 }
 
