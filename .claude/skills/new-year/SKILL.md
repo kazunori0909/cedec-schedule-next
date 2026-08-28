@@ -19,6 +19,6 @@ CEDEC の新しい年度（例: 2026）のデータをサイトに追加する�
   手動配置が必要になるため、その場合は配置済みか確認しユーザーに案内する。
 - **年度別設定は2ファイル両方に追加する** — `src/lib/cedec.ts` の `SCHEDULE_SETTING` と `scripts/generate_json.ts` の `YEAR_CONFIGS`。片方だけでは動作しない。
 - 公式 HTML のフォーマットが前年と異なる場合のみ `scripts/parsers/` に新パーサーを追加する。同形式なら既存の `format_YYYY` を再利用する。
-- **`cedil_tag_no` は新規作成時には指定しない** — CEDiL検索タグIDは会期中〜翌週ごろにCEDiLへセッションが登録された後、URLから判明する。新規追加時は `SCHEDULE_SETTING` で省略し（省略した年度は `cedil.json` が生成されない）、タグ判明後にタグ番号を **2箇所**（`src/lib/cedec.ts` の `SCHEDULE_SETTING.cedil_tag_no` と `public/cgi/generate_cedil.php` の `$YEAR_TAG` テーブル）へ追記し、`php public/cgi/generate_cedil.php {year}` を実行して `cedil.json` を生成する。
+- **`cedil_tag_no` は新規作成時には指定しない** — CEDiL イベントID（`https://cedil.cesa.or.jp/cedil_sessions/search?event={id}` の `{id}`）は会期中〜翌週ごろにCEDiLへセッションが登録された後、URLから判明する。新規追加時は `SCHEDULE_SETTING` で省略し（省略した年度は `cedil.json` が生成されない）、判明後にIDを **2箇所**（`src/lib/cedec.ts` の `SCHEDULE_SETTING.cedil_tag_no` と `public/cgi/generate_cedil.php` の `$YEAR_EVENT` テーブル）へ追記し、`php public/cgi/generate_cedil.php {year}` を実行して `cedil.json` を生成する。
 - `src/lib/custom.ts` に `html` を追加・変更した場合は、`dangerouslySetInnerHTML` の例外箇所のため SECURITY.md に従ってレビューする。
 - 完了後は `npm run dev` を起動し、追加年度が選択でき正しく表示されることを確認する。
