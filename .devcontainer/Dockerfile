@@ -1,4 +1,4 @@
-FROM node:22-bookworm
+FROM node:24-bookworm
 
 # Git・基本ツールをインストール
 RUN apt-get update && apt-get install -y \

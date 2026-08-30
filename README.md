@@ -24,7 +24,7 @@ CEDiLに登録済みの資料リンクも自動付与します。
 | スタイリング   | Tailwind CSS v4                                           |
 | 状態管理       | Zustand（localStorage で永続化）                          |
 | データ生成     | TypeScript スクリプト（tsx + cheerio）／CEDiL資料は PHP   |
-| 開発環境       | devcontainer（Node.js 22）                                |
+| 開発環境       | devcontainer（Node.js 24）                                |
 
 ## ファイル構成
 
