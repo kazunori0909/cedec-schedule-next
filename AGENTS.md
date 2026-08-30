@@ -11,7 +11,7 @@ Next.js + React + TypeScript で構築された静的サイト（`next build` �
 - **データ生成**: TypeScript スクリプト（`scripts/`、tsx で実行）
 - **HTMLパース**: cheerio（jQueryライクAPI）
 - **データ**: `public/web_data/{year}/schedule.json`, `cedil.json`（事前生成済みJSON、git管理外）
-- **開発環境**: devcontainer（Node.js 22）
+- **開発環境**: devcontainer（Node.js 24）
 
 ## データフロー
 
