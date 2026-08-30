@@ -5,7 +5,8 @@
     "context": "."
   },
   "features": {
-    "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {}
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
   },
   "forwardPorts": [3000],
   "portsAttributes": {
@@ -15,7 +16,8 @@
     }
   },
   "mounts": [
-    "source=cedec-schedule-claude-config-${devcontainerId},target=/home/node/.claude,type=volume"
+    "source=cedec-schedule-claude-config-${devcontainerId},target=/home/node/.claude,type=volume",
+    "source=cedec-schedule-gh-config-${devcontainerId},target=/home/node/.config/gh,type=volume"
   ],
   "containerEnv": {
     "DISABLE_AUTOUPDATER": "1",
