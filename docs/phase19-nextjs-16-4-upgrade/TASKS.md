@@ -44,5 +44,5 @@
 
 - [x] AGENTS.md の技術スタック（Next 16.4・React Compiler 有効・Rust 版）を更新
 - [ ] docs/README.md の Phase 19 を ✅ に更新
-- [ ] 実機調査で判明した挙動・制約を KNOWLEDGE.md に記録
-- [ ] 個人情報チェック（更新した Git 追跡ファイルに実値が混入していないか）
+- [x] 実機調査で判明した挙動・制約を KNOWLEDGE.md に記録
+- [x] 個人情報チェック（更新した Git 追跡ファイルに実値が混入していないか）
