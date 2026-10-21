@@ -16,6 +16,39 @@
 - `react.memo_cache_sentinel` は React Compiler がメモキャッシュの初期化判定に出力するシンボル。
   Rust 版へ置き換えたあとも同程度の数が出ていれば、コンパイラが適用されていると判断できる。
 
+## 16.4.2 での計測（Babel 版 → Rust 版）
+
+`.next` と `out` を消してから `npm run build` を各 2 回。ビルド時間は 1 回ごとに数秒ぶれる。サイズは毎回同じ。
+
+| 構成             | 全体（秒） | Compiled（秒） | JS 合計     | JS（gzip -9） | sentinel |
+| ---------------- | ---------- | -------------- | ----------- | ------------- | -------- |
+| 16.3.3・Babel 版 | 19         | 11.7           | 1,717,349 B | 481,737 B     | 24       |
+| 16.4.2・Babel 版 | 13.2〜14.3 | 7.6〜8.2       | 1,679,079 B | 485,582 B     | 24       |
+| 16.4.2・Rust 版  | 12.4〜15.3 | 5.9            | 1,679,079 B | 485,582 B     | 24       |
+
+- 16.3.3 → 16.4.2 で JS 合計は約 38 KB 減（チャンク 11 本 → 10 本）だが、gzip 後は約 4 KB 増。
+  参考 PR と同じく、単一ページ・CSS Modules 未使用のサイトでは 16.4 の「バンドル縮小」はほぼ出ない
+- 16.3.3 の計測は 1 回のみで、`npm install` 直後の負荷を含む可能性がある（全体時間の差は割り引いて見る）
+
+## Rust 版 React Compiler は Babel 版と同じ JS を出す
+
+- `_next/static/chunks/` の JS が**バイト単位で一致**した。差が出るのはビルド ID を埋め込む HTML と RSC ペイロード
+  （`__next.*.txt`）とビルド ID ディレクトリだけ
+- `babel-plugin-react-compiler` を依存から外しても `build`・`dev` とも動く。Vitest は React Compiler を通さず、
+  ESLint の Compiler 系ルールは `eslint-plugin-react-hooks` が自前でコンパイラを同梱しているため影響しない
+- ビルドログに `Experiments (use with caution): ✓ turbopackRustReactCompiler` が出る
+
+## `next dev` が AGENTS.md にブロックを追記する
+
+- 16.4 の `next dev` は、AGENTS.md に `<!-- BEGIN:nextjs-agent-rules -->` ブロックが無ければ末尾に追記する
+  （ログ: `Generated AGENTS.md for AI agents. Set agentRules: false in next.config to disable.`）
+- 消しても `next dev` のたびに再生成されるため、コミットして差分を出さないようにした
+
+## `next dev` のテレメトリ
+
+- devcontainer の `DISABLE_TELEMETRY` は Next.js には効かず、`next dev` 初回に匿名テレメトリの告知が出た。
+  止めるには `NEXT_TELEMETRY_DISABLED=1` が必要
+
 ## devcontainer: gh 設定ボリュームの所有者
 
 - 名前付きボリュームを `/home/node/.config/gh` にマウントすると、イメージ側にディレクトリがない場合は

@@ -111,8 +111,8 @@ Cache Components は Next.js 17 で既定になる予告がある。17 への移
 - AGENTS.md の技術スタックを「React Compiler 有効・Rust 版」に更新する
 - 切り戻し手順（`experimental.turbopackRustReactCompiler` を消し、`babel-plugin-react-compiler` を入れ直す）を
   決定事項ログに残す
-- `next dev` が AGENTS.md の `nextjs-agent-rules` ブロックを書き換える件は、本リポジトリの AGENTS.md に
-  そのブロックが無いため対象外（`next dev` 後に差分が出ないことだけ確認する）
+- `next dev` が AGENTS.md に書き込む `nextjs-agent-rules` ブロックはそのままコミットする
+  （本リポジトリには元々無かったが、16.4 の `next dev` が末尾に追記した。消しても毎回再生成される）
 
 PR と異なる点:
 
@@ -139,3 +139,11 @@ PR と異なる点:
   16.4 の新機能を設定では有効にしない判断（表）を参考 PR に合わせる（ユーザー指示）。
 - 新機能の評価として予定していた `turbopackLazyDynamicImports`・`turbopackGc`・Cache Components は、
   参考 PR と同じ理由で採らない表に移した。
+
+### 2026-10-21: Rust 版 React Compiler を採用し、`babel-plugin-react-compiler` を外す
+
+- 16.4.2 の Babel 版と比べ、出力 JS（`_next/static/chunks/`）がバイト単位で一致し、
+  `memo_cache_sentinel` もどちらも 24 箇所。Compiled 工程は 7.6〜8.2 秒 → 5.9 秒（計測は KNOWLEDGE.md）。
+  挙動が変わらず速くなるため、experimental でも採る。
+- 戻すときは `next.config.ts` の `experimental.turbopackRustReactCompiler` を消し、
+  `npm install -D babel-plugin-react-compiler` で入れ直す。
