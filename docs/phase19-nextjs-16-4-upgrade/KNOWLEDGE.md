@@ -55,3 +55,14 @@
   root 所有で作られ、node ユーザーの `gh auth login` が認証情報（`hosts.yml`）を保存できない。
 - Dockerfile でディレクトリを事前作成して `chown node:node` しておけば、初回マウント時に所有者が引き継がれる。
   再ビルド前の暫定対処は `sudo chown node:node /home/node/.config/gh`。
+
+## `npm audit` の残り（12 件 → 7 件）
+
+`npm audit fix`（非破壊）で undici（cheerio・jsdom 経由）・vite（vitest 経由）・sharp・source-map-js・
+brace-expansion を解消した（lock ファイルだけの変更）。残りはどれも公開物（`out/`）に入らないか、該当 API を通らない。
+
+- `braces`（`eslint-config-next` → `@next/eslint-plugin-next` → `fast-glob` → `micromatch` 経由、high）—
+  入っている 3.0.3 が最新で修正版がまだ無い（残りの high 5 件はこれとその上流）。lint 時だけの依存。
+  `npm audit fix --force` の提案は eslint-config-next を 14 系へ**下げる**もので採れない
+- `uuid`（exceljs 経由、moderate）— exceljs 4.4.0 が最新で前方修正が無い（提案は 3.4.0 への**ダウングレード**）。
+  該当するのは `buf` 引数付きの v3/v5/v6 で、exceljs の利用経路では通らない（Phase 8 と同じ判断）

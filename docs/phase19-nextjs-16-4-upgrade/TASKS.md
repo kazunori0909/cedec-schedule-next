@@ -25,9 +25,9 @@
 
 ## Step 3: 脆弱性
 
-- [ ] `npm audit fix`（非破壊）を適用
-- [ ] eslint-config-next 経由の high が解消したか再確認
-- [ ] 残った指摘（uuid 等）と見送り理由を記録
+- [x] `npm audit fix`（非破壊）を適用
+- [x] eslint-config-next 経由の high が解消したか再確認（braces の修正版待ちで未解消）
+- [x] 残った指摘（uuid 等）と見送り理由を記録
 
 ## Step 4: その他の依存更新
 
