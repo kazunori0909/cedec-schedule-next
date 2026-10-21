@@ -47,7 +47,7 @@
 ## `next dev` のテレメトリ
 
 - devcontainer の `DISABLE_TELEMETRY` は Next.js には効かず、`next dev` 初回に匿名テレメトリの告知が出た。
-  止めるには `NEXT_TELEMETRY_DISABLED=1` が必要
+  止めるには `NEXT_TELEMETRY_DISABLED=1` が必要（Phase 19 の後に devcontainer の `containerEnv` へ追加。反映はコンテナ再ビルド後）
 
 ## devcontainer: gh 設定ボリュームの所有者
 

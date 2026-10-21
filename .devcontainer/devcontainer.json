@@ -21,6 +21,7 @@
   ],
   "containerEnv": {
     "DISABLE_TELEMETRY": "1",
+    "NEXT_TELEMETRY_DISABLED": "1",
     "DISABLE_ERROR_REPORTING": "1"
   },
   "postCreateCommand": "bash .devcontainer/setup.sh",
