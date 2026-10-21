@@ -147,3 +147,8 @@ PR と異なる点:
   挙動が変わらず速くなるため、experimental でも採る。
 - 戻すときは `next.config.ts` の `experimental.turbopackRustReactCompiler` を消し、
   `npm install -D babel-plugin-react-compiler` で入れ直す。
+
+### 2026-10-21: Vitest 5 を採用する
+
+- テストは無修正で全件通り、型・設定の追従（jest-dom の Vitest 向けエントリ・`vitest.config.mts`・
+  `import.meta.dirname`）だけで済んだ（KNOWLEDGE.md）。

@@ -1,4 +1,4 @@
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 // jsdom に存在しないブラウザ API のモック（Radix UI / floating-ui が参照する）。
 // node 環境のテストでも読み込まれるため window の有無で分岐する。

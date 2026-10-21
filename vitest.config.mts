@@ -3,7 +3,7 @@ import { defineConfig } from "vitest/config";
 
 // @ エイリアスは全プロジェクト共通で使用する。
 const alias = {
-  "@": path.resolve(__dirname, "./src"),
+  "@": path.resolve(import.meta.dirname, "./src"),
 };
 
 export default defineConfig({

@@ -66,3 +66,16 @@ brace-expansion を解消した（lock ファイルだけの変更）。残り�
   `npm audit fix --force` の提案は eslint-config-next を 14 系へ**下げる**もので採れない
 - `uuid`（exceljs 経由、moderate）— exceljs 4.4.0 が最新で前方修正が無い（提案は 3.4.0 への**ダウングレード**）。
   該当するのは `buf` 引数付きの v3/v5/v6 で、exceljs の利用経路では通らない（Phase 8 と同じ判断）
+
+## Vitest 5 への更新で必要だった変更
+
+テストはそのまま 207 件通ったが、型と設定の読み込みで 3 点の追従が必要だった。
+
+- **jest-dom マッチャーの型**: `src/test/setup.ts` が `@testing-library/jest-dom`（本体）を読み込んでいたため、
+  Vitest 5 では `toBeInTheDocument` 等が `Assertion` の型に乗らず `tsc` が失敗した（実行は通る）。
+  Vitest 向けのエントリ `@testing-library/jest-dom/vitest` に切り替えると解消する
+- **設定ファイルの拡張子**: Vite の `configLoader: 'native'`（将来の既定）では、`"type": "module"` の無い
+  パッケージの `vitest.config.ts` が CommonJS 扱いになり警告が出る。`vitest.config.mts` に改名した
+  （tsconfig の `exclude` も追従）
+- **`__dirname`**: 同じく native ローダーでは使えないと警告が出るため `import.meta.dirname` に置き換えた
+- 所要時間は 4.1 と同程度（8.7〜13.9 秒。この環境では 1 回ごとのぶれが大きい）
