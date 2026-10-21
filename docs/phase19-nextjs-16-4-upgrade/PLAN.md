@@ -65,15 +65,15 @@ experimental: {
   lint-staged・prettier・tsx・@testing-library/user-event・@types/node（24 系のまま）。
 - **Vitest 5**（vitest / @vitest/coverage-v8 4.1 → 5.0.5）: peer 上は導入可能。破壊的変更を確認し、
   `vitest.config.ts`（projects 構成）が無修正で動くか実測して採否を決める。
+- **ESLint 10**（9.39 → 10.13）: 当初は見送り予定だったが、`eslint-config-next@16.4` が peer を `eslint >=9.0.0` に広げ、
+  ESLint 10 で削除された `context.getFilename()` 等を補う互換処理（`dist/rule-context.js`）を同梱した。
+  Next.js の移行ガイドにも「`eslint-config-next@16.4.0` 以降は ESLint 10 に対応」とあるため、実測して採否を決める。
 
 #### 見送り
 
 - **TypeScript 7**: 7.1 は beta / dev 版のみで正式版がまだない。`typescript-eslint` の peer も
   `typescript <6.1.0` のままで lint が通らない。6.0.x に据え置く。
   再検討の目安: TypeScript 7.1 の正式版が出て、`typescript-eslint` の peer が 7 系を含むようになったとき。
-- **ESLint 10**: `eslint-config-next@16.4.2` が同梱する `eslint-plugin-react@7.37.5` の peer が
-  `^9.7` 止まりのまま（Phase 8 から状況に変化なし）。参考 PR のリポジトリのように、`eslint-config-next` をやめて
-  個別プラグインに組み替えれば回避できるが、規模が大きいため別フェーズで検討する。
 
 ### Step 5: 16.4 の効果の計測と、採らない新機能
 
@@ -118,7 +118,7 @@ PR と異なる点:
 
 - バージョンは 16.4.1 ではなく、その後に出た **16.4.2** に上げる。本リポジトリの `next` は exact ピンのまま
 - 先方は ESLint 10 化を個別プラグインへの組み替えで別フェーズ（Phase 73）として進めている。
-  本フェーズでは扱わず、ESLint 10 は見送りのまま（下記）
+  本リポジトリは `eslint-config-next@16.4` の互換処理に乗り、組み替えずに ESLint 10 へ上げる（上記）
 
 ## 決定事項ログ
 
@@ -152,3 +152,11 @@ PR と異なる点:
 
 - テストは無修正で全件通り、型・設定の追従（jest-dom の Vitest 向けエントリ・`vitest.config.mts`・
   `import.meta.dirname`）だけで済んだ（KNOWLEDGE.md）。
+
+### 2026-10-21: ESLint 10 を採用する（Phase 8 の見送りを解除）
+
+- `eslint-config-next@16.4.2` の互換処理により、ESLint 10.13 で lint が通り、react・react-hooks・jsx-a11y・
+  import・@next の各規則が実際に効くことを違反入りのファイルで確認した（KNOWLEDGE.md）。
+- 同梱プラグイン 3 つ（`eslint-plugin-react`・`eslint-plugin-import`・`eslint-plugin-jsx-a11y`）の peer は `^9` 止まりで、
+  install 時の ERESOLVE 警告と `npm ls` の invalid 表示は残る。`npm ci` は成功するため、警告は許容する（ユーザー承認）。
+- 戻すときは `npm install -D eslint@^9` で 9 系に戻す（設定ファイルの変更は無い）。

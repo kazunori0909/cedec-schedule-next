@@ -79,3 +79,15 @@ brace-expansion を解消した（lock ファイルだけの変更）。残り�
   （tsconfig の `exclude` も追従）
 - **`__dirname`**: 同じく native ローダーでは使えないと警告が出るため `import.meta.dirname` に置き換えた
 - 所要時間は 4.1 と同程度（8.7〜13.9 秒。この環境では 1 回ごとのぶれが大きい）
+
+## ESLint 10 は eslint-config-next 16.4 の互換処理で動く
+
+- Phase 8 で ESLint 10 がクラッシュした原因（`eslint-plugin-react` が削除済みの `context.getFilename()` を呼ぶ）は、
+  `eslint-config-next@16.4` が `dist/rule-context.js` で `getFilename` 等をルールのコンテキストに補うことで解消された。
+  peer も `eslint >=9.0.0` に広がっている
+- ただし同梱の `eslint-plugin-react@7.37.5`・`eslint-plugin-import`・`eslint-plugin-jsx-a11y` 自身の peer は `^9` 止まり。
+  `npm install` / `npm ci` で `ERESOLVE overriding peer dependency` の警告が 3 件出て、`npm ls` は invalid を表示する
+  （`npm ci` 自体は成功する）
+- 違反を仕込んだファイルで、`react/jsx-key`・`react-hooks/rules-of-hooks`・`jsx-a11y/alt-text`・
+  `@next/next/no-img-element`・`import/no-anonymous-default-export` がすべて検出されることを確認した
+  （互換処理で「読み込めるが規則が黙る」状態になっていないことの確認）
