@@ -5,8 +5,8 @@ Next.js + React + TypeScript で構築された静的サイト（`next build` �
 
 ## 技術スタック
 
-- **フロントエンド**: Next.js 16 + React 19 + TypeScript + Tailwind CSS v4
-  - React Compiler 有効（`reactCompiler: true`）。導出値のメモ化は Compiler に委ね、手動 `useMemo`/`useCallback` は書かない。react-hooks 系ルールの eslint-disable は Compiler の最適化拒否（Suppression skip）を招くため禁止
+- **フロントエンド**: Next.js 16.4 + React 19.3 + TypeScript + Tailwind CSS v4
+  - React Compiler 有効（`reactCompiler: true`・Rust 版 `experimental.turbopackRustReactCompiler`）。導出値のメモ化は Compiler に委ね、手動 `useMemo`/`useCallback` は書かない。react-hooks 系ルールの eslint-disable は Compiler の最適化拒否（Suppression skip）を招くため禁止
 - **状態管理**: Zustand + localStorage（フィルター・お気に入り・選択日付の永続化）
 - **データ生成**: TypeScript スクリプト（`scripts/`、tsx で実行）
 - **HTMLパース**: cheerio（jQueryライクAPI）
@@ -116,3 +116,13 @@ cedec_schedule/
 - `npm run generate:json [year]` — schedule.json 生成（年度省略時は全年度）
 - `php public/cgi/generate_cedil.php [year]` — cedil.json 生成（引数なし=最新年度。URL 経由は `?key=` 必須・`all` 非対応。CLI/cron はトークン不要）
 - `npm run generate:youtube [-- --force]` — YouTube動画リスト取得（要 `.env` の `YOUTUBE_API_KEY`）
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
