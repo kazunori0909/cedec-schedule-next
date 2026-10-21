@@ -42,10 +42,11 @@ experimental: {
 - `babel-plugin-react-compiler` を devDependencies から削除する（Rust 版は Turbopack 内蔵のため不要）。
 - Turbopack 専用オプションのため、`next build` / `next dev` が Turbopack で動いていることを確認する。
 - **検証方法の置き換え**: Phase 7 は Babel プラグインのロガーで `Suppression` skip の有無を見ていたが、
-  Rust 版では使えない。代わりに以下で「コンパイラが適用されていること」を確認する。
-  - ビルド成果物（`out/_next/static/chunks/`）に `react/compiler-runtime`（`c` 関数によるメモキャッシュ）が
-    含まれるかを置き換え前後で比較
-  - React DevTools の「Memo ✨」バッジで主要コンポーネント（ScheduleTable・SessionCell 等）を目視確認
+  Rust 版では使えない。代わりに 16.4.2 の Babel 版と Rust 版で同じビルドを 2 回行い、以下を比較する。
+  - `out/_next/static/chunks/` の JS が**バイト単位で一致**するか（参考 PR では一致した。
+    差が出てよいのはビルド ID を埋め込む HTML と RSC ペイロードだけ）
+  - `react.memo_cache_sentinel` の出現数が同じか（コンパイラが効いている目安）
+  - ビルド全体と Compiled 工程の所要時間（環境で ±4 秒ほどぶれるため複数回測る）
 - lint 側の React Compiler ルールは `eslint-plugin-react-hooks@7`（eslint-config-next 同梱）が
   独自に持つため影響しない。AGENTS.md の「eslint-disable 禁止」方針は維持する。
 - experimental 扱いのため、問題が出た場合は `turbopackRustReactCompiler` を外せば Babel 版へ戻せるよう、
@@ -71,27 +72,53 @@ experimental: {
   `typescript <6.1.0` のままで lint が通らない。6.0.x に据え置く。
   再検討の目安: TypeScript 7.1 の正式版が出て、`typescript-eslint` の peer が 7 系を含むようになったとき。
 - **ESLint 10**: `eslint-config-next@16.4.2` が同梱する `eslint-plugin-react@7.37.5` の peer が
-  `^9.7` 止まりのまま（Phase 8 から状況に変化なし）。
+  `^9.7` 止まりのまま（Phase 8 から状況に変化なし）。参考 PR のリポジトリのように、`eslint-config-next` をやめて
+  個別プラグインに組み替えれば回避できるが、規模が大きいため別フェーズで検討する。
 
-### Step 5: 16.4 の最適化機能の評価
+### Step 5: 16.4 の効果の計測と、採らない新機能
 
-本サイトは `output: "export"` の静的サイトのため、サーバー側の機能は対象外とし、
-ビルド成果物とローカル開発の改善に効くものを評価する。
-最適化の効果は、置き換え前（16.3.3・Babel 版）に `out/` のサイズを測っておき、比較して判断する。
+本サイトは `output: "export"` の単一ページで、データは実行時に `schedule.json` を fetch する。
+サーバーで取るデータも遷移もないため、16.4 の新機能は設定で有効にするものを採らず、
+自動で入る改善（本番バンドル縮小）の効果だけを計測して記録する。
+比較元は Step 0 のベースライン（16.3.3・Babel 版、KNOWLEDGE.md）。
 
-| 機能                                                          | 扱い                                                                                                                |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| 本番バンドル縮小（CSS 短縮名・export mangling・共通 runtime） | 自動適用。サイズ差を計測して記録                                                                                    |
-| `turbopackLazyDynamicImports`                                 | 評価。exceljs を `import()` しているため dev の初回コンパイル短縮が見込める                                         |
-| `turbopackGc`                                                 | 評価。長時間の dev セッションのキャッシュ肥大を抑える                                                               |
-| Turbopack Bundle Analyzer                                     | サイズ比較・肥大要因の確認に使う（設定変更なし）                                                                    |
-| Cache Components / `ensureStatic`                             | `output: "export"` との両立可否を確認。データは実行時 fetch で `'use cache'` の対象がなく、メリットが薄ければ見送る |
-| `turbopackPluginRuntimeStrategy`                              | 見送り。Node 24.13.1 以降は Node のバグにより child process へ戻されるため効果なし                                  |
-| `agentFeedback`                                               | 見送り。テレメトリ必須だが devcontainer で `DISABLE_TELEMETRY` を設定している                                       |
+参考 PR では「共通ランタイムは複数ルートで効く仕組み・CSS Modules 未使用」のためバンドル縮小は出なかった
+（gzip で +1.5 KB）。本サイトも同じ構成のため同様の結果が見込まれるが、実測して記録する。
 
-### 参考 PR（scrum-fest-archive#109）への合わせ込み
+#### 16.4 の新機能で採らないもの
 
-（GitHub CLI 認証後に PR 内容を確認して追記する）
+| 機能                                              | 採らない理由                                                         |
+| ------------------------------------------------- | -------------------------------------------------------------------- |
+| Cache Components・`partialPrefetching`            | 静的エクスポートでキャッシュ対象のサーバーデータが無い               |
+| `ensureStatic`                                    | `cacheComponents` が前提。静的であることは `output: "export"` が保証 |
+| `navigation()` / `prefetch()`                     | 遷移もサーバー処理も無い                                             |
+| `turbopackLazyDynamicImports`                     | 開発時だけの効果で、`next/dynamic` は対象外のことがある              |
+| `turbopackGc`                                     | 開発時だけの効果。dev セッションが短く、キャッシュ肥大の問題も無い   |
+| `turbopackPluginRuntimeStrategy: 'workerThreads'` | Node 24.13.1 以降は Node の不具合で子プロセスに戻される              |
+| `agentFeedback`                                   | Next.js のテレメトリ有効化が前提                                     |
+| `agentUpgrade`                                    | 既定の `'security'` のままで足りる                                   |
+
+Cache Components は Next.js 17 で既定になる予告がある。17 への移行時はこの表から読み直す。
+
+### 参考 PR（scrum-fest-archive#109・同オーナーの別リポジトリ）への合わせ込み
+
+同じ 16.4 対応を先行して行った PR。以下を揃える。
+
+- Rust 版 React Compiler の**採否判断の根拠**（JS のバイト一致・`memo_cache_sentinel` 数・Compiled 工程の時間）と
+  計測の取り方（`.next` を消してから `next build`、複数回測る）
+- 「採らない新機能」の表（上記。`turbopackGc` は本リポジトリで追加）
+- `next.config.ts` の `reactCompiler` の上に、Rust 版を使う理由と本フェーズ PLAN への参照をコメントで残す
+- AGENTS.md の技術スタックを「React Compiler 有効・Rust 版」に更新する
+- 切り戻し手順（`experimental.turbopackRustReactCompiler` を消し、`babel-plugin-react-compiler` を入れ直す）を
+  決定事項ログに残す
+- `next dev` が AGENTS.md の `nextjs-agent-rules` ブロックを書き換える件は、本リポジトリの AGENTS.md に
+  そのブロックが無いため対象外（`next dev` 後に差分が出ないことだけ確認する）
+
+PR と異なる点:
+
+- バージョンは 16.4.1 ではなく、その後に出た **16.4.2** に上げる。本リポジトリの `next` は exact ピンのまま
+- 先方は ESLint 10 化を個別プラグインへの組み替えで別フェーズ（Phase 73）として進めている。
+  本フェーズでは扱わず、ESLint 10 は見送りのまま（下記）
 
 ## 決定事項ログ
 
@@ -105,3 +132,10 @@ experimental: {
 ### 2026-10-21: TypeScript 7 は見送り
 
 - 7.1 の正式版が未リリースで、`typescript-eslint` が対応していないため（ユーザー承認）。
+
+### 2026-10-21: 参考 PR（scrum-fest-archive#109）に方針を揃える
+
+- Rust 版 React Compiler の採否根拠（JS のバイト一致・`memo_cache_sentinel` 数・Compiled 工程の時間）と、
+  16.4 の新機能を設定では有効にしない判断（表）を参考 PR に合わせる（ユーザー指示）。
+- 新機能の評価として予定していた `turbopackLazyDynamicImports`・`turbopackGc`・Cache Components は、
+  参考 PR と同じ理由で採らない表に移した。
