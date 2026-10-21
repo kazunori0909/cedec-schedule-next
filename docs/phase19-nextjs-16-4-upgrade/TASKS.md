@@ -10,9 +10,9 @@
 
 ## Step 1: Next.js 16.4.2 / React 19.3
 
-- [ ] `next upgrade --agent` の移行ガイド・codemod を確認
-- [ ] next / eslint-config-next 16.4.2、react / react-dom 19.3.1、@types/react(-dom) 19.3.0 に更新
-- [ ] lint / tsc --noEmit / test:run / build / format:check を通過
+- [x] 同梱ドキュメント（`upgrading/version-16.md`）で移行事項を確認（該当する codemod なし）
+- [x] next / eslint-config-next 16.4.2、react / react-dom 19.3.1、@types/react(-dom) 19.3.0 に更新
+- [x] lint / tsc --noEmit / test:run / build / format:check を通過
 
 ## Step 2: Rust 版 React Compiler
 
