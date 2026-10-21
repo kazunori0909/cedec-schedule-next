@@ -35,4 +35,4 @@
 | 16  | テスト・ドキュメント・重複の整理 ✅           | Phase 9〜15 で溜まったテストの不足・ドキュメントの実態ズレ・導出ロジックの重複をまとめて解消                                                     | [phase16/](phase16-test-docs-refactor/)          |
 | 17  | トークン設定の配置と Excel の LT ✅           | CEDiL 更新トークンを公開ディレクトリ外から読むようにし、Excel 出力に LT シートを追加                                                             | [phase17/](phase17-cedil-config-excel-lt/)       |
 | 18  | CEDiL サイトリニューアル対応 ✅               | 検索 URL の `search?event=` 化と一覧 HTML の刷新に `generate_cedil.php` を追従（イベントIDは旧タグ番号と同一）                                   | [phase18/](phase18-cedil-site-renewal/)          |
-| 19  | Next.js 16.4 アップデートと最適化（進行中）   | Next 16.4.2 / React 19.3 で critical 脆弱性を解消し、React Compiler を Rust 版へ。Vitest 5・ESLint 10 も採用（TS7 は見送り）                     | [phase19/](phase19-nextjs-16-4-upgrade/)         |
+| 19  | Next.js 16.4 アップデートと最適化 ✅          | Next 16.4.2 / React 19.3 で critical 脆弱性を解消し、React Compiler を Rust 版へ。Vitest 5・ESLint 10 も採用（TS7 は見送り）                     | [phase19/](phase19-nextjs-16-4-upgrade/)         |

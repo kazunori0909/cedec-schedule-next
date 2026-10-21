@@ -20,7 +20,7 @@
 - [x] `babel-plugin-react-compiler` を削除
 - [x] 16.4.2 の Babel 版と Rust 版で、JS チャンクのバイト一致・`memo_cache_sentinel` 数・Compiled 工程の時間を比較
 - [x] `next.config.ts` に Rust 版を使う理由と PLAN への参照をコメントで追加
-- [ ] `next dev` で画面を確認（タイムテーブル・フィルター・Excel ダウンロードの動的読み込み）
+- [x] `next dev` で画面を確認（タイムテーブル・フィルター・Excel ダウンロードの動的読み込み）
 - [x] 切り戻し手順を決定事項ログに記録
 
 ## Step 3: 脆弱性
@@ -43,6 +43,6 @@
 ## 共通
 
 - [x] AGENTS.md の技術スタック（Next 16.4・React Compiler 有効・Rust 版）を更新
-- [ ] docs/README.md の Phase 19 を ✅ に更新
+- [x] docs/README.md の Phase 19 を ✅ に更新
 - [x] 実機調査で判明した挙動・制約を KNOWLEDGE.md に記録
 - [x] 個人情報チェック（更新した Git 追跡ファイルに実値が混入していないか）
